@@ -5,8 +5,9 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { ApplicationProvider } from '@ui-kitten/components';
+import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
+import { EvaIconsPack } from '@ui-kitten/eva-icons';
 
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -52,6 +53,7 @@ function RootLayoutNav() {
 
   return (
     <ApplicationProvider {...eva} theme={eva.light}>
+      <IconRegistry icons={EvaIconsPack} />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
