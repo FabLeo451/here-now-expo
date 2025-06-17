@@ -1,9 +1,21 @@
+import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 
+import { Redirect } from 'expo-router';
+
 export default function TabOneScreen() {
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await AsyncStorage.getItem('authToken');
+      return <Redirect href="/login" />;
+    };
+    checkAuth();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tab One</Text>
