@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 		marginVertical: 15,
 		textDecorationLine: 'underline',
-		cursor: 'pointer', // per web
+		/*cursor: 'pointer', */// per web
 	},
 	divider: {
 		textAlign: 'center',
