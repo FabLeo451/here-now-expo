@@ -15,7 +15,7 @@ export default function HomeScreen() {
       console.log('[index] Authenticated: ', !!token);
 
       if (!token)
-        router.replace("/");
+        router.replace("/login");
     };
     checkAuth();
   }, []);
