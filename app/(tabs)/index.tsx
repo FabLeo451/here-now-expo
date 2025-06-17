@@ -3,22 +3,22 @@ import { StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
-import { Redirect } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import Navbar from '@/components/Navbar';
 
 export default function HomeScreen() {
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem('authToken');
-      setIsLoggedIn(!!token);
+
+      console.log('[index] Authenticated: ', !!token);
+
+      if (!token)
+        router.replace("/");
     };
     checkAuth();
   }, []);
-
-   if (!isLoggedIn) return <Redirect href="/login" />;
 
   return (
     <>
