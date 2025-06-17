@@ -55,7 +55,6 @@ function RootLayoutNav() {
     <ApplicationProvider {...eva} theme={eva.light}>
       <IconRegistry icons={EvaIconsPack} />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </ApplicationProvider>

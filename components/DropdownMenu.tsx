@@ -6,22 +6,60 @@ import {
   StyleSheet,
   Modal,
   Pressable,
+  Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
 export default function HamburgerMenu(): JSX.Element {
   const [visible, setVisible] = useState(false);
 
   const options = [
-    { label: 'Profilo', value: 'profile' },
-    { label: 'Impostazioni', value: 'settings' },
-    { label: 'Esci', value: 'logout' },
+    { label: 'About', value: 'about' },
+    { label: 'Log out', value: 'logout' },
   ];
 
   const handleSelect = (value: string) => {
     setVisible(false);
-    console.log('Selezionato:', value);
-    // Puoi aggiungere qui navigazione o logica
+    console.log('Selected:', value);
+    
+    switch(value) {
+      case 'logout':
+        handleLogout();
+        break;
+    }
+  };
+
+  const handleLogout = async () => {
+  
+    const token = await AsyncStorage.getItem('authToken');
+
+    try {
+    
+      console.log('[profile] logging out...');
+    
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      
+      console.log('[profile] logging out...');
+
+      if (!response.ok) {
+        throw new Error('Error calling /logout');
+      }
+
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        console.log('[profile]', message);
+        Alert.alert('Error:', message);
+    }
+    
+    await AsyncStorage.removeItem('authToken');
+    
+    router.replace('/login');
   };
 
   return (
