@@ -1,27 +1,82 @@
 import React, { useState } from 'react';
-import { Layout, Select, SelectItem, SelectProps } from '@ui-kitten/components';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  Pressable,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-const data = ['Opzione 1', 'Opzione 2', 'Opzione 3'];
+export default function HamburgerMenu(): JSX.Element {
+  const [visible, setVisible] = useState(false);
 
-export default function DropdownMenu(): JSX.Element {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const options = [
+    { label: 'Profilo', value: 'profile' },
+    { label: 'Impostazioni', value: 'settings' },
+    { label: 'Esci', value: 'logout' },
+  ];
 
-  const onSelect = (index: SelectProps['selectedIndex']) => {
-    setSelectedIndex(index as number);
+  const handleSelect = (value: string) => {
+    setVisible(false);
+    console.log('Selezionato:', value);
+    // Puoi aggiungere qui navigazione o logica
   };
 
   return (
-    <Layout style={{ padding: 16 }}>
-      <Select
-        placeholder="Seleziona un'opzione"
-        value={selectedIndex !== null ? data[selectedIndex] : undefined}
-        selectedIndex={selectedIndex}
-        onSelect={onSelect}
-      >
-        {data.map((title) => (
-          <SelectItem key={title} title={title} />
-        ))}
-      </Select>
-    </Layout>
+    <View style={styles.wrapper}>
+      {/* ICONA HAMBURGER */}
+      <TouchableOpacity onPress={() => setVisible(true)}>
+        <Ionicons name="menu" size={28} color="#000" />
+      </TouchableOpacity>
+
+      {/* MODALE MENU */}
+      <Modal transparent visible={visible} animationType="fade">
+        <Pressable style={styles.backdrop} onPress={() => setVisible(false)}>
+          <View style={styles.menu}>
+            {options.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                onPress={() => handleSelect(option.value)}
+                style={styles.menuItem}
+              >
+                <Text style={styles.menuText}>{option.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  wrapper: {
+    padding: 10,
+    alignItems: 'flex-start',
+  },
+  backdrop: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: 40,
+    paddingRight: 16,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  menu: {
+    backgroundColor: 'white',
+    borderRadius: 6,
+    elevation: 4,
+    width: 160,
+    paddingVertical: 8,
+  },
+  menuItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  menuText: {
+    fontSize: 16,
+    color: '#333',
+  },
+});
