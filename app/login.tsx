@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFonts, Ubuntu_300Light } from '@expo-google-fonts/ubuntu';
 
 const getDeviceType = () => {
 	switch (Device.deviceType) {
@@ -41,6 +42,14 @@ export default function LoginScreen() {
 
 	const [loading, setLoading] = useState(false);
 	const insets = useSafeAreaInsets();
+
+	const [fontsLoaded] = useFonts({
+		Ubuntu_300Light,
+	});
+
+	if (!fontsLoaded) {
+		return null; // oppure <AppLoading />
+	}
 
 	const getDeviceInfo = () => {
 		const name = Constants.manifest?.name ?? Constants.expoConfig?.name ?? 'unknown';
@@ -246,6 +255,7 @@ const styles = StyleSheet.create({
 		marginTop: 10,
 		marginBottom: 20,
 		textAlign: 'center',
+		fontFamily: 'Ubuntu_300Light'
 	},
 	input: {
 		marginBottom: 15,

@@ -11,7 +11,7 @@ export default function Navbar(): JSX.Element {
   return (
     <>
       <View style={styles.container}>
-        <View style={styles.placeholder} /> {/* spazio sinistro per bilanciare */}
+        <View style={styles.placeholder} />
         <Text style={styles.title}>HereNow</Text>
          <DropdownMenu />
       </View>

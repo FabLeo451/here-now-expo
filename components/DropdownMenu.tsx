@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
-export default function HamburgerMenu(): JSX.Element {
+export default function DropdownMenu(): JSX.Element {
   const [visible, setVisible] = useState(false);
 
   const options = [
