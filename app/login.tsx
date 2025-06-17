@@ -6,6 +6,7 @@ import { Redirect, router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const getDeviceType = () => {
 	switch (Device.deviceType) {
@@ -39,6 +40,7 @@ export default function LoginScreen() {
 	const [guestNameError, setGuestNameError] = useState('');
 
 	const [loading, setLoading] = useState(false);
+	const insets = useSafeAreaInsets();
 
 	const getDeviceInfo = () => {
 		const name = Constants.manifest?.name ?? Constants.expoConfig?.name ?? 'unknown';
@@ -146,6 +148,15 @@ export default function LoginScreen() {
 	};
 
 	return (
+	<View style={{
+		paddingTop: insets.top,
+		paddingBottom: insets.bottom,
+		paddingLeft: insets.left,
+		paddingRight: insets.right,
+		flex: 1,
+		backgroundColor: '#f0f0f0',
+	  }}
+	>
 		<Layout style={styles.container}>
 			<Text category="h1" style={styles.title}>HereNow</Text>
 
@@ -213,6 +224,7 @@ export default function LoginScreen() {
 				An app by ekhoes.com
 			</Text>
 		</Layout>
+		</View>
 	);
 }
 
