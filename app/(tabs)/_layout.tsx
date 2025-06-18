@@ -18,41 +18,47 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-    const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={{
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-        flex: 1,
-        backgroundColor: '#f0f0f0',
-      }}
+      paddingTop: insets.top,
+      paddingBottom: /*insets.bottom*/ 50,
+      paddingLeft: insets.left,
+      paddingRight: insets.right,
+      flex: 1,
+      backgroundColor: '#f0f0f0',
+    }}
     >
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        //headerShown: useClientOnlyValue(false, true),
-        headerShown: false
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-    </Tabs>
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+          // Disable the static render of the header on web
+          // to prevent a hydration error in React Navigation v6.
+          //headerShown: useClientOnlyValue(false, true),
+          headerShown: false,
+          tabBarStyle: {
+            elevation: 0, // Android shadow
+            shadowOpacity: 0, // iOS shadow
+            borderTopWidth: 0, // iOS/web fallback
+            backgroundColor: '#f0f0f0', // assicurati che non crei contrasto
+          },
+        }}>
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: 'Tab One',
+            tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="two"
+          options={{
+            title: 'Tab Two',
+            tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          }}
+        />
+      </Tabs>
     </View>
   );
 }
