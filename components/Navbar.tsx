@@ -21,14 +21,14 @@ export default function Navbar(): JSX.Element {
 
 const styles = StyleSheet.create({
   container: {
-    height: 56,
+    height: 50,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    backgroundColor: 'gainsboro',
+    backgroundColor: '#f0f0f0',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#ddd',
   },
   title: {
     fontSize: 18,

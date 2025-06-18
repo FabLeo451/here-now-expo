@@ -132,19 +132,27 @@ const HomeTab: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>My Hotspots</Text>
+      <Text style={styles.sectionTitle}>My Hotspots</Text>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {hotspots.length > 0 ? (
           hotspots.map((h) => (
             <View key={h.id} style={styles.card}>
-              <Text style={styles.cardTitle}>{h.name}</Text>
-              <TouchableOpacity
-                onPress={() => confirmDelete(h.id)}
-                style={styles.deleteButton}
-              >
-                <Text style={styles.deleteButtonText}>🗑️ Elimina</Text>
-              </TouchableOpacity>
+
+
+              <View style={styles.row}>
+                <Text style={styles.cardTitle}>{h.name}</Text>
+                <TouchableOpacity
+                  onPress={() => confirmDelete(h.id)}
+                  style={styles.deleteButton}
+                >
+                  <Text style={styles.deleteButtonText}>🗑️</Text>
+                </TouchableOpacity>
+              </View>
+
+
+
+
             </View>
           ))
         ) : (
@@ -173,12 +181,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 12,
   },
+  sectionTitle: {
+    fontWeight: 'bold',
+    marginVertical: 12,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center', // opzionale, per allineamento verticale
+    paddingHorizontal: 16, // opzionale
+  },
   scrollContent: {
     paddingBottom: 20,
   },
   card: {
     backgroundColor: '#fff',
-    padding: 14,
+    padding: 10,
     borderRadius: 8,
     marginBottom: 12,
     shadowColor: '#000',
