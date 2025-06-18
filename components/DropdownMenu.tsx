@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import Constants from 'expo-constants';
 
 export default function DropdownMenu(): JSX.Element {
   const [visible, setVisible] = useState(false);
@@ -23,8 +24,12 @@ export default function DropdownMenu(): JSX.Element {
   const handleSelect = (value: string) => {
     setVisible(false);
     console.log('Selected:', value);
-    
-    switch(value) {
+
+    switch (value) {
+      case 'about':
+        const version = Constants.expoConfig?.version ?? 'N/A';
+        Alert.alert("HereNow", `Version ${version}\n\nThis is an app by ekhoes.com`);
+        break;
       case 'logout':
         handleLogout();
         break;
