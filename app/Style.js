@@ -27,6 +27,14 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		marginVertical: 10,
 	},
+	selectButton: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+	},
 	link: {
 		textAlign: 'center',
 		marginVertical: 15,

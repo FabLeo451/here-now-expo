@@ -131,10 +131,17 @@ const HomeTab: React.FC = () => {
     handleDelete(id);
   };
 
+  const handleCreate = async () => {
+    router.replace('/create-hotspot');
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>My Hotspots</Text>
-
+      <Button title="Create"
+        onPress={handleCreate}
+      >
+      </Button>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {hotspots.length > 0 ? (
           hotspots.map((h) => (
@@ -161,9 +168,6 @@ const HomeTab: React.FC = () => {
         )}
       </ScrollView>
 
-      <View style={styles.buttonContainer}>
-        <Button title="Create Hotspot" onPress={createHotspot} />
-      </View>
     </View>
   );
 };
