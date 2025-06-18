@@ -13,10 +13,12 @@ export default function HomeScreen() {
       const token = await AsyncStorage.getItem('authToken');
 
       console.log('[index] Authenticated: ', !!token);
-      console.log('[index] Redirecting to login...');
+      
 
-      if (!token)
+      if (!token) {
+        console.log('[index] Redirecting to login...');
         router.replace("/login");
+      }
     };
     checkAuth();
   }, []);
