@@ -8,6 +8,8 @@ import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import Navbar from '@/components/Navbar';
+
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
@@ -23,13 +25,14 @@ export default function TabLayout() {
   return (
     <View style={{
       paddingTop: insets.top,
-      paddingBottom: /*insets.bottom*/ 50,
+      paddingBottom: /*insets.bottom*/ 0,
       paddingLeft: insets.left,
       paddingRight: insets.right,
       flex: 1,
       backgroundColor: '#f0f0f0',
     }}
     >
+      <Navbar />
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
