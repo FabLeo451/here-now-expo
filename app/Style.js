@@ -1,0 +1,97 @@
+import { StyleSheet } from 'react-native';
+
+
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+		paddingTop: 20,
+		paddingBottom: 100,
+		paddingLeft: 10,
+		paddingRight: 10,
+	},
+	title: {
+		marginTop: 10,
+		marginBottom: 20,
+		textAlign: 'center',
+		fontFamily: 'Ubuntu_300Light'
+	},
+	input: {
+		marginBottom: 15,
+	},
+	button: {
+		minWidth: 250,
+		alignSelf: 'center',
+		marginVertical: 10,
+	},
+	link: {
+		textAlign: 'center',
+		marginVertical: 15,
+		textDecorationLine: 'underline',
+		/*cursor: 'pointer', */// per web
+	},
+	divider: {
+		textAlign: 'center',
+		marginVertical: 10,
+	},
+	footer: {
+		position: 'absolute',
+		bottom: 30,
+		left: 0,
+		right: 0,
+		textAlign: 'center',
+		fontSize: 12,
+		color: 'dimgray',
+	},
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f8f8f8',
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
+    marginVertical: 12,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center', 
+    paddingHorizontal: 16,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
+  card: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2, // Android shadow
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  deleteButton: {
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  deleteButtonText: {
+    color: '#cc0000',
+    fontWeight: 'bold',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 20,
+  },
+  buttonContainer: {
+    marginTop: 'auto',
+    paddingVertical: 16,
+  },
+});
+
+export { styles }

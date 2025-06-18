@@ -8,6 +8,7 @@ import Constants from 'expo-constants';
 import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFonts, Ubuntu_300Light } from '@expo-google-fonts/ubuntu';
+import { styles } from "@/app/Style";
 
 const getDeviceType = () => {
 	switch (Device.deviceType) {
@@ -242,46 +243,3 @@ export const LoadingIndicator = (): JSX.Element => (
 		<Spinner size="small" />
 	</View>
 );
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		paddingTop: 20,
-		paddingBottom: 100,
-		paddingLeft: 10,
-		paddingRight: 10,
-	},
-	title: {
-		marginTop: 10,
-		marginBottom: 20,
-		textAlign: 'center',
-		fontFamily: 'Ubuntu_300Light'
-	},
-	input: {
-		marginBottom: 15,
-	},
-	button: {
-		minWidth: 250,
-		alignSelf: 'center',
-		marginVertical: 10,
-	},
-	link: {
-		textAlign: 'center',
-		marginVertical: 15,
-		textDecorationLine: 'underline',
-		/*cursor: 'pointer', */// per web
-	},
-	divider: {
-		textAlign: 'center',
-		marginVertical: 10,
-	},
-	footer: {
-		position: 'absolute',
-		bottom: 30,
-		left: 0,
-		right: 0,
-		textAlign: 'center',
-		fontSize: 12,
-		color: 'dimgray',
-	},
-});
