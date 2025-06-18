@@ -1,13 +1,16 @@
 import { StyleSheet } from 'react-native';
 
-
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
-		paddingTop: 20,
-		paddingBottom: 100,
-		paddingLeft: 10,
-		paddingRight: 10,
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f8f8f8',
+	},
+	mainTitle: {
+		marginTop: 60,
+		marginBottom: 100,
+		textAlign: 'center',
+		fontFamily: 'Dosis_600SemiBold'
 	},
 	title: {
 		marginTop: 10,
@@ -17,6 +20,7 @@ const styles = StyleSheet.create({
 	},
 	input: {
 		marginBottom: 15,
+    backgroundColor: "white"
 	},
 	button: {
 		minWidth: 250,
@@ -35,18 +39,13 @@ const styles = StyleSheet.create({
 	},
 	footer: {
 		position: 'absolute',
-		bottom: 30,
+		bottom: 20,
 		left: 0,
 		right: 0,
 		textAlign: 'center',
 		fontSize: 12,
 		color: 'dimgray',
 	},
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#f8f8f8',
-  },
   sectionTitle: {
     fontWeight: 'bold',
     marginVertical: 12,
@@ -95,3 +94,4 @@ const styles = StyleSheet.create({
 });
 
 export { styles }
+

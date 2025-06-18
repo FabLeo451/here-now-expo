@@ -7,8 +7,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFonts, Ubuntu_300Light } from '@expo-google-fonts/ubuntu';
-import { styles } from "@/app/Style";
+import { useFonts, Dosis_600SemiBold } from '@expo-google-fonts/dosis';
+import { FontAwesome } from '@expo/vector-icons';
+import { styles } from './Style';
 
 const getDeviceType = () => {
 	switch (Device.deviceType) {
@@ -45,7 +46,7 @@ export default function LoginScreen() {
 	const insets = useSafeAreaInsets();
 
 	const [fontsLoaded] = useFonts({
-		Ubuntu_300Light,
+		Dosis_600SemiBold,
 	});
 
 	if (!fontsLoaded) {
@@ -168,7 +169,7 @@ export default function LoginScreen() {
 	  }}
 	>
 		<Layout style={styles.container}>
-			<Text category="h1" style={styles.title}>HereNow</Text>
+			<Text category="h1" style={styles.mainTitle}>HereN<FontAwesome name="wifi" size={22} color="#000" />w</Text>
 
 			<Input
 				placeholder="Email"
