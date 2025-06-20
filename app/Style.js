@@ -59,6 +59,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginVertical: 12,
   },
+  label: {
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 5,
+  },
   sectionTitle: {
     fontWeight: 'bold',
     marginVertical: 12,
@@ -73,6 +78,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',   // Tutti su una linea
     justifyContent: 'flex-start', // Allineati a sinistra
     alignItems: 'center',   // Centra verticalmente (opzionale)
+    gap: 10, 
   },
   scrollContent: {
     paddingBottom: 20,

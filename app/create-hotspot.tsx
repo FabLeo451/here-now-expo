@@ -12,6 +12,8 @@ import { styles } from "@/app/Style";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams } from 'expo-router';
 
 interface Hotspot {
 	id: string;
@@ -26,15 +28,29 @@ interface Hotspot {
 
 const CreateHotspot: React.FC = () => {
 
+	const { action, hotspotEnc } = useLocalSearchParams();
 	const insets = useSafeAreaInsets();
 
+	const [id, setId] = useState('');
 	const [name, setName] = useState('');
+	const [position, setPosition] = useState('');
 	const [startDate, setStartDate] = useState(new Date());
 	const [showStartDatePicker, setShowStartDatePicker] = useState(false);
 	const [showStartTimePicker, setShowStartTimePicker] = useState(false);
 	const [endDate, setEndDate] = useState(new Date(new Date().getTime() + 24 * 60 * 60 * 1000));
 	const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 	const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+	const [showMap, setShowMap] = useState(false);
+
+	useEffect(() => {
+		if (action == 'update' && typeof hotspotEnc === 'string')  {
+			const hotspot = JSON.parse(hotspotEnc);
+			setId(hotspot.id);
+			setName(hotspot.name);
+			setStartDate(new Date(hotspot.startTime));
+			setEndDate(new Date(hotspot.endTime));
+		}
+	}, [hotspotEnc, action]);
 
 	const onChangeStartDate = (event: any, selectedDate?: Date) => {
 		if (selectedDate && selectedDate < endDate) setStartDate(selectedDate);
@@ -46,6 +62,72 @@ const CreateHotspot: React.FC = () => {
 		if (selectedDate && selectedDate > startDate) setEndDate(selectedDate);
 		setShowEndDatePicker(false);
 		setShowEndTimePicker(false);
+	};
+
+	async function validate() {
+
+		const token = await AsyncStorage.getItem('authToken');
+		const title = 'Invalid data';
+
+		if (!token) {
+			Alert.alert('Error', 'Not authenticated');
+			return false;
+		}
+
+		if (!name || name.length < 3) {
+			Alert.alert(title, 'Name too short.');
+			return false;
+		}
+
+		if (!position) {
+			Alert.alert(title, 'Position not set.');
+			return false;
+		}
+
+		return true;
+	}
+
+	const updateHotspot = async () => {
+		
+		if (!validate())
+			return;
+	}
+
+	const createHotspot = async () => {
+		
+		if (!validate())
+			return;
+
+		const hotspot: Omit<Hotspot, 'id'> = {
+			name: 'Test',
+			position: {
+				latitude: 41.18,
+				longitude: 21.35,
+			},
+			startTime: 'start',
+			endTime: 'end',
+		};
+		/*
+			try {
+			  const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
+				method: 'POST',
+				headers: {
+				  'Content-Type': 'application/json',
+				  Authorization: token,
+				},
+				body: JSON.stringify(hotspot),
+			  });
+		
+			  if (!response.ok) {
+				throw new Error('Failed to create hotspot');
+			  }
+		
+			  const newHotspot: Hotspot = await response.json();
+		
+			} catch (error: any) {
+			  Alert.alert('Errore di accesso', error.message);
+			}
+			  */
 	};
 
 	return (
@@ -61,13 +143,12 @@ const CreateHotspot: React.FC = () => {
 				<TouchableOpacity onPress={() => router.replace("/")}>
 					<Ionicons name="arrow-back" size={24} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.sectionTitle}>Create an hotspot</Text>
+				<Text style={styles.sectionTitle}>{action == 'create' ? "Create" : "Update" } hotspot</Text>
 			</View>
 			<View style={styles.container}>
+				<Input value={id} style={{ display: 'none' }}/>
 
-				
-
-				<Text>Name</Text>
+				<Text style={styles.label}>Name</Text>
 				<Input
 					placeholder="Name"
 					style={styles.input}
@@ -76,8 +157,21 @@ const CreateHotspot: React.FC = () => {
 					autoCapitalize="none"
 				/>
 
+				<Text style={styles.label}>Position</Text>
+				<View style={styles.rowLeft}>
+					<Input
+						style={styles.input}
+						value={position}
+						autoCapitalize="none"
+						disabled={true}
+					/>
+					<TouchableOpacity style={styles.selectButton} onPress={() => setShowMap(true)}>
+						<Ionicons name="map" size={25} color="#fff" />
+					</TouchableOpacity>
+				</View>
+
 				{/* Start time */}
-				<Text>Start time</Text>
+				<Text style={styles.label}>Start time</Text>
 				<View style={styles.rowLeft}>
 					<Text>{startDate.toLocaleString()}</Text>
 					<TouchableOpacity style={styles.selectButton} onPress={() => setShowStartDatePicker(true)}>
@@ -110,7 +204,7 @@ const CreateHotspot: React.FC = () => {
 				}
 
 				{/* End time */}
-				<Text>End time</Text>
+				<Text style={styles.label}>End time</Text>
 				<View style={styles.rowLeft}>
 					<Text>{endDate.toLocaleString()}</Text>
 					<TouchableOpacity style={styles.selectButton} onPress={() => setShowEndDatePicker(true)}>
@@ -141,6 +235,16 @@ const CreateHotspot: React.FC = () => {
 						/>
 					)
 				}
+
+				{action == 'create' ? (
+					<Button style={{ marginTop: 30 }} onPress={createHotspot}>
+						Create
+					</Button>
+				) : (
+				<Button style={{ marginTop: 30 }} onPress={updateHotspot}>
+					Update
+				</Button>
+				)}
 
 			</View>
 		</View >

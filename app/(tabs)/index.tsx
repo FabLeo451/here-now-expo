@@ -11,6 +11,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { styles } from "@/app/Style";
+import { Ionicons } from '@expo/vector-icons';
 
 interface Hotspot {
   id: string;
@@ -25,7 +26,7 @@ interface Hotspot {
 
 const HomeTab: React.FC = () => {
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
-  const [context, setContext] = useState({user:{name:''}});
+  const [context, setContext] = useState({ user: { name: '' } });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -52,7 +53,7 @@ const HomeTab: React.FC = () => {
   }, []);
 
   const getMyHotspots = async (token: string) => {
-    
+
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
         method: 'GET',
@@ -73,46 +74,7 @@ const HomeTab: React.FC = () => {
       Alert.alert('Error getting my hotspots', error.message);
     }
   };
-/*
-  const createHotspot = async () => {
-    const token = await AsyncStorage.getItem('authToken');
 
-    if (!token) {
-      router.replace('/login');
-      return;
-    }
-
-    const hotspot: Omit<Hotspot, 'id'> = {
-      name: 'Test',
-      position: {
-        latitude: 41.18,
-        longitude: 21.35,
-      },
-      startTime: 'start',
-      endTime: 'end',
-    };
-
-    try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token,
-        },
-        body: JSON.stringify(hotspot),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create hotspot');
-      }
-
-      const newHotspot: Hotspot = await response.json();
-      setHotspots((prev) => [...prev, newHotspot]);
-    } catch (error: any) {
-      Alert.alert('Errore di accesso', error.message);
-    }
-  };
-*/
   const handleDelete = async (id: string) => {
     const token = await AsyncStorage.getItem('authToken');
 
@@ -140,23 +102,36 @@ const HomeTab: React.FC = () => {
   };
 
   const handleCreate = async () => {
-    router.replace('/create-hotspot');
+    //router.replace('/create-hotspot');
+    router.push({
+      pathname: '/create-hotspot',
+      params: { action: 'create' }
+    });
+  }
+
+  const handleUpdate = async (hs: Hotspot) => {
+
+    router.push({
+      pathname: '/create-hotspot',
+      params: { 
+        action: 'update',
+        hotspotEnc: JSON.stringify(hs)
+      }
+    });
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.hello}>Hello, {context.user ? context.user?.name : 'user'}</Text>
       <Text style={styles.sectionTitle}>Your Hotspots</Text>
-      <Button title="Create"
-        onPress={handleCreate}
-      >
-      </Button>
+      <TouchableOpacity style={styles.selectButton} onPress={() => handleCreate()}>
+        <Ionicons name="add" size={25} color="#fff" />
+      </TouchableOpacity>
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {hotspots.length > 0 ? (
           hotspots.map((h) => (
-            <View key={h.id} style={styles.card}>
-
-
+            <TouchableOpacity key={h.id} style={styles.card} onPress={() => handleUpdate(h)}>
               <View style={styles.row}>
                 <Text style={styles.cardTitle}>{h.name}</Text>
                 <TouchableOpacity
@@ -166,11 +141,7 @@ const HomeTab: React.FC = () => {
                   <Text style={styles.deleteButtonText}>🗑️</Text>
                 </TouchableOpacity>
               </View>
-
-
-
-
-            </View>
+            </TouchableOpacity>
           ))
         ) : (
           <Text style={styles.emptyText}>Nessun hotspot disponibile</Text>
