@@ -25,7 +25,7 @@ interface Hotspot {
 
 const HomeTab: React.FC = () => {
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
-  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [context, setContext] = useState({user:{name:''}});
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -36,7 +36,12 @@ const HomeTab: React.FC = () => {
         console.log('[index] Redirecting to login...');
         router.replace('/login');
       } else {
-        setAuthToken(token);
+
+        const contextStr = await AsyncStorage.getItem('context');
+        const ctx = contextStr ? JSON.parse(contextStr) : {};
+        setContext(ctx);
+
+        //setAuthToken(token);
         getMyHotspots(token);
       }
     };
@@ -137,7 +142,8 @@ const HomeTab: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>My Hotspots</Text>
+      <Text style={{paddingBottom:10}}>Hello, {context.user.name}</Text>
+      <Text style={styles.sectionTitle}>Your Hotspots</Text>
       <Button title="Create"
         onPress={handleCreate}
       >

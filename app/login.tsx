@@ -103,6 +103,7 @@ export default function LoginScreen() {
 
 			type LoginResponse = {
 				token: string;
+				name: string;
 			};
 
 			const data = await response.json() as LoginResponse;
@@ -111,12 +112,26 @@ export default function LoginScreen() {
 
 			await AsyncStorage.setItem('authToken', data.token);
 
-			setTimeout(() => {
+			const context = {
+				user: {
+					name: data.name,
+					isGuest: false,
+					isAuthenticated: true
+				}
+			};
+
+			console.log('context = ', context);
+
+			await AsyncStorage.setItem('context', JSON.stringify(context));
+
+			/*setTimeout(() => {
 				console.log('[login] Redirecting...');
 				router.replace('/(tabs)');
-			}, 1000)
+			}, 1000)*/
 			
 			//setLoggedIn(true);
+			router.replace('/(tabs)');
+
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Unknown error';
 			Alert.alert('Access error:', message);
@@ -148,8 +163,21 @@ export default function LoginScreen() {
 			}
 
 			const data = await response.json();
+
 			await AsyncStorage.setItem('authToken', data.token);
+
+			const context = {
+				user: {
+					name: guestName,
+					isGuest: true,
+					isAuthenticated: false
+				}
+			};
+
+			await AsyncStorage.setItem('context', JSON.stringify(context));
+
 			router.replace('/(tabs)');
+
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Unknown error';
 			Alert.alert('Access error:', message);
