@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     backgroundColor: '#007AFF',
-    borderRadius: 8,
+    borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',
 	},
@@ -68,6 +68,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center', 
     paddingHorizontal: 16,
+  },
+  rowLeft: {
+    flexDirection: 'row',   // Tutti su una linea
+    justifyContent: 'flex-start', // Allineati a sinistra
+    alignItems: 'center',   // Centra verticalmente (opzionale)
   },
   scrollContent: {
     paddingBottom: 20,

@@ -145,7 +145,7 @@ const HomeTab: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.hello}>Hello, {context.user.name}</Text>
+      <Text style={styles.hello}>Hello, {context.user ? context.user?.name : 'user'}</Text>
       <Text style={styles.sectionTitle}>Your Hotspots</Text>
       <Button title="Create"
         onPress={handleCreate}
