@@ -54,6 +54,11 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		color: 'dimgray',
 	},
+  hello: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    marginVertical: 12,
+  },
   sectionTitle: {
     fontWeight: 'bold',
     marginVertical: 12,

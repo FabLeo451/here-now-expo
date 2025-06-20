@@ -30,7 +30,7 @@ const HomeTab: React.FC = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem('authToken');
-      console.log('[index] Authenticated: ', !!token);
+      console.log('[index] Token found: ', !!token);
 
       if (!token) {
         console.log('[index] Redirecting to login...');
@@ -42,7 +42,9 @@ const HomeTab: React.FC = () => {
         setContext(ctx);
 
         //setAuthToken(token);
-        getMyHotspots(token);
+
+        if (ctx.user.isAuthenticated)
+          getMyHotspots(token);
       }
     };
 
@@ -50,6 +52,7 @@ const HomeTab: React.FC = () => {
   }, []);
 
   const getMyHotspots = async (token: string) => {
+    
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
         method: 'GET',
@@ -70,7 +73,7 @@ const HomeTab: React.FC = () => {
       Alert.alert('Error getting my hotspots', error.message);
     }
   };
-
+/*
   const createHotspot = async () => {
     const token = await AsyncStorage.getItem('authToken');
 
@@ -109,7 +112,7 @@ const HomeTab: React.FC = () => {
       Alert.alert('Errore di accesso', error.message);
     }
   };
-
+*/
   const handleDelete = async (id: string) => {
     const token = await AsyncStorage.getItem('authToken');
 
@@ -142,7 +145,7 @@ const HomeTab: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={{paddingBottom:10}}>Hello, {context.user.name}</Text>
+      <Text style={styles.hello}>Hello, {context.user.name}</Text>
       <Text style={styles.sectionTitle}>Your Hotspots</Text>
       <Button title="Create"
         onPress={handleCreate}
