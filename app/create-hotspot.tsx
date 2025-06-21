@@ -17,7 +17,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
-import MapView, { Marker, MapPressEvent } from 'react-native-maps';
 import { Dimensions } from 'react-native';
 import ModalMapSelect from '@/components/ModalMapSelect'
 
@@ -231,7 +230,7 @@ const CreateHotspot: React.FC = () => {
 					visible={modalVisible} 
 					latitude={location?.latitude ?? 0} 
 					longitude={location?.longitude ?? 0} 
-					onSelect={(coords) => {
+					onSelect={(coords: { latitude: number; longitude: number } | null) => {
         				
 						//Alert.alert(JSON.stringify(coords))
         				setModalVisible(false);
