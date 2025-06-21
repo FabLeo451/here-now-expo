@@ -99,7 +99,14 @@ const HomeTab: React.FC = () => {
   };
 
   const confirmDelete = (id: string) => {
-    handleDelete(id);
+    Alert.alert(
+      "Delete hotspot",
+      "Are you sure you want to delete this item?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "OK", onPress: () => handleDelete(id) }
+      ]
+    );
   };
 
   const handleCreate = async () => {

@@ -148,15 +148,6 @@ const CreateHotspot: React.FC = () => {
 	const [position, setPosition] = useState(''); // On screen
 
 	useEffect(() => {
-		if (action == 'update' && typeof hotspotEnc === 'string') {
-			const hotspot = JSON.parse(hotspotEnc);
-			//Alert.alert('', hotspotEnc)
-			setId(hotspot.id);
-			setName(hotspot.name);
-			setPosition(hotspot.Position.latitude.toFixed(6) + ', ' + hotspot.Position.longitude.toFixed(6));
-			setStartDate(new Date(hotspot.startTime));
-			setEndDate(new Date(hotspot.endTime));
-		}
 
 		const init = async () => {
 			const token = await AsyncStorage.getItem('authToken');
@@ -168,15 +159,31 @@ const CreateHotspot: React.FC = () => {
 				return;
 			}
 
-			let loc = await Location.getCurrentPositionAsync({
-				accuracy: Location.Accuracy.BestForNavigation, // o .BestForNavigation
-				//maximumAge: 0,      // No cache
-			});
+			let coords = { latitude: 0, longitude: 0};
 
-			let coords = {
-				latitude: loc.coords.latitude,
-				longitude: loc.coords.longitude,
-			};
+			if (action == 'update' && typeof hotspotEnc === 'string') {
+				const hotspot = JSON.parse(hotspotEnc);
+				//Alert.alert('', hotspotEnc)
+				setId(hotspot.id);
+				setName(hotspot.name);
+				setPosition(hotspot.Position.latitude.toFixed(6) + ', ' + hotspot.Position.longitude.toFixed(6));
+				setStartDate(new Date(hotspot.startTime));
+				setEndDate(new Date(hotspot.endTime));
+
+				coords.latitude = hotspot.Position.latitude;
+				coords.longitude = hotspot.Position.longitude;
+
+			} else {
+
+				let loc = await Location.getCurrentPositionAsync({
+					accuracy: Location.Accuracy.BestForNavigation, // o .BestForNavigation
+					//maximumAge: 0,      // No cache
+				});
+
+				coords.latitude = loc.coords.latitude;
+				coords.longitude = loc.coords.longitude;
+
+			}
 
 			setLocation(coords);
 
