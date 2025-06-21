@@ -31,6 +31,7 @@ const CreateHotspot: React.FC = () => {
 	const { action, hotspotEnc } = useLocalSearchParams();
 	const insets = useSafeAreaInsets();
 
+	const [authToken, setAuthToken] = useState('');
 	const [id, setId] = useState('');
 	const [name, setName] = useState('');
 	const [position, setPosition] = useState('');
@@ -50,6 +51,14 @@ const CreateHotspot: React.FC = () => {
 			setStartDate(new Date(hotspot.startTime));
 			setEndDate(new Date(hotspot.endTime));
 		}
+		
+		const init = async () => {
+			const token = await AsyncStorage.getItem('authToken');
+			setAuthToken(token ?? '');
+		}
+
+		init();
+
 	}, [hotspotEnc, action]);
 
 	const onChangeStartDate = (event: any, selectedDate?: Date) => {
@@ -66,10 +75,10 @@ const CreateHotspot: React.FC = () => {
 
 	async function validate() {
 
-		const token = await AsyncStorage.getItem('authToken');
+		//const token = await AsyncStorage.getItem('authToken');
 		const title = 'Invalid data';
 
-		if (!token) {
+		if (!authToken) {
 			Alert.alert('Error', 'Not authenticated');
 			return false;
 		}
@@ -91,6 +100,36 @@ const CreateHotspot: React.FC = () => {
 		
 		if (!validate())
 			return;
+
+		const hotspot: Omit<Hotspot, 'id'> = {
+			name,
+			position: {
+				latitude: 41.18,
+				longitude: 21.35,
+			},
+			startTime: startDate.toISOString(),
+			endTime: endDate.toISOString(),
+		};
+
+		try {
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: authToken,
+				},
+				body: JSON.stringify(hotspot),
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to create hotspot');
+			}
+
+			const newHotspot: Hotspot = await response.json();
+
+		} catch (error: any) {
+			Alert.alert('Errore di accesso', error.message);
+		}
 	}
 
 	const createHotspot = async () => {
