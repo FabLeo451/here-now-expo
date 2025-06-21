@@ -44,16 +44,16 @@ type Props = {
 function ModalMapSelect({ visible, latitude, longitude, onSelect }: Props) {
 	const [selectedCoords, setSelectedCoords] = useState<{ latitude: number; longitude: number } | null>(null);
 
-  const handleMapPress = (e: MapPressEvent) => {
-    const coords = e.nativeEvent.coordinate;
-    setSelectedCoords(coords);
-  };
+	const handleMapPress = (e: MapPressEvent) => {
+		const coords = e.nativeEvent.coordinate;
+		setSelectedCoords(coords);
+	};
 
-  const handleSelect = () => {
-    if (selectedCoords) {
-      onSelect(selectedCoords); // Passa le coordinate al componente padre
-    }
-  };
+	const handleSelect = () => {
+		if (selectedCoords) {
+		onSelect(selectedCoords); // Passa le coordinate al componente padre
+		}
+	};
 
 	const stylesModal = StyleSheet.create({
 		overlay: {
@@ -86,6 +86,8 @@ function ModalMapSelect({ visible, latitude, longitude, onSelect }: Props) {
 		},
 	});
 
+	//console.log('[ModalMapSelect] Initial coords: ', latitude, longitude);
+
 	return (
 		<Modal
 			visible={visible}
@@ -107,8 +109,8 @@ function ModalMapSelect({ visible, latitude, longitude, onSelect }: Props) {
 						initialRegion={{
 							latitude,
 							longitude,
-							latitudeDelta: 0.05,
-							longitudeDelta: 0.05,
+							latitudeDelta: 0.005,
+							longitudeDelta: 0.005,
 						}}
 						onPress={handleMapPress}
 					>
@@ -132,7 +134,6 @@ const CreateHotspot: React.FC = () => {
 	const [authToken, setAuthToken] = useState('');
 	const [id, setId] = useState('');
 	const [name, setName] = useState('');
-	const [position, setPosition] = useState('');
 	const [startDate, setStartDate] = useState(new Date());
 	const [showStartDatePicker, setShowStartDatePicker] = useState(false);
 	const [showStartTimePicker, setShowStartTimePicker] = useState(false);
@@ -144,12 +145,15 @@ const CreateHotspot: React.FC = () => {
 		latitude: 41.9028,
 		longitude: 12.4964,
 	});
+	const [position, setPosition] = useState(''); // On screen
 
 	useEffect(() => {
 		if (action == 'update' && typeof hotspotEnc === 'string') {
 			const hotspot = JSON.parse(hotspotEnc);
+			//Alert.alert('', hotspotEnc)
 			setId(hotspot.id);
 			setName(hotspot.name);
+			setPosition(hotspot.Position.latitude.toFixed(6) + ', ' + hotspot.Position.longitude.toFixed(6));
 			setStartDate(new Date(hotspot.startTime));
 			setEndDate(new Date(hotspot.endTime));
 		}
@@ -175,6 +179,8 @@ const CreateHotspot: React.FC = () => {
 			};
 
 			setLocation(coords);
+
+			//console.log('[init] Initial coords: ', coords);
 		}
 
 		init();
@@ -224,8 +230,8 @@ const CreateHotspot: React.FC = () => {
 		const hotspot: Omit<Hotspot, 'id'> = {
 			name,
 			position: {
-				latitude: 41.18,
-				longitude: 21.35,
+				latitude: location?.latitude || 0,
+				longitude: location?.longitude || 0,
 			},
 			startTime: startDate.toISOString(),
 			endTime: endDate.toISOString(),
@@ -242,13 +248,15 @@ const CreateHotspot: React.FC = () => {
 			});
 
 			if (!response.ok) {
-				throw new Error('Failed to create hotspot');
+				throw new Error('Failed to update hotspot');
 			}
 
-			const newHotspot: Hotspot = await response.json();
+			//const newHotspot: Hotspot = await response.json();
+
+			router.replace("/");
 
 		} catch (error: any) {
-			Alert.alert('Errore di accesso', error.message);
+			Alert.alert('Error updating:', error.message);
 		}
 	}
 
@@ -258,35 +266,36 @@ const CreateHotspot: React.FC = () => {
 			return;
 
 		const hotspot: Omit<Hotspot, 'id'> = {
-			name: 'Test',
+			name,
 			position: {
-				latitude: 41.18,
-				longitude: 21.35,
+				latitude: location?.latitude || 0,
+				longitude: location?.longitude || 0,
 			},
-			startTime: 'start',
-			endTime: 'end',
+			startTime: startDate.toISOString(),
+			endTime: endDate.toISOString(),
 		};
-		/*
-			try {
-			  const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
-				method: 'POST',
-				headers: {
-				  'Content-Type': 'application/json',
-				  Authorization: token,
-				},
-				body: JSON.stringify(hotspot),
-			  });
-		
-			  if (!response.ok) {
+
+		try {
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: authToken,
+			},
+			body: JSON.stringify(hotspot),
+			});
+	
+			if (!response.ok) {
 				throw new Error('Failed to create hotspot');
-			  }
-		
-			  const newHotspot: Hotspot = await response.json();
-		
-			} catch (error: any) {
-			  Alert.alert('Errore di accesso', error.message);
 			}
-			  */
+	
+			const newHotspot: Hotspot = await response.json();
+
+			router.replace("/");
+	
+		} catch (error: any) {
+			Alert.alert('Error', error.message);
+		}
 	};
 
 	return (
@@ -310,13 +319,18 @@ const CreateHotspot: React.FC = () => {
 					latitude={location?.latitude ?? 0} 
 					longitude={location?.longitude ?? 0} 
 					onSelect={(coords) => {
-        				setLocation(coords);
-						Alert.alert(JSON.stringify(coords))
+        				
+						//Alert.alert(JSON.stringify(coords))
         				setModalVisible(false);
+						if (coords) {
+							setLocation(coords);
+							setPosition(coords.latitude.toFixed(6) + ', ' + coords.longitude.toFixed(6));
+						}
+							
       				}}
 				/>
 
-				<Input value={id} style={{ display: 'none' }} />
+				{/*<Input value={id} style={{ display: 'none' }} />*/}
 
 				<Text style={styles.label}>Name</Text>
 				<Input

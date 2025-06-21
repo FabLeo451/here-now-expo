@@ -19,8 +19,8 @@ const styles = StyleSheet.create({
 		fontFamily: 'Ubuntu_300Light'
 	},
 	input: {
-		marginBottom: 15,
-    backgroundColor: "white"
+    backgroundColor: "white",
+    minWidth: 300,
 	},
 	button: {
 		minWidth: 250,

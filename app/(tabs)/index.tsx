@@ -69,6 +69,7 @@ const HomeTab: React.FC = () => {
 
       const data: Hotspot[] = await response.json();
       setHotspots(data);
+      //Alert.alert('', JSON.stringify(data))
     } catch (error: any) {
       console.log('[getMyHotspots] ', error);
       Alert.alert('Error getting my hotspots', error.message);
