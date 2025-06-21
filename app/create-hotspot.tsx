@@ -71,12 +71,12 @@ const CreateHotspot: React.FC = () => {
 				//Alert.alert('', hotspotEnc)
 				setId(hotspot.id);
 				setName(hotspot.name);
-				setPosition(hotspot.Position.latitude.toFixed(6) + ', ' + hotspot.Position.longitude.toFixed(6));
+				setPosition(hotspot.position.latitude.toFixed(6) + ', ' + hotspot.position.longitude.toFixed(6));
 				setStartDate(new Date(hotspot.startTime));
 				setEndDate(new Date(hotspot.endTime));
 
-				coords.latitude = hotspot.Position.latitude;
-				coords.longitude = hotspot.Position.longitude;
+				coords.latitude = hotspot.position.latitude;
+				coords.longitude = hotspot.position.longitude;
 
 			} else {
 
