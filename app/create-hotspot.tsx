@@ -4,7 +4,9 @@ import {
 	View,
 	ScrollView,
 	TouchableOpacity,
-	Platform
+	Platform,
+	Modal,
+	StyleSheet
 } from 'react-native';
 import { router } from 'expo-router';
 import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
@@ -14,6 +16,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
+import * as Location from 'expo-location';
+import MapView, { Marker, MapPressEvent } from 'react-native-maps';
+import { Dimensions } from 'react-native';
+import { Float } from 'react-native/Libraries/Types/CodegenTypes';
+
 
 interface Hotspot {
 	id: string;
@@ -24,6 +31,97 @@ interface Hotspot {
 	};
 	startTime?: string;
 	endTime?: string;
+}
+
+type Props = {
+	visible: boolean;
+	latitude: number;
+	longitude: number;
+	//onClose: () => void;
+	onSelect: (coords: { latitude: number; longitude: number } | null) => void;
+};
+
+function ModalMapSelect({ visible, latitude, longitude, onSelect }: Props) {
+	const [selectedCoords, setSelectedCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+
+  const handleMapPress = (e: MapPressEvent) => {
+    const coords = e.nativeEvent.coordinate;
+    setSelectedCoords(coords);
+  };
+
+  const handleSelect = () => {
+    if (selectedCoords) {
+      onSelect(selectedCoords); // Passa le coordinate al componente padre
+    }
+  };
+
+	const stylesModal = StyleSheet.create({
+		overlay: {
+			flex: 1,
+			backgroundColor: 'rgba(0,0,0,0.5)',
+			justifyContent: 'center',
+			alignItems: 'center',
+		},
+		content: {
+			padding: 10,
+			backgroundColor: 'white',
+			borderRadius: 10,
+			elevation: 5,
+		},
+		text: {
+			marginBottom: 10,
+			fontSize: 16,
+		},
+		map: {
+			/*width: Dimensions.get('window').width,
+			height: Dimensions.get('window').height,*/
+			width: 350,
+			height: 350,
+		},
+		closeButton: {
+		position: 'absolute',
+		top: 10,
+		right: 10,
+		zIndex: 1,
+		},
+	});
+
+	return (
+		<Modal
+			visible={visible}
+			animationType="slide"
+			transparent
+			onRequestClose={() => onSelect(selectedCoords || { latitude, longitude })}
+		>
+
+			<View style={stylesModal.overlay}>
+				<View style={stylesModal.content}>
+
+					<TouchableOpacity onPress={() => onSelect(null)} style={stylesModal.closeButton}>
+					<Ionicons name="close" size={24} color="black" />
+					</TouchableOpacity>		
+
+					<Text style={stylesModal.text}>Select a position</Text>
+					<MapView
+						style={stylesModal.map}
+						initialRegion={{
+							latitude,
+							longitude,
+							latitudeDelta: 0.05,
+							longitudeDelta: 0.05,
+						}}
+						onPress={handleMapPress}
+					>
+						<Marker coordinate={selectedCoords ?? { latitude, longitude }} />
+					</MapView>
+	  				<Button onPress={handleSelect} >Select</Button>
+				</View>
+			</View>
+
+		</Modal>
+	);
+
+
 }
 
 const CreateHotspot: React.FC = () => {
@@ -41,20 +139,42 @@ const CreateHotspot: React.FC = () => {
 	const [endDate, setEndDate] = useState(new Date(new Date().getTime() + 24 * 60 * 60 * 1000));
 	const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 	const [showEndTimePicker, setShowEndTimePicker] = useState(false);
-	const [showMap, setShowMap] = useState(false);
+	const [modalVisible, setModalVisible] = useState(false);
+	const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>({
+		latitude: 41.9028,
+		longitude: 12.4964,
+	});
 
 	useEffect(() => {
-		if (action == 'update' && typeof hotspotEnc === 'string')  {
+		if (action == 'update' && typeof hotspotEnc === 'string') {
 			const hotspot = JSON.parse(hotspotEnc);
 			setId(hotspot.id);
 			setName(hotspot.name);
 			setStartDate(new Date(hotspot.startTime));
 			setEndDate(new Date(hotspot.endTime));
 		}
-		
+
 		const init = async () => {
 			const token = await AsyncStorage.getItem('authToken');
 			setAuthToken(token ?? '');
+
+			const { status } = await Location.requestForegroundPermissionsAsync();
+			if (status !== 'granted') {
+				Alert.alert('GPS not permitted');
+				return;
+			}
+
+			let loc = await Location.getCurrentPositionAsync({
+				accuracy: Location.Accuracy.BestForNavigation, // o .BestForNavigation
+				//maximumAge: 0,      // No cache
+			});
+
+			let coords = {
+				latitude: loc.coords.latitude,
+				longitude: loc.coords.longitude,
+			};
+
+			setLocation(coords);
 		}
 
 		init();
@@ -97,7 +217,7 @@ const CreateHotspot: React.FC = () => {
 	}
 
 	const updateHotspot = async () => {
-		
+
 		if (!validate())
 			return;
 
@@ -133,7 +253,7 @@ const CreateHotspot: React.FC = () => {
 	}
 
 	const createHotspot = async () => {
-		
+
 		if (!validate())
 			return;
 
@@ -182,10 +302,21 @@ const CreateHotspot: React.FC = () => {
 				<TouchableOpacity onPress={() => router.replace("/")}>
 					<Ionicons name="arrow-back" size={24} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.sectionTitle}>{action == 'create' ? "Create" : "Update" } hotspot</Text>
+				<Text style={styles.sectionTitle}>{action == 'create' ? "Create" : "Update"} hotspot</Text>
 			</View>
 			<View style={styles.container}>
-				<Input value={id} style={{ display: 'none' }}/>
+				<ModalMapSelect 
+					visible={modalVisible} 
+					latitude={location?.latitude ?? 0} 
+					longitude={location?.longitude ?? 0} 
+					onSelect={(coords) => {
+        				setLocation(coords);
+						Alert.alert(JSON.stringify(coords))
+        				setModalVisible(false);
+      				}}
+				/>
+
+				<Input value={id} style={{ display: 'none' }} />
 
 				<Text style={styles.label}>Name</Text>
 				<Input
@@ -204,7 +335,7 @@ const CreateHotspot: React.FC = () => {
 						autoCapitalize="none"
 						disabled={true}
 					/>
-					<TouchableOpacity style={styles.selectButton} onPress={() => setShowMap(true)}>
+					<TouchableOpacity style={styles.selectButton} onPress={() => setModalVisible(true)}>
 						<Ionicons name="map" size={25} color="#fff" />
 					</TouchableOpacity>
 				</View>
@@ -280,9 +411,9 @@ const CreateHotspot: React.FC = () => {
 						Create
 					</Button>
 				) : (
-				<Button style={{ marginTop: 30 }} onPress={updateHotspot}>
-					Update
-				</Button>
+					<Button style={{ marginTop: 30 }} onPress={updateHotspot}>
+						Update
+					</Button>
 				)}
 
 			</View>
