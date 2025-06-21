@@ -74,8 +74,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   map: {
-    flex: 1,
-  },
+  
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  left: 0,
+  right: 0  },
   markerLabel: {
     paddingHorizontal: 8,
     paddingVertical: 4,

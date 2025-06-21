@@ -114,16 +114,17 @@ export default function MapTab() {
 	}, []);
 
 	return (
-		<View style={{flex: 1}}>
-			<View style={styles.container}>
-				<Text>Messaggio dal server: {message}</Text>
-				{location && (
-					<Text>
-						Posizione attuale: {location.coords.latitude.toFixed(5)}, {location.coords.longitude.toFixed(5)}
-					</Text>
-				)}
-			</View>
+		<View style={{ flex: 1 }}>
+
+			<Text>Messaggio dal server: {message}</Text>
+			{location && (
+				<Text>
+					Posizione attuale: {location.coords.latitude.toFixed(5)}, {location.coords.longitude.toFixed(5)}
+				</Text>
+			)}
+
 			<Map markerCoords={markerCoords} />
+
 		</View>
 	);
 }
