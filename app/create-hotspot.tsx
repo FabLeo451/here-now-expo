@@ -206,7 +206,7 @@ const CreateHotspot: React.FC = () => {
 		setShowEndTimePicker(false);
 	};
 
-	async function validate() {
+	function validate() {
 
 		//const token = await AsyncStorage.getItem('authToken');
 		const title = 'Invalid data';
@@ -222,7 +222,7 @@ const CreateHotspot: React.FC = () => {
 		}
 
 		if (!position) {
-			Alert.alert(title, 'Position not set.');
+			Alert.alert(title, 'Location not set.');
 			return false;
 		}
 

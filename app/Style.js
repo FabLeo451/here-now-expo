@@ -99,7 +99,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   deleteButton: {
-    marginTop: 8,
     alignSelf: 'flex-start',
   },
   deleteButtonText: {

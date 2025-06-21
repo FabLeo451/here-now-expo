@@ -137,17 +137,21 @@ const HomeTab: React.FC = () => {
       </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {hotspots.length > 0 ? (
+        {hotspots && hotspots.length > 0 ? (
           hotspots.map((h) => (
             <TouchableOpacity key={h.id} style={styles.card} onPress={() => handleUpdate(h)}>
               <View style={styles.row}>
+
                 <Text style={styles.cardTitle}>{h.name}</Text>
+
                 <TouchableOpacity
                   onPress={() => confirmDelete(h.id)}
                   style={styles.deleteButton}
                 >
-                  <Text style={styles.deleteButtonText}>🗑️</Text>
+                  {/*<Text style={styles.deleteButtonText}>🗑️</Text>*/}
+                  <Ionicons name="remove-circle-outline" size={30} color="red" />
                 </TouchableOpacity>
+                
               </View>
             </TouchableOpacity>
           ))
