@@ -59,15 +59,15 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
             <View key={h.id}>
             <Circle 
               center={{ latitude: h.position.latitude, longitude: h.position.longitude }}
-              radius={10}
-              strokeColor="#0000FF"
-              fillColor="rgba(0,0,255,0.2)"
+              radius={20}
+              strokeColor="#00FF00"
+              fillColor="rgba(0,255,0,0.2)"
             />
-            <Marker coordinate={{ latitude: h.position.latitude, longitude: h.position.longitude }}>
+            {/*<Marker coordinate={{ latitude: h.position.latitude, longitude: h.position.longitude }}>
               <View style={styles.markerLabel}>
                 <Text style={styles.markerText}>{h.name}</Text>
               </View>
-            </Marker>
+            </Marker>*/}
             </View>
           ))
         )}
