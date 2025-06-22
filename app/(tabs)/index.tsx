@@ -131,10 +131,13 @@ const HomeTab: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.hello}>Hello, {context.user ? context.user?.name : 'user'}</Text>
-      <Text style={styles.sectionTitle}>Your Hotspots</Text>
-      <TouchableOpacity style={styles.selectButton} onPress={() => handleCreate()}>
-        <Ionicons name="add" size={25} color="#fff" />
-      </TouchableOpacity>
+
+      <View style={[styles.row, { marginBottom: 20}]}>
+        <Text style={styles.sectionTitle}>Your hotspots</Text>
+        <TouchableOpacity style={styles.selectButton} onPress={() => handleCreate()}>
+          <Ionicons name="add" size={25} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {hotspots && hotspots.length > 0 ? (
@@ -142,14 +145,16 @@ const HomeTab: React.FC = () => {
             <TouchableOpacity key={h.id} style={styles.card} onPress={() => handleUpdate(h)}>
               <View style={styles.row}>
 
-                <Text style={styles.cardTitle}>{h.name}</Text>
-
+                <View>
+                  <Text style={styles.cardTitle}>{h.name}</Text>
+                  <View style={styles.row}><Ionicons name="wifi" size={20} /><Text>Active</Text></View>
+                </View>
                 <TouchableOpacity
                   onPress={() => confirmDelete(h.id)}
                   style={styles.deleteButton}
                 >
                   {/*<Text style={styles.deleteButtonText}>🗑️</Text>*/}
-                  <Ionicons name="remove-circle-outline" size={30} color="red" />
+                  <Ionicons name="trash" size={24} />
                 </TouchableOpacity>
                 
               </View>
