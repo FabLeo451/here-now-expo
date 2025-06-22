@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import MapView, { Marker, Circle, Callout, MapPressEvent } from 'react-native-maps';
 
@@ -14,6 +14,38 @@ type Hotspot = {
   position: LatLng;
   startTime?: string;
   endTime?: string;
+}
+
+function PulsingCircle({ center }: { center: { latitude: number; longitude: number } }) {
+  const [radius, setRadius] = useState(20);
+  const [growing, setGrowing] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRadius(prev => {
+        if (prev >= 40) {
+          setGrowing(false);
+          return prev - 2;
+        } else if (prev <= 10) {
+          setGrowing(true);
+          return prev + 2;
+        } else {
+          return growing ? prev + 2 : prev - 2;
+        }
+      });
+    }, 20); // ogni 100ms
+
+    return () => clearInterval(interval);
+  }, [growing]);
+
+  return (
+    <Circle
+      center={center}
+      radius={radius}
+      strokeColor="#00FF00"
+      fillColor="rgba(0,255,0,0.2)"
+    />
+  );
 }
 
 // Props del componente
@@ -57,12 +89,8 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
         {hotspots && hotspots.length > 0 && (
           hotspots.map((h) => (
             <View key={h.id}>
-            <Circle 
-              center={{ latitude: h.position.latitude, longitude: h.position.longitude }}
-              radius={20}
-              strokeColor="#00FF00"
-              fillColor="rgba(0,255,0,0.2)"
-            />
+            <PulsingCircle center={{ latitude: h.position.latitude, longitude: h.position.longitude }} />
+
             {/*<Marker coordinate={{ latitude: h.position.latitude, longitude: h.position.longitude }}>
               <View style={styles.markerLabel}>
                 <Text style={styles.markerText}>{h.name}</Text>
