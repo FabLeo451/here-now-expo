@@ -89,7 +89,7 @@ export default function LoginScreen() {
 
 		try {
 
-			console.log('[login] Logging in...');
+			console.log('[login] Logging in...', `${process.env.EXPO_PUBLIC_API_BASE_URL}/login`);
 
 			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/login`, {
 				method: 'POST',
@@ -133,6 +133,7 @@ export default function LoginScreen() {
 			router.replace('/(tabs)');
 
 		} catch (error) {
+			//console.log('[login]', error)
 			const message = error instanceof Error ? error.message : 'Unknown error';
 			Alert.alert('Access error:', message);
 		} finally {
@@ -179,6 +180,7 @@ export default function LoginScreen() {
 			router.replace('/(tabs)');
 
 		} catch (error) {
+			//console.log('[login]', error)
 			const message = error instanceof Error ? error.message : 'Unknown error';
 			Alert.alert('Access error:', message);
 		} finally {

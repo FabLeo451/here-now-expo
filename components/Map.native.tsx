@@ -61,13 +61,6 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
   const LATITUDE_DELTA = 0.005;
   const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
-  // Funzione per gestire il tocco sulla mappa
-  const handleMapPress = (e: MapPressEvent) => {
-    const coords = e.nativeEvent.coordinate;
-    console.log('Mappa toccata in:', coords);
-    alert(`Hai toccato: ${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`);
-  };
-
   //console.log("hotspots = ", hotspots)
 
   return (
@@ -81,7 +74,6 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
           latitudeDelta: LATITUDE_DELTA,
           longitudeDelta: LONGITUDE_DELTA,
         }}
-        onPress={handleMapPress}
       >
         {/* Marker principale */}
         <Marker coordinate={markerCoords} title="Your position" />

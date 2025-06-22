@@ -142,12 +142,11 @@ export default function MapTab() {
 	return (
 		<View style={{ flex: 1 }}>
 
-			<Text>Messaggio dal server: {message}</Text>
-			{location && (
+			{/*location && (
 				<Text>
 					Posizione attuale: {location.coords.latitude.toFixed(5)}, {location.coords.longitude.toFixed(5)}
 				</Text>
-			)}
+			)*/}
 
 			{markerCoords && (<Map markerCoords={markerCoords} hotspots={hotspots}/>)}
 			
