@@ -203,7 +203,7 @@ export default function LoginScreen() {
 
 			<Input
 				placeholder="Email"
-				style={styles.input}
+				style={[styles.input, { marginBottom: 10 }]}
 				value={email}
 				onChangeText={setEmail}
 				autoCapitalize="none"
@@ -215,7 +215,7 @@ export default function LoginScreen() {
 
 			<Input
 				placeholder="Password"
-				style={styles.input}
+				style={[styles.input, { marginBottom: 10 }]}
 				value={password}
 				onChangeText={setPassword}
 				secureTextEntry
@@ -245,7 +245,7 @@ export default function LoginScreen() {
 
 			<Input
 				placeholder="Nome (Guest)"
-				style={styles.input}
+				style={[styles.input, { marginBottom: 10 }]}
 				value={guestName}
 				onChangeText={setGuestName}
 				status={guestNameError ? 'danger' : 'basic'}
