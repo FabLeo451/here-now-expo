@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { styles } from "@/app/Style";
 import { Ionicons } from '@expo/vector-icons';
+import { color } from 'three/examples/jsm/nodes/Nodes.js';
 
 interface Hotspot {
   id: string;
@@ -31,7 +32,7 @@ const HomeTab: React.FC = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem('authToken');
-      console.log('[index] Token found: ', !!token);
+      //console.log('[index] Token found: ', !!token);
 
       if (!token) {
         console.log('[index] Redirecting to login...');
@@ -128,6 +129,16 @@ const HomeTab: React.FC = () => {
     });
   }
 
+function isActive(h: Hotspot): boolean {
+  if (!h.startTime || !h.endTime) return false;
+
+  const now = new Date();
+  const start = new Date(h.startTime);
+  const end = new Date(h.endTime);
+
+  return now >= start && now <= end;
+}
+
   return (
     <View style={styles.container}>
       <Text style={styles.hello}>Hello, {context.user ? context.user?.name : 'user'}</Text>
@@ -147,13 +158,16 @@ const HomeTab: React.FC = () => {
 
                 <View>
                   <Text style={styles.cardTitle}>{h.name}</Text>
-                  <View style={styles.row}><Ionicons name="wifi" size={20} /><Text>Active</Text></View>
+                  
+                  <View style={styles.row}>
+                    {isActive(h) ? (<><Ionicons name="wifi" size={18} color="forestgreen" /><Text style={{color:"forestgreen"}}>Active</Text></>) : (<><Ionicons name="wifi" size={18} color="gray"/><Text style={{color:"gray"}}>Inactive</Text></>)}
+                    
+                  </View>
                 </View>
                 <TouchableOpacity
                   onPress={() => confirmDelete(h.id)}
                   style={styles.deleteButton}
                 >
-                  {/*<Text style={styles.deleteButtonText}>🗑️</Text>*/}
                   <Ionicons name="trash" size={24} />
                 </TouchableOpacity>
                 
