@@ -26,10 +26,7 @@ export default function MapTab() {
 	const [message, setMessage] = useState<string>('');
 	const [authToken, setAuthToken] = useState<string | null>('');
 	const [location, setLocation] = useState<Location.LocationObject | null>(null);
-	const [markerCoords, setMarkerCoords] = useState({
-		latitude: 41.9028,
-		longitude: 12.4964,
-	});
+	const [markerCoords, setMarkerCoords] = useState(null);
 
 	useEffect(() => {
 
@@ -57,6 +54,10 @@ export default function MapTab() {
 			// Get current position
 			const currentLocation = await Location.getCurrentPositionAsync({});
 			setLocation(currentLocation);
+			setMarkerCoords({
+				latitude: currentLocation.coords.latitude,
+				longitude: currentLocation.coords.longitude,
+			});
 
 			// Connect to WebSocket
 			const wsUrl = `${process.env.EXPO_PUBLIC_WEBSOCKET_URL}?token=${token}`;
@@ -148,7 +149,8 @@ export default function MapTab() {
 				</Text>
 			)}
 
-			<Map markerCoords={markerCoords} hotspots={hotspots}/>
+			{markerCoords && (<Map markerCoords={markerCoords} hotspots={hotspots}/>)}
+			
 
 		</View>
 	);
