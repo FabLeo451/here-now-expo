@@ -6,10 +6,22 @@ import * as Location from 'expo-location';
 import { styles } from "@/app/Style";
 import Map from '@/components/Map'
 
+interface Hotspot {
+  id: string;
+  name: string;
+  position: {
+    latitude: number;
+    longitude: number;
+  };
+  startTime?: string;
+  endTime?: string;
+}
+
 // Tipizza meglio il tipo di WebSocket
 export default function MapTab() {
 	const socket = useRef<WebSocket | null>(null);
 
+	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
 	const [gpsPermission, setGPSPermission] = useState<boolean>(false);
 	const [message, setMessage] = useState<string>('');
 	const [authToken, setAuthToken] = useState<string | null>('');
@@ -32,7 +44,7 @@ export default function MapTab() {
 
 			setAuthToken(token);
 
-			// Richiesta permessi GPS
+			// Request GPS permissions
 			const { status } = await Location.requestForegroundPermissionsAsync();
 			const granted = status === 'granted';
 			setGPSPermission(granted);
@@ -42,11 +54,11 @@ export default function MapTab() {
 				return;
 			}
 
-			// Ottieni posizione corrente
+			// Get current position
 			const currentLocation = await Location.getCurrentPositionAsync({});
 			setLocation(currentLocation);
 
-			// Connetti WebSocket
+			// Connect to WebSocket
 			const wsUrl = `${process.env.EXPO_PUBLIC_WEBSOCKET_URL}?token=${token}`;
 			socket.current = new WebSocket(wsUrl);
 
@@ -56,7 +68,20 @@ export default function MapTab() {
 			};
 
 			socket.current.onmessage = (event) => {
-				setMessage(event.data);
+				//console.log('[websocket-reply]', event.data);
+
+				try {
+					const message = JSON.parse(event.data);
+					//console.log('[maps] message = ', message);
+					const parsed: Hotspot[] = JSON.parse(message.Text);
+
+					setHotspots(parsed);
+
+					//console.log('[maps] parsed = ', parsed);
+
+				} catch(e) {
+					console.log('[websocket-reply]', e);
+				}
 			};
 
 			socket.current.onerror = (error) => {
@@ -123,7 +148,7 @@ export default function MapTab() {
 				</Text>
 			)}
 
-			<Map markerCoords={markerCoords} />
+			<Map markerCoords={markerCoords} hotspots={hotspots}/>
 
 		</View>
 	);

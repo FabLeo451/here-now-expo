@@ -8,12 +8,21 @@ type LatLng = {
   longitude: number;
 };
 
+type Hotspot = {
+  id: string;
+  name: string;
+  position: LatLng;
+  startTime?: string;
+  endTime?: string;
+}
+
 // Props del componente
 type MapProps = {
   markerCoords: LatLng;
+  hotspots: Hotspot[];
 };
 
-export default function Map({ markerCoords }: MapProps) {
+export default function Map({ markerCoords, hotspots }: MapProps) {
   const { width, height } = Dimensions.get('window');
   const ASPECT_RATIO = width / height;
 
@@ -26,6 +35,8 @@ export default function Map({ markerCoords }: MapProps) {
     console.log('Mappa toccata in:', coords);
     alert(`Hai toccato: ${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`);
   };
+
+  //console.log("hotspots = ", hotspots)
 
   return (
     <View style={styles.mapContainer}>
@@ -43,25 +54,29 @@ export default function Map({ markerCoords }: MapProps) {
         {/* Marker principale */}
         <Marker coordinate={markerCoords} title="Your position" />
 
-        {/* Cerchio statico su Roma */}
-        <Circle
-          center={{ latitude: 41.9028, longitude: 12.4964 }}
-          radius={10}
-          strokeColor="#0000FF"
-          fillColor="rgba(0,0,255,0.2)"
-        />
+        {hotspots && hotspots.length > 0 && (
+          hotspots.map((h) => (
+            <View key={h.id}>
+            <Circle 
+              center={{ latitude: h.position.latitude, longitude: h.position.longitude }}
+              radius={10}
+              strokeColor="#0000FF"
+              fillColor="rgba(0,0,255,0.2)"
+            />
+            <Marker coordinate={{ latitude: h.position.latitude, longitude: h.position.longitude }}>
+              <View style={styles.markerLabel}>
+                <Text style={styles.markerText}>{h.name}</Text>
+              </View>
+            </Marker>
+            </View>
+          ))
+        )}
 
         {/* Marker su Roma con Callout */}
         <Marker coordinate={{ latitude: 41.9028, longitude: 12.4964 }}>
           <View style={styles.markerLabel}>
             <Text style={styles.markerText}>Roma</Text>
           </View>
-          <Callout>
-            <View style={{ padding: 8 }}>
-              <Text style={{ fontWeight: 'bold' }}>Roma</Text>
-              <Text>Capitale d'Italia</Text>
-            </View>
-          </Callout>
         </Marker>
       </MapView>
     </View>
