@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, Linking } from 'react-native';
 import * as Device from 'expo-device';
 import { Alert, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
@@ -236,7 +236,7 @@ export default function LoginScreen() {
 			<Text
 				style={styles.link}
 				status="primary"
-				onPress={() => router.push('/register')}
+				onPress={() => Linking.openURL('https://www.ekhoes.com/sign-in')}
 			>
 				No account? Sign in
 			</Text>
