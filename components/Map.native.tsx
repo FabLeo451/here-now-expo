@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import MapView, { Marker, Circle, Callout, MapPressEvent } from 'react-native-maps';
+import PulsingCircle from '@/components/PulsingCircle'
 
 // Tipizzazione delle coordinate (latitudine e longitudine)
 type LatLng = {
@@ -15,7 +16,7 @@ type Hotspot = {
   startTime?: string;
   endTime?: string;
 }
-
+/*
 function PulsingCircle({ center }: { center: { latitude: number; longitude: number } }) {
   const [radius, setRadius] = useState(20);
   const [growing, setGrowing] = useState(true);
@@ -47,7 +48,7 @@ function PulsingCircle({ center }: { center: { latitude: number; longitude: numb
     />
   );
 }
-
+*/
 // Props del componente
 type MapProps = {
   markerCoords: LatLng;
