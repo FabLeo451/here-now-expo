@@ -1,7 +1,7 @@
 {
   "name": "here-now-expo",
   "main": "expo-router/entry",
-  "version": "1.0.0-alpha1",
+  "version": "1.0.0",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
