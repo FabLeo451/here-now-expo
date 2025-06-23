@@ -82,23 +82,31 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
         {hotspots && hotspots.length > 0 && (
           hotspots.map((h) => (
             <View key={h.id}>
-            <PulsingCircle center={{ latitude: h.position.latitude, longitude: h.position.longitude }} />
+              <PulsingCircle center={{ latitude: h.position.latitude, longitude: h.position.longitude }} />
 
-            {/*<Marker coordinate={{ latitude: h.position.latitude, longitude: h.position.longitude }}>
-              <View style={styles.markerLabel}>
-                <Text style={styles.markerText}>{h.name}</Text>
-              </View>
-            </Marker>*/}
+              {<Marker coordinate={{ latitude: h.position.latitude, longitude: h.position.longitude }} anchor={{ x: 0.5, y: 0.5 }}>
+                <View style={{
+                  backgroundColor: 'yellow',
+                  padding: 10,
+                  width: 220, // anziché maxWidth
+                  alignItems: 'center',
+                }}>
+                  <Text numberOfLines={2} style={{ fontSize: 12, color: 'black', textAlign: 'center' }}>
+                    Testo che non viene tagliato
+                  </Text>
+                </View>
+              </Marker>}
             </View>
           ))
         )}
 
-        {/* Marker su Roma con Callout */}
-        <Marker coordinate={{ latitude: 41.9028, longitude: 12.4964 }}>
-          <View style={styles.markerLabel}>
-            <Text style={styles.markerText}>Roma</Text>
+
+        <Marker coordinate={{ latitude: 41.8678328, longitude: 12.468 }} anchor={{ x: 0.5, y: 1 }}>
+          <View style={{ backgroundColor: 'yellow', padding: 10, maxWidth: 250 }}>
+            <Text style={{ fontSize: 14, color: 'black', flexShrink: 1 }}>Testo che non deve tagliarsi</Text>
           </View>
         </Marker>
+
       </MapView>
     </View>
   );
@@ -110,12 +118,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   map: {
-  
-  position: 'absolute',
-  top: 0,
-  bottom: 0,
-  left: 0,
-  right: 0  },
+
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0
+  },
   markerLabel: {
     paddingHorizontal: 8,
     paddingVertical: 4,
