@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Text, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
@@ -111,10 +111,12 @@ export default function MapTab() {
 
 				socket.current.onerror = (error) => {
 					console.error('WebSocket error:', error);
+					//Alert.alert('Error', "Server disconnected:\n" + error);
 				};
 
 				socket.current.onclose = () => {
 					console.log('WebSocket disconnected');
+
 				};
 
 			}
