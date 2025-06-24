@@ -48,13 +48,13 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
 
   return (
     <View style={styles.mapContainer}>
-<ModalHotspot
-  visible={modalVisible.visible}
-  id={modalVisible.id}
-  onClose={() => {
-    setModalVisible({ visible: false, id: null });
-  }}
-/>
+      <ModalHotspot
+        visible={modalVisible.visible}
+        id={modalVisible.id}
+        onClose={() => {
+          setModalVisible({ visible: false, id: null });
+        }}
+      />
 
 
       <MapView
