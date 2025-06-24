@@ -1,8 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
-import { Circle } from 'react-native-maps';
+import MapView, { Circle, Marker } from 'react-native-maps';
 
-export default function PulsingCircle({ center }: { center: { latitude: number; longitude: number } }) {
+// Creiamo un Circle animato
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+type PulsingCircleProps = {
+  center: { latitude: number; longitude: number };
+  onPress?: () => void; // handler opzionale per il tocco
+};
+
+export default function PulsingCircle({ center, onPress }: PulsingCircleProps) {
   const radius = useRef(new Animated.Value(20)).current;
 
   useEffect(() => {
@@ -26,14 +34,19 @@ export default function PulsingCircle({ center }: { center: { latitude: number; 
   }, [radius]);
 
   return (
-    <AnimatedCircle
-      center={center}
-      radius={radius}
-      strokeColor="#00FF00"
-      fillColor="rgba(0,255,0,0.2)"
-    />
+    <>
+      <AnimatedCircle
+        center={center}
+        radius={radius}
+        strokeColor="#00FF00"
+        fillColor="rgba(0,255,0,0.2)"
+      />
+      <Marker
+        coordinate={center}
+        onPress={onPress}
+        opacity={0} // invisibile ma intercetta i tocchi
+        zIndex={1}  // opzionale: garantisce che sia "cliccabile" sopra il Circle
+      />
+    </>
   );
 }
-
-// Wrapper per supportare Animated con MapView.Circle
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);

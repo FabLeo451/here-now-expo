@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Alert } from 'react-native';
 import MapView, { Marker, Circle, Callout, MapPressEvent } from 'react-native-maps';
 import PulsingCircle from '@/components/PulsingCircle'
 
@@ -82,7 +82,13 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
         {hotspots && hotspots.length > 0 && (
           hotspots.map((h) => (
             <View key={h.id}>
-              <PulsingCircle center={{ latitude: h.position.latitude, longitude: h.position.longitude }} />
+              <PulsingCircle
+                center={{ latitude: h.position.latitude, longitude: h.position.longitude }}
+                onPress={() => {
+                  Alert.alert(h.name, h.id);
+                  // oppure naviga, mostra popup, ecc.
+                }}
+              />
 
               {<Marker coordinate={{ latitude: h.position.latitude, longitude: h.position.longitude }} anchor={{ x: 0.5, y: 0.5 }}>
                 <View style={{
