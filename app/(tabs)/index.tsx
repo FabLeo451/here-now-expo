@@ -160,7 +160,7 @@ function isActive(h: Hotspot): boolean {
                   <Text style={styles.cardTitle}>{h.name}</Text>
                   
                   <View style={styles.row}>
-                    {isActive(h) ? (<><Ionicons name="wifi" size={18} color="forestgreen" /><Text style={{color:"forestgreen"}}>Active</Text></>) : (<><Ionicons name="wifi" size={18} color="gray"/><Text style={{color:"gray"}}>Inactive</Text></>)}
+                    {isActive(h) ? (<><Ionicons name="radio-outline" size={16} color="forestgreen" /><Text style={{color:"forestgreen", marginLeft:5}}>Active</Text></>) : (<><Ionicons name="radio-outline" size={16} color="gray"/><Text style={{color:"gray", marginLeft:5}}>Inactive</Text></>)}
                     
                   </View>
                 </View>

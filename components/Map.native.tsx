@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, Alert, Linking, Platform } from 'react-native';
 import MapView, { Marker, Circle, Callout, MapPressEvent } from 'react-native-maps';
 import PulsingCircle from '@/components/PulsingCircle'
+import ModalHotspot from '@/components/ModalHotspot'
 
 // Tipizzazione delle coordinate (latitudine e longitudine)
 type LatLng = {
@@ -33,6 +34,8 @@ type MapProps = {
 };
 
 export default function Map({ markerCoords, hotspots }: MapProps) {
+  const [modalVisible, setModalVisible] = useState(false);
+
   const { width, height } = Dimensions.get('window');
   const ASPECT_RATIO = width / height;
 
@@ -43,6 +46,13 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
 
   return (
     <View style={styles.mapContainer}>
+      <ModalHotspot
+        visible={modalVisible}
+        onClose={() => {
+          setModalVisible(false);
+        }}
+      />
+
       <MapView
         provider="google"
         style={styles.map}
@@ -63,7 +73,8 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
                 center={{ latitude: h.position.latitude, longitude: h.position.longitude }}
                 onPress={() => {
                   //Alert.alert(h.name, h.id);
-                  openInGoogleMaps(h.position.latitude, h.position.longitude);
+                  //openInGoogleMaps(h.position.latitude, h.position.longitude);
+                  setModalVisible(true);
                 }}
               />
 
