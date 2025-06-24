@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, Alert } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Alert, Linking, Platform } from 'react-native';
 import MapView, { Marker, Circle, Callout, MapPressEvent } from 'react-native-maps';
 import PulsingCircle from '@/components/PulsingCircle'
 
@@ -16,39 +16,16 @@ type Hotspot = {
   startTime?: string;
   endTime?: string;
 }
-/*
-function PulsingCircle({ center }: { center: { latitude: number; longitude: number } }) {
-  const [radius, setRadius] = useState(20);
-  const [growing, setGrowing] = useState(true);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRadius(prev => {
-        if (prev >= 40) {
-          setGrowing(false);
-          return prev - 2;
-        } else if (prev <= 10) {
-          setGrowing(true);
-          return prev + 2;
-        } else {
-          return growing ? prev + 2 : prev - 2;
-        }
-      });
-    }, 20); // ogni 100ms
+function openInGoogleMaps(latitude: number, longitude: number) {
+  const url = Platform.select({
+    ios: `http://maps.apple.com/?ll=${latitude},${longitude}`,
+    android: `geo:${latitude},${longitude}?q=${latitude},${longitude}`, // apre direttamente l'app Maps
+  });
 
-    return () => clearInterval(interval);
-  }, [growing]);
-
-  return (
-    <Circle
-      center={center}
-      radius={radius}
-      strokeColor="#00FF00"
-      fillColor="rgba(0,255,0,0.2)"
-    />
-  );
+  Linking.openURL(url ?? '');
 }
-*/
+
 // Props del componente
 type MapProps = {
   markerCoords: LatLng;
@@ -85,8 +62,8 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
               <PulsingCircle
                 center={{ latitude: h.position.latitude, longitude: h.position.longitude }}
                 onPress={() => {
-                  Alert.alert(h.name, h.id);
-                  // oppure naviga, mostra popup, ecc.
+                  //Alert.alert(h.name, h.id);
+                  openInGoogleMaps(h.position.latitude, h.position.longitude);
                 }}
               />
 
