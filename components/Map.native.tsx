@@ -34,8 +34,10 @@ type MapProps = {
 };
 
 export default function Map({ markerCoords, hotspots }: MapProps) {
-  const [modalVisible, setModalVisible] = useState(false);
-
+  const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string | null }>({
+    visible: false,
+    id: null,
+  });
   const { width, height } = Dimensions.get('window');
   const ASPECT_RATIO = width / height;
 
@@ -46,12 +48,14 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
 
   return (
     <View style={styles.mapContainer}>
-      <ModalHotspot
-        visible={modalVisible}
-        onClose={() => {
-          setModalVisible(false);
-        }}
-      />
+<ModalHotspot
+  visible={modalVisible.visible}
+  id={modalVisible.id}
+  onClose={() => {
+    setModalVisible({ visible: false, id: null });
+  }}
+/>
+
 
       <MapView
         provider="google"
@@ -74,7 +78,8 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
                 onPress={() => {
                   //Alert.alert(h.name, h.id);
                   //openInGoogleMaps(h.position.latitude, h.position.longitude);
-                  setModalVisible(true);
+                  console.log('Opening hotspot ', h.id);
+                  setModalVisible({ visible: true, id: h.id });
                 }}
               />
 

@@ -10,10 +10,11 @@ import { Ionicons } from '@expo/vector-icons';
 
 type Props = {
 	visible: boolean;
+	id: string | null;
 	onClose: () => void;
 };
 
-export default function ModalHotspot({ visible, onClose }: Props) {
+export default function ModalHotspot({ visible, id, onClose }: Props) {
 
 	const stylesModal = StyleSheet.create({
 		overlay: {
@@ -59,7 +60,7 @@ export default function ModalHotspot({ visible, onClose }: Props) {
 					<TouchableOpacity onPress={() => onClose()} style={stylesModal.closeButton}>
 					<Ionicons name="close" size={24} color="black" />
 					</TouchableOpacity>	
-					<Text>Hotspot</Text>
+					<Text>{id}</Text>
 				</View>
 			</View>
 
