@@ -3,18 +3,68 @@ import {
 	View,
 	TouchableOpacity,
 	Modal,
-	StyleSheet
+	StyleSheet,
+	Alert
 } from 'react-native';
 import { Text, Button } from '@ui-kitten/components';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Hotspot } from '@/lib/hotspot'
 
 type Props = {
 	visible: boolean;
-	id: string | null;
+	id: string;
 	onClose: () => void;
 };
 
 export default function ModalHotspot({ visible, id, onClose }: Props) {
+	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		const init = async () => {
+			const token = await AsyncStorage.getItem('authToken');
+
+			console.log('visible = ', visible, 'id = ', id);
+
+			if (!visible)
+				return;
+
+			if (token)
+				getHotspot(token, id);
+		};
+
+		init();
+	}, [visible, id]);
+
+	const getHotspot = async (token: string, id: string) => {
+
+		console.log(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}`);
+
+		try {
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: token,
+				},
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to fetch hotspots');
+			}
+
+			const data: Hotspot[] = await response.json();
+			setHotspots(data);
+			
+			//Alert.alert('', JSON.stringify(data))
+		} catch (error: any) {
+			console.log('[getMyHotspots] ', error);
+			Alert.alert('Error getting my hotspots', error.message);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	const stylesModal = StyleSheet.create({
 		overlay: {
@@ -28,6 +78,7 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 			backgroundColor: 'white',
 			borderRadius: 10,
 			elevation: 5,
+			minWidth: 350
 		},
 		text: {
 			marginBottom: 10,
@@ -55,14 +106,17 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 			onRequestClose={() => onClose()}
 		>
 
-			<View style={stylesModal.overlay}>
-				<View style={stylesModal.content}>
-					<TouchableOpacity onPress={() => onClose()} style={stylesModal.closeButton}>
-					<Ionicons name="close" size={24} color="black" />
-					</TouchableOpacity>	
-					<Text>{id}</Text>
-				</View>
-			</View>
+			{loading ? (<View><Text>Loading...</Text></View>)
+				: (
+					<View style={stylesModal.overlay}>
+						<View style={stylesModal.content}>
+							<TouchableOpacity onPress={() => onClose()} style={stylesModal.closeButton}>
+								<Ionicons name="close" size={24} color="black" />
+							</TouchableOpacity>
+							<Text style={{ fontWeight:"bold"}}>{hotspots[0].name}</Text>
+						</View>
+					</View>
+				)}
 
 		</Modal>
 	);

@@ -34,7 +34,7 @@ type MapProps = {
 };
 
 export default function Map({ markerCoords, hotspots }: MapProps) {
-  const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string | null }>({
+  const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string }>({
     visible: false,
     id: null,
   });
@@ -52,7 +52,7 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
         visible={modalVisible.visible}
         id={modalVisible.id}
         onClose={() => {
-          setModalVisible({ visible: false, id: null });
+          setModalVisible({ visible: false, id: 'dummyId' });
         }}
       />
 
@@ -78,35 +78,34 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
                 onPress={() => {
                   //Alert.alert(h.name, h.id);
                   //openInGoogleMaps(h.position.latitude, h.position.longitude);
-                  console.log('Opening hotspot ', h.id);
+                  //console.log('Opening hotspot ', h.id);
                   setModalVisible({ visible: true, id: h.id });
                 }}
               />
 
-              {<Marker coordinate={{ latitude: h.position.latitude, longitude: h.position.longitude }} anchor={{ x: 0.5, y: 0.5 }}>
+              {/*<Marker coordinate={{ latitude: h.position.latitude, longitude: h.position.longitude }} anchor={{ x: 0.5, y: 0.5 }}  >
                 <View style={{
                   backgroundColor: 'yellow',
                   padding: 10,
                   width: 220, // anziché maxWidth
                   alignItems: 'center',
                 }}>
-                  <Text numberOfLines={2} style={{ fontSize: 12, color: 'black', textAlign: 'center' }}>
+                  <Text numberOfLines={2}
+                    style={{
+                      fontSize: 12, color: 'black', textAlign: 'center',
+                    }}
+                  >
                     Testo che non viene tagliato
                   </Text>
                 </View>
-              </Marker>}
+              </Marker>*/}
             </View>
           ))
         )}
-
-
-        <Marker coordinate={{ latitude: 41.8678328, longitude: 12.468 }} anchor={{ x: 0.5, y: 1 }}>
-          <View style={{ backgroundColor: 'yellow', padding: 10, maxWidth: 250 }}>
-            <Text style={{ fontSize: 14, color: 'black', flexShrink: 1 }}>Testo che non deve tagliarsi</Text>
-          </View>
-        </Marker>
-
       </MapView>
+
+
+
     </View>
   );
 }
