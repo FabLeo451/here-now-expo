@@ -243,14 +243,19 @@ const CreateHotspot: React.FC = () => {
 					autoCapitalize="none"
 				/>
 
-				<Text style={styles.label}>Position</Text>
+				<Text style={styles.label}>Location</Text>
 				<View style={styles.rowLeft}>
-					<Input
+					{/*<Input
 						style={styles.input}
 						value={position}
 						autoCapitalize="none"
 						disabled={true}
-					/>
+					/>*/}
+					{position ? (
+						<View style={styles.rowLeft}><Text>Selected</Text><Ionicons name="checkmark-sharp" size={25} color="#0b0" /></View>
+					) : (
+						<Text style={{ color:"gray"}}>Not selected</Text>
+					)}
 					<TouchableOpacity style={styles.selectButton} onPress={() => setModalVisible(true)}>
 						<Ionicons name="map" size={25} color="#fff" />
 					</TouchableOpacity>
