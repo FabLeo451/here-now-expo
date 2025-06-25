@@ -4,12 +4,25 @@ import {
 	TouchableOpacity,
 	Modal,
 	StyleSheet,
-	Alert
+	Alert,
+	Platform,
+	Linking
 } from 'react-native';
 import { Text, Button } from '@ui-kitten/components';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { styles } from "@/app/Style";
 import { Hotspot } from '@/lib/hotspot'
+
+function openInGoogleMaps(latitude: number, longitude: number) {
+	const url = Platform.select({
+		ios: `http://maps.apple.com/?ll=${latitude},${longitude}`,
+		android: `geo:${latitude},${longitude}?q=${latitude},${longitude}`, // apre direttamente l'app Maps
+	});
+
+	Linking.openURL(url ?? '');
+}
+
 
 type Props = {
 	visible: boolean;
@@ -58,7 +71,7 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 			const data: Hotspot[] = await response.json();
 			setHotspots(data);
 			setLoaded(true);
-			
+
 			//Alert.alert('', JSON.stringify(data))
 		} catch (error: any) {
 			console.log('[getMyHotspots] ', error);
@@ -111,16 +124,26 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 			{loading && (<View><Text>Loading...</Text></View>)}
 
 
-			{loaded	&& (
-					<View style={stylesModal.overlay}>
-						<View style={stylesModal.content}>
-							<TouchableOpacity onPress={() => onClose()} style={stylesModal.closeButton}>
-								<Ionicons name="close" size={24} color="black" />
-							</TouchableOpacity>
-							<Text style={{ fontWeight:"bold", marginBottom:10}}>{hotspots[0].name}</Text>
-						</View>
+			{loaded && (
+				<View style={stylesModal.overlay}>
+					<View style={stylesModal.content}>
+						<TouchableOpacity onPress={() => onClose()} style={stylesModal.closeButton}>
+							<Ionicons name="close" size={24} color="black" />
+						</TouchableOpacity>
+						<Text style={{ fontWeight: "bold", marginBottom: 20 }}>{hotspots[0].name}</Text>
+						<TouchableOpacity
+							style={styles.rowLeft}
+							onPress={() => {
+								const { latitude, longitude } = hotspots[0].position;
+								openInGoogleMaps(latitude, longitude);
+							}}
+						>
+							<Ionicons name="location-outline" size={25} color="steelblue" />
+							<Text>Open in Google Maps</Text>
+						</TouchableOpacity>
 					</View>
-				)}
+				</View>
+			)}
 
 		</Modal>
 	);

@@ -18,15 +18,6 @@ type Hotspot = {
   endTime?: string;
 }
 
-function openInGoogleMaps(latitude: number, longitude: number) {
-  const url = Platform.select({
-    ios: `http://maps.apple.com/?ll=${latitude},${longitude}`,
-    android: `geo:${latitude},${longitude}?q=${latitude},${longitude}`, // apre direttamente l'app Maps
-  });
-
-  Linking.openURL(url ?? '');
-}
-
 // Props del componente
 type MapProps = {
   markerCoords: LatLng;
