@@ -1,13 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated } from 'react-native';
+import { Animated, View, Platform } from 'react-native';
 import MapView, { Circle, Marker } from 'react-native-maps';
 
-// Creiamo un Circle animato
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 type PulsingCircleProps = {
   center: { latitude: number; longitude: number };
-  onPress?: () => void; // handler opzionale per il tocco
+  onPress?: () => void;
 };
 
 export default function PulsingCircle({ center, onPress }: PulsingCircleProps) {
@@ -41,12 +40,19 @@ export default function PulsingCircle({ center, onPress }: PulsingCircleProps) {
         strokeColor="#00FF00"
         fillColor="rgba(0,255,0,0.2)"
       />
-      <Marker
-        coordinate={center}
-        onPress={onPress}
-        opacity={0} // invisibile ma intercetta i tocchi
-        zIndex={1}  // opzionale: garantisce che sia "cliccabile" sopra il Circle
-      />
+
+      <Marker coordinate={center} anchor={{ x: 0.5, y: 0.5 }} onPress={onPress}>
+        {/* Transparent but visible View trasparente with clickable area */}
+        <View
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: 15,
+            backgroundColor: 'rgba(0, 0, 0, 0.01)', // invisible but clickable
+            //backgroundColor: 'red', // debug
+          }}
+        />
+      </Marker>
     </>
   );
 }
