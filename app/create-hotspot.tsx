@@ -19,17 +19,7 @@ import { useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import { Dimensions } from 'react-native';
 import ModalMapSelect from '@/components/ModalMapSelect'
-
-interface Hotspot {
-	id: string;
-	name: string;
-	position: {
-		latitude: number;
-		longitude: number;
-	};
-	startTime?: string;
-	endTime?: string;
-}
+import { Hotspot } from '@/lib/hotspot'
 
 const CreateHotspot: React.FC = () => {
 

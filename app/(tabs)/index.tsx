@@ -12,18 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { styles } from "@/app/Style";
 import { Ionicons } from '@expo/vector-icons';
-import { color } from 'three/examples/jsm/nodes/Nodes.js';
-
-interface Hotspot {
-  id: string;
-  name: string;
-  position: {
-    latitude: number;
-    longitude: number;
-  };
-  startTime?: string;
-  endTime?: string;
-}
+import { Hotspot } from '@/lib/hotspot'
 
 const HomeTab: React.FC = () => {
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);

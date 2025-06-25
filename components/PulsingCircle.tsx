@@ -41,15 +41,17 @@ export default function PulsingCircle({ center, onPress }: PulsingCircleProps) {
         fillColor="rgba(0,255,0,0.2)"
       />
 
-      <Marker coordinate={center} anchor={{ x: 0.5, y: 0.5 }} onPress={onPress}>
+      <Marker coordinate={center} anchor={{ x: 0.5, y: 0.5 }} onPress={onPress} style={{zIndex:100,width:200}}>
         {/* Transparent but visible View trasparente with clickable area */}
         <View
           style={{
             width: 50,
             height: 50,
             borderRadius: 15,
-            backgroundColor: 'rgba(0, 0, 0, 0.01)', // invisible but clickable
-            //backgroundColor: 'red', // debug
+            //backgroundColor: 'rgba(0, 0, 0, 0.01)', // invisible but clickable
+            backgroundColor: 'red', // debug
+            zIndex:100,
+            
           }}
         />
       </Marker>

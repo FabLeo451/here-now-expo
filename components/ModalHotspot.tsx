@@ -20,6 +20,7 @@ type Props = {
 export default function ModalHotspot({ visible, id, onClose }: Props) {
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [loaded, setLoaded] = useState(false);
 
 	useEffect(() => {
 		const init = async () => {
@@ -56,11 +57,12 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 
 			const data: Hotspot[] = await response.json();
 			setHotspots(data);
+			setLoaded(true);
 			
 			//Alert.alert('', JSON.stringify(data))
 		} catch (error: any) {
 			console.log('[getMyHotspots] ', error);
-			Alert.alert('Error getting my hotspots', error.message);
+			Alert.alert('Error', error.message);
 		} finally {
 			setLoading(false);
 		}
@@ -106,14 +108,16 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 			onRequestClose={() => onClose()}
 		>
 
-			{loading ? (<View><Text>Loading...</Text></View>)
-				: (
+			{loading && (<View><Text>Loading...</Text></View>)}
+
+
+			{loaded	&& (
 					<View style={stylesModal.overlay}>
 						<View style={stylesModal.content}>
 							<TouchableOpacity onPress={() => onClose()} style={stylesModal.closeButton}>
 								<Ionicons name="close" size={24} color="black" />
 							</TouchableOpacity>
-							<Text style={{ fontWeight:"bold"}}>{hotspots[0].name}</Text>
+							<Text style={{ fontWeight:"bold", marginBottom:10}}>{hotspots[0].name}</Text>
 						</View>
 					</View>
 				)}
