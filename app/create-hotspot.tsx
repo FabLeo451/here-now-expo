@@ -254,10 +254,10 @@ const CreateHotspot: React.FC = () => {
 					{position ? (
 						<View style={styles.rowLeft}><Text>Selected</Text><Ionicons name="checkmark-sharp" size={25} color="#0b0" /></View>
 					) : (
-						<Text style={{ color:"gray"}}>Not selected</Text>
+						<View style={styles.rowLeft}><Text style={{ color:"darkgray"}}>Not selected</Text><Ionicons name="help-circle-outline" size={25} color="darkgray" /></View>
 					)}
 					<TouchableOpacity style={styles.selectButton} onPress={() => setModalVisible(true)}>
-						<Ionicons name="map" size={25} color="#fff" />
+						<Ionicons name="locate" size={25} color="#fff" />
 					</TouchableOpacity>
 				</View>
 
