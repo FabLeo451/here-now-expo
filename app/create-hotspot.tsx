@@ -309,7 +309,7 @@ const CreateHotspot: React.FC = () => {
 				{
 					showEndDatePicker && (
 						<DateTimePicker
-							value={startDate}
+							value={endDate}
 							mode="date"
 							display={Platform.OS === 'ios' ? 'inline' : 'default'}
 							onChange={onChangeEndDate}
@@ -319,7 +319,7 @@ const CreateHotspot: React.FC = () => {
 				{
 					showEndTimePicker && (
 						<DateTimePicker
-							value={startDate}
+							value={endDate}
 							mode="time"
 							display={Platform.OS === 'ios' ? 'inline' : 'default'}
 							onChange={onChangeEndDate}
