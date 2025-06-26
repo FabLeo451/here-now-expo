@@ -129,8 +129,8 @@ function isActive(h: Hotspot): boolean {
 }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.hello}>Hello, {context.user ? context.user?.name : 'user'}</Text>
+    <View style={styles.containerList}>
+      {/*<Text style={styles.hello}>Hello, {context.user ? context.user?.name : 'user'}</Text>*/}
 
 
           <TouchableOpacity style={styles.fab} onPress={() => handleCreate()}>
@@ -142,16 +142,16 @@ function isActive(h: Hotspot): boolean {
 
         {hotspots && hotspots.length > 0 ? (
           hotspots.map((h) => (
-            <TouchableOpacity key={h.id} style={styles.card} onPress={() => handleUpdate(h)}>
+            <TouchableOpacity key={h.id} style={styles.listItem} onPress={() => handleUpdate(h)}>
               <View style={styles.row}>
 
                 <View>
-                  <Text style={styles.cardTitle}>{h.name}</Text>
+                  <Text style={styles.listItemTitle}>{h.name}</Text>
                   
                   <View style={styles.row}>
                     {isActive(h) ? (<><Ionicons name="radio-outline" size={16} color="forestgreen" /><Text style={{color:"forestgreen", marginLeft:5}}>Active</Text></>) : (<><Ionicons name="radio-outline" size={16} color="gray"/><Text style={{color:"gray", marginLeft:5}}>Inactive</Text></>)}
-                    
                   </View>
+
                 </View>
                 <TouchableOpacity
                   onPress={() => confirmDelete(h.id)}

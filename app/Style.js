@@ -4,7 +4,11 @@ const styles = StyleSheet.create({
 	container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: 'white',
+	},
+	containerList: {
+    flex: 1,
+    backgroundColor: 'white',
 	},
 	mainTitle: {
 		marginTop: 60,
@@ -104,9 +108,13 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 20,
   },
-  card: {
+  listItem: {
     backgroundColor: '#fff',
-    padding: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderBottomColor: 'lightgray',
+    borderBottomWidth: 1
+    /*
     borderRadius: 8,
     marginBottom: 12,
     shadowColor: '#000',
@@ -114,10 +122,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2, // Android shadow
+    */
   },
-  cardTitle: {
+  listItemTitle: {
     fontSize: 16,
     fontWeight: 'bold',
+    marginBottom: 10
   },
   deleteButton: {
     alignSelf: 'flex-start',
