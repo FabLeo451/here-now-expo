@@ -132,14 +132,14 @@ function isActive(h: Hotspot): boolean {
     <View style={styles.container}>
       <Text style={styles.hello}>Hello, {context.user ? context.user?.name : 'user'}</Text>
 
-      <View style={[styles.row, { marginBottom: 20}]}>
-        <Text style={styles.sectionTitle}>Your hotspots</Text>
-        <TouchableOpacity style={styles.selectButton} onPress={() => handleCreate()}>
-          <Ionicons name="add" size={25} color="#fff" />
-        </TouchableOpacity>
-      </View>
+
+          <TouchableOpacity style={styles.fab} onPress={() => handleCreate()}>
+            <Ionicons name="add" size={25} color="#fff" />
+          </TouchableOpacity>
+
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
+
         {hotspots && hotspots.length > 0 ? (
           hotspots.map((h) => (
             <TouchableOpacity key={h.id} style={styles.card} onPress={() => handleUpdate(h)}>

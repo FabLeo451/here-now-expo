@@ -35,6 +35,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
 	},
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 30,
+    backgroundColor: '#2196F3',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    // Ombra per Android
+    elevation: 5,
+
+    // Ombra per iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    zIndex: 5
+  },
 	link: {
 		textAlign: 'center',
 		marginVertical: 15,
