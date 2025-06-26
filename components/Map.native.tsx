@@ -3,19 +3,12 @@ import { View, Text, StyleSheet, Dimensions, Alert, Linking, Platform } from 're
 import MapView, { Marker, Region } from 'react-native-maps';
 import PulsingCircle from '@/components/PulsingCircle'
 import ModalHotspot from '@/components/ModalHotspot'
+import { Hotspot } from '@/lib/hotspot'
 
 type LatLng = {
 	latitude: number;
 	longitude: number;
 };
-
-type Hotspot = {
-	id: string;
-	name: string;
-	position: LatLng;
-	startTime?: string;
-	endTime?: string;
-}
 
 type MapProps = {
 	markerCoords: LatLng;
