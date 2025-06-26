@@ -48,8 +48,8 @@ export default function PulsingCircle({ center, onPress }: PulsingCircleProps) {
             width: 50,
             height: 50,
             borderRadius: 15,
-            //backgroundColor: 'rgba(0, 0, 0, 0.01)', // invisible but clickable
-            backgroundColor: 'red', // debug
+            backgroundColor: 'rgba(0, 0, 0, 0.01)', // invisible but clickable
+            //backgroundColor: 'red', // debug
             zIndex:100,
             
           }}
