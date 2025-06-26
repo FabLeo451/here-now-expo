@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderBottomColor: 'lightgray',
+    borderBottomColor: 'gainsboro',
     borderBottomWidth: 1
     /*
     borderRadius: 8,
