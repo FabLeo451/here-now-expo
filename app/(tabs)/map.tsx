@@ -6,17 +6,7 @@ import * as Location from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
 import { styles } from "@/app/Style";
 import Map from '@/components/Map';
-
-interface Hotspot {
-	id: string;
-	name: string;
-	position: {
-		latitude: number;
-		longitude: number;
-	};
-	startTime?: string;
-	endTime?: string;
-}
+import { Hotspot } from '@/lib/hotspot'
 
 export default function MapTab() {
 	const socket = useRef<WebSocket | null>(null);
