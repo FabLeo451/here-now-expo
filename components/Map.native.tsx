@@ -76,24 +76,24 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
 
 				{hotspots && (
 					hotspots.map((h) => (
-						<>
-						<PulsingCircle
-							key={h.id}
-							center={{ latitude: h.position.latitude, longitude: h.position.longitude }}
-							onPress={() => setModalVisible({ visible: true, id: h.id })}
-						/>
+						<View key={h.id}>
+							<PulsingCircle
 
-						{/* On iOs use a regular marker (on Android the text is cutted off) */}
-						{Platform.OS === 'ios' && (
-							<Marker
-								coordinate={h.position}
-							>
+								center={{ latitude: h.position.latitude, longitude: h.position.longitude }}
+								onPress={() => setModalVisible({ visible: true, id: h.id })}
+							/>
+
+							{/* On iOs use a regular marker (on Android the text is cutted off) */}
+							{Platform.OS === 'ios' && (
+								<Marker
+									coordinate={h.position}
+								>
 									<View style={styles.hotspotLabelOverlay}>
 										<Text style={styles.hotspotText}>{h.name}</Text>
 									</View>
-							</Marker>
-						)}
-						</>
+								</Marker>
+							)}
+						</View>
 					))
 				)}
 			</MapView>
