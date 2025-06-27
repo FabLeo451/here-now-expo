@@ -58,6 +58,12 @@ export default function MapTab() {
 	// Start/stop location tracking only when tab is focused
 	useFocusEffect(
 		useCallback(() => {
+			if (!authToken) {
+				// ⛔ Non connettere finché il token non è stato caricato
+				console.log('[MapTab] WebSocket: Auth token not yet available');
+				return;
+			}
+
 			let subscription: Location.LocationSubscription;
 
 			const startTracking = async () => {
@@ -127,7 +133,8 @@ export default function MapTab() {
 	);
 
 	function sendUserPosition(latitude: number, longitude: number) {
-		if (socket.current) {
+		if (socket.current && socket.current.readyState === WebSocket.OPEN) {
+			console.log('[sendUserPosition]');
 			const payload = {
 				appId: process.env.EXPO_PUBLIC_APP_ID,
 				type: 'position',
