@@ -11,7 +11,7 @@ import {
 import { Text, Button } from '@ui-kitten/components';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { styles } from "@/app/Style";
+import { styles } from "@/Style";
 import { Hotspot } from '@/lib/hotspot'
 
 function openInGoogleMaps(latitude: number, longitude: number) {

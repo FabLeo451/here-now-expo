@@ -4,7 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
-import { styles } from "@/app/Style";
 import Map from '@/components/Map';
 import { Hotspot } from '@/lib/hotspot'
 

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { styles } from "@/app/Style";
+import { styles } from "@/Style";
 import { Ionicons } from '@expo/vector-icons';
 import { Hotspot } from '@/lib/hotspot'
 

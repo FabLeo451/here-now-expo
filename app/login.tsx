@@ -9,7 +9,7 @@ import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/comp
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFonts, Dosis_600SemiBold } from '@expo-google-fonts/dosis';
 import { FontAwesome } from '@expo/vector-icons';
-import { styles } from './Style';
+import { styles } from '@/Style';
 
 const getDeviceType = () => {
 	switch (Device.deviceType) {

@@ -10,14 +10,13 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
-import { styles } from "@/app/Style";
+import { styles } from "@/Style";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
-import { Dimensions } from 'react-native';
 import ModalMapSelect from '@/components/ModalMapSelect'
 import { Hotspot } from '@/lib/hotspot'
 
