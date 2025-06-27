@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, Alert, Linking, Platform } from 'react-native';
-import MapView, { Marker, Region } from 'react-native-maps';
+import MapView, { Marker, Callout } from 'react-native-maps';
 import PulsingCircle from '@/components/PulsingCircle'
 import ModalHotspot from '@/components/ModalHotspot'
 import { Hotspot } from '@/lib/hotspot'
@@ -75,21 +75,31 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
 				<Marker coordinate={markerCoords} title="Your position" />
 
 				{hotspots && (
-				
-				hotspots.map((h) => (
-					<PulsingCircle
-						key={h.id}
-						center={{ latitude: h.position.latitude, longitude: h.position.longitude }}
-						onPress={() => setModalVisible({ visible: true, id: h.id })}
-					/>
-				))
+					hotspots.map((h) => (
+						<>
+						<PulsingCircle
+							key={h.id}
+							center={{ latitude: h.position.latitude, longitude: h.position.longitude }}
+							onPress={() => setModalVisible({ visible: true, id: h.id })}
+						/>
 
-			)
-				}
+						{/* On iOs use a regular marker (on Android the text is cutted off) */}
+						{Platform.OS === 'ios' && (
+							<Marker
+								coordinate={h.position}
+							>
+									<View style={styles.hotspotLabelOverlay}>
+										<Text style={styles.hotspotText}>{h.name}</Text>
+									</View>
+							</Marker>
+						)}
+						</>
+					))
+				)}
 			</MapView>
 
-			{/* Hotspot names */}
-			{(hotspots && !mapMoving) && (
+			{/* Hotspot names on Android to skip cutting bug */}
+			{(Platform.OS === 'android' && hotspots && !mapMoving) && (
 				hotspots.map((h) => {
 					const pos = screenPositions[h.id];
 					if (!pos) return null;
