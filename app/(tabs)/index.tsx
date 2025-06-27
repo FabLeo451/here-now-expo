@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Alert,
-  StyleSheet,
   Text,
   View,
-  Button,
   ScrollView,
   TouchableOpacity,
+  RefreshControl
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
@@ -17,6 +16,8 @@ import { Hotspot } from '@/lib/hotspot'
 const HomeTab: React.FC = () => {
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [context, setContext] = useState({ user: { name: '' } });
+  const [authToken, setAuthToken] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -28,11 +29,11 @@ const HomeTab: React.FC = () => {
         router.replace('/login');
       } else {
 
+        setAuthToken(token);
+
         const contextStr = await AsyncStorage.getItem('context');
         const ctx = contextStr ? JSON.parse(contextStr) : {};
         setContext(ctx);
-
-        //setAuthToken(token);
 
         if (ctx.user.isAuthenticated)
           getMyHotspots(token);
@@ -45,6 +46,9 @@ const HomeTab: React.FC = () => {
   const getMyHotspots = async (token: string) => {
 
     try {
+      setRefreshing(true);
+      setHotspots([]);
+
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
         method: 'GET',
         headers: {
@@ -54,7 +58,8 @@ const HomeTab: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch hotspots');
+        console.log(response)
+        throw new Error('Failed to fetch: ' + response.status + ' ' + response.statusText);
       }
 
       const data: Hotspot[] = await response.json();
@@ -63,8 +68,14 @@ const HomeTab: React.FC = () => {
     } catch (error: any) {
       console.log('[getMyHotspots] ', error);
       Alert.alert('Error getting my hotspots', error.message);
+    } finally {
+      setRefreshing(false);
     }
   };
+
+	const onRefresh = useCallback(() => {
+		getMyHotspots(authToken);
+	}, [authToken]);
 
   const handleDelete = async (id: string) => {
     const token = await AsyncStorage.getItem('authToken');
@@ -111,34 +122,40 @@ const HomeTab: React.FC = () => {
 
     router.push({
       pathname: '/create-hotspot',
-      params: { 
+      params: {
         action: 'update',
         hotspotEnc: JSON.stringify(hs)
       }
     });
   }
 
-function isActive(h: Hotspot): boolean {
-  if (!h.startTime || !h.endTime) return false;
+  function isActive(h: Hotspot): boolean {
+    if (!h.startTime || !h.endTime) return false;
 
-  const now = new Date();
-  const start = new Date(h.startTime);
-  const end = new Date(h.endTime);
+    const now = new Date();
+    const start = new Date(h.startTime);
+    const end = new Date(h.endTime);
 
-  return now >= start && now <= end;
-}
+    return now >= start && now <= end;
+  }
+
+  if (refreshing)
+    return (<View><Text>Loading...</Text></View>)
 
   return (
     <View style={styles.containerList}>
-      {/*<Text style={styles.hello}>Hello, {context.user ? context.user?.name : 'user'}</Text>*/}
+
+      <TouchableOpacity style={styles.fab} onPress={() => handleCreate()}>
+        <Ionicons name="add" size={25} color="#fff" />
+      </TouchableOpacity>
 
 
-          <TouchableOpacity style={styles.fab} onPress={() => handleCreate()}>
-            <Ionicons name="add" size={25} color="#fff" />
-          </TouchableOpacity>
-
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
 
         {hotspots && hotspots.length > 0 ? (
           hotspots.map((h) => (
@@ -147,9 +164,9 @@ function isActive(h: Hotspot): boolean {
 
                 <View>
                   <Text style={styles.listItemTitle}>{h.name}</Text>
-                  
+
                   <View style={styles.row}>
-                    {isActive(h) ? (<><Ionicons name="radio-outline" size={16} color="forestgreen" /><Text style={{color:"forestgreen", marginLeft:5}}>Active</Text></>) : (<><Ionicons name="radio-outline" size={16} color="gray"/><Text style={{color:"gray", marginLeft:5}}>Inactive</Text></>)}
+                    {isActive(h) ? (<><Ionicons name="radio-outline" size={16} color="forestgreen" /><Text style={{ color: "forestgreen", marginLeft: 5 }}>Active</Text></>) : (<><Ionicons name="radio-outline" size={16} color="gray" /><Text style={{ color: "gray", marginLeft: 5 }}>Inactive</Text></>)}
                   </View>
 
                 </View>
@@ -159,12 +176,12 @@ function isActive(h: Hotspot): boolean {
                 >
                   <Ionicons name="trash" size={24} />
                 </TouchableOpacity>
-                
+
               </View>
             </TouchableOpacity>
           ))
         ) : (
-          <Text style={styles.emptyText}>Nessun hotspot disponibile</Text>
+          <Text style={styles.emptyText}>No hotspot</Text>
         )}
       </ScrollView>
 
