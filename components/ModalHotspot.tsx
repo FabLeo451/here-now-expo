@@ -16,8 +16,8 @@ import { Hotspot } from '@/lib/hotspot'
 
 function openInGoogleMaps(latitude: number, longitude: number) {
 	const url = Platform.select({
-		ios: `http://maps.apple.com/?ll=${latitude},${longitude}`,
-		android: `geo:${latitude},${longitude}?q=${latitude},${longitude}`, // apre direttamente l'app Maps
+		ios: `http://maps.apple.com/?q=${latitude},${longitude}&ll=${latitude},${longitude}`,
+		android: `geo:${latitude},${longitude}?q=${latitude},${longitude}`, 
 	});
 
 	Linking.openURL(url ?? '');
@@ -139,7 +139,7 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 							}}
 						>
 							<Ionicons name="location-outline" size={25} color="steelblue" />
-							<Text>Open in Google Maps</Text>
+							<Text>Open in Maps</Text>
 						</TouchableOpacity>
 					</View>
 				</View>
