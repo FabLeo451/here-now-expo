@@ -89,7 +89,9 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 			alignItems: 'center',
 		},
 		content: {
-			padding: 10,
+			paddingHorizontal: 20,
+			paddingTop: 10,
+			paddingBottom: 20,
 			backgroundColor: 'white',
 			borderRadius: 10,
 			elevation: 5,
