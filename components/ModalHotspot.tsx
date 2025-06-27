@@ -39,7 +39,7 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 		const init = async () => {
 			const token = await AsyncStorage.getItem('authToken');
 
-			console.log('visible = ', visible, 'id = ', id);
+			//console.log('visible = ', visible, 'id = ', id);
 
 			if (!visible)
 				return;
