@@ -74,17 +74,22 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
 				{/* Marker user */}
 				<Marker coordinate={markerCoords} title="Your position" />
 
-				{hotspots.map((h) => (
+				{hotspots && (
+				
+				hotspots.map((h) => (
 					<PulsingCircle
 						key={h.id}
 						center={{ latitude: h.position.latitude, longitude: h.position.longitude }}
 						onPress={() => setModalVisible({ visible: true, id: h.id })}
 					/>
-				))}
+				))
+
+			)
+				}
 			</MapView>
 
 			{/* Hotspot names */}
-			{!mapMoving && (
+			{(hotspots && !mapMoving) && (
 				hotspots.map((h) => {
 					const pos = screenPositions[h.id];
 					if (!pos) return null;
