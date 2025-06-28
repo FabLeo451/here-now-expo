@@ -15,7 +15,7 @@ import { Hotspot } from '@/lib/hotspot'
 
 const HomeTab: React.FC = () => {
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
-  const [context, setContext] = useState({ user: { name: '', isGuest: true, isAuthenticated: false } });
+  const [context, setContext] = useState(null);
   const [authToken, setAuthToken] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -139,17 +139,27 @@ const HomeTab: React.FC = () => {
     return now >= start && now <= end;
   }
 
+  if (!context)
+    return null;
+
+  if (context.user.isGuest)
+    return (
+      <View style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}><Text>Only registered users can add hotspots</Text></View>
+    )
+
   if (refreshing)
     return (<View><Text>Loading...</Text></View>)
 
   return (
     <View style={styles.containerList}>
 
-      {context.user.isAuthenticated && (
-        <TouchableOpacity style={styles.fab} onPress={() => handleCreate()}>
-          <Ionicons name="add" size={25} color="#fff" />
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity style={styles.fab} onPress={() => handleCreate()}>
+        <Ionicons name="add" size={25} color="#fff" />
+      </TouchableOpacity>
 
 
       <ScrollView 
