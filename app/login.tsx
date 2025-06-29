@@ -236,9 +236,9 @@ export default function LoginScreen() {
 			<Text
 				style={styles.link}
 				status="primary"
-				onPress={() => Linking.openURL('https://www.ekhoes.com/sign-in')}
+				onPress={() => Linking.openURL('https://www.ekhoes.com/sign-up')}
 			>
-				No account? Sign in
+				No account? Sign up
 			</Text>
 
 			<Text category="h6" style={styles.divider}>Or</Text>
