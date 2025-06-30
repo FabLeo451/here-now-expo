@@ -38,6 +38,7 @@ export default function DropdownMenu(): JSX.Element {
 
   const handleLogout = async () => {
   
+    /*
     const token = await AsyncStorage.getItem('authToken');
 
     try {
@@ -65,6 +66,8 @@ export default function DropdownMenu(): JSX.Element {
     await AsyncStorage.removeItem('authToken');
     
     router.replace('/login');
+    */
+    router.replace('/logout');
   };
 
   return (
