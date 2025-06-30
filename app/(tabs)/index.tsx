@@ -15,9 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
 import { Hotspot } from '@/lib/hotspot'
 
-const isTokenValid = async (): Promise<boolean> => {
-  const token = await AsyncStorage.getItem('authToken');
-  if (!token) return false;
+const isTokenValid = async (token: string): Promise<boolean> => {
 
   try {
     const payloadBase64 = token.split('.')[1];
@@ -43,8 +41,14 @@ const HomeTab: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       const checkToken = async () => {
+
+        const token = await AsyncStorage.getItem('authToken');
+
+        if (!token)
+          return;
+
         console.log('[index] Checking token validity...')
-        const valid = await isTokenValid();
+        const valid = await isTokenValid(token);
         if (!valid) {
           console.log('[index] Invalid token')
           router.replace('/logout');
