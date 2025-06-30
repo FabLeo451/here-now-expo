@@ -7,17 +7,52 @@ import {
   TouchableOpacity,
   RefreshControl
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { styles } from "@/Style";
 import { Ionicons } from '@expo/vector-icons';
+import { decode as atob } from 'base-64';
 import { Hotspot } from '@/lib/hotspot'
+
+const isTokenValid = async (): Promise<boolean> => {
+  const token = await AsyncStorage.getItem('authToken');
+  if (!token) return false;
+
+  try {
+    const payloadBase64 = token.split('.')[1];
+    const payloadJson = atob(payloadBase64);
+    const payload = JSON.parse(payloadJson);
+
+    if (!payload.exp) return true;
+
+    const now = Math.floor(Date.now() / 1000); // current time in seconds
+    return payload.exp > now;
+  } catch (err) {
+    console.error('Error decoding token JWT:', err);
+    return false;
+  }
+};
 
 const HomeTab: React.FC = () => {
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [context, setContext] = useState(null);
   const [authToken, setAuthToken] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      const checkToken = async () => {
+        console.log('[index] Checking token validity...')
+        const valid = await isTokenValid();
+        if (!valid) {
+          console.log('[index] Invalid token')
+          router.replace('/logout');
+        }
+      };
+      checkToken();
+    }, [])
+  );
 
   useEffect(() => {
     const checkAuth = async () => {
