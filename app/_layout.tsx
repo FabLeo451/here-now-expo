@@ -1,15 +1,14 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
+import { SplashScreen } from 'expo-router';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
-
 import { useColorScheme } from '@/components/useColorScheme';
+import { useFonts, Dosis_600SemiBold } from '@expo-google-fonts/dosis';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -25,9 +24,8 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
+  const [fontsLoaded, error] = useFonts({
+    Dosis_600SemiBold,
   });
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -36,12 +34,17 @@ export default function RootLayout() {
   }, [error]);
 
   useEffect(() => {
-    if (loaded) {
+    if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [fontsLoaded]);
 
-  if (!loaded) {
+useEffect(() => {
+  console.log('Fonts loaded:', fontsLoaded);
+}, [fontsLoaded]);
+
+
+  if (!fontsLoaded) {
     return null;
   }
 

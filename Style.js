@@ -14,7 +14,8 @@ const styles = StyleSheet.create({
 		marginTop: 60,
 		marginBottom: 100,
 		textAlign: 'center',
-		fontFamily: 'Dosis_600SemiBold'
+		fontFamily: 'Dosis_600SemiBold',
+    fontSize: 40
 	},
 	title: {
 		marginTop: 10,

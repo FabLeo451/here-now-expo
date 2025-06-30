@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Platform, Linking } from 'react-native';
+import { Text, Platform, Linking } from 'react-native';
 import * as Device from 'expo-device';
 import { Alert, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
-import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
+import { Layout, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFonts, Dosis_600SemiBold } from '@expo-google-fonts/dosis';
+
 import { FontAwesome } from '@expo/vector-icons';
 import { styles } from '@/Style';
 
@@ -45,13 +45,9 @@ export default function LoginScreen() {
 	const [loading, setLoading] = useState(false);
 	const insets = useSafeAreaInsets();
 
-	const [fontsLoaded] = useFonts({
-		Dosis_600SemiBold,
-	});
 
-	if (!fontsLoaded) {
-		return null; // oppure <AppLoading />
-	}
+
+
 
 	const getDeviceInfo = () => {
 		const name = Constants.manifest?.name ?? Constants.expoConfig?.name ?? 'unknown';
@@ -199,7 +195,7 @@ export default function LoginScreen() {
 	  }}
 	>
 		<Layout style={styles.container}>
-			<Text category="h1" style={styles.mainTitle}>HereN<FontAwesome name="wifi" size={22} color="#000" />w</Text>
+			<Text style={styles.mainTitle}>HereN<FontAwesome name="wifi" size={22} color="#000" />w</Text>
 
 			<Input
 				placeholder="Email"
