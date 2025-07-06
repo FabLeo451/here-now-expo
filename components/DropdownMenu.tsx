@@ -18,6 +18,7 @@ export default function DropdownMenu(): JSX.Element {
 
   const options = [
     { label: 'About', value: 'about' },
+    { label: 'Debug', value: 'debug' },
     { label: 'Log out', value: 'logout' },
   ];
 
@@ -30,6 +31,13 @@ export default function DropdownMenu(): JSX.Element {
         const version = Constants.expoConfig?.version ?? 'N/A';
         Alert.alert("HereNow", `Version ${version}\n\nThis is an app by ekhoes.com`);
         break;
+      case 'debug':
+        Alert.alert('Debug',
+          `API base URL: ${process.env.EXPO_PUBLIC_API_BASE_URL}
+Websocket URL: ${process.env.EXPO_PUBLIC_WEBSOCKET_URL}
+`
+        )
+        break;
       case 'logout':
         handleLogout();
         break;
@@ -37,36 +45,6 @@ export default function DropdownMenu(): JSX.Element {
   };
 
   const handleLogout = async () => {
-  
-    /*
-    const token = await AsyncStorage.getItem('authToken');
-
-    try {
-    
-      console.log('[profile] logging out...');
-    
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/logout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
-      
-      console.log('[profile] logging out...');
-
-      if (!response.ok) {
-        throw new Error('Error calling /logout');
-      }
-
-    } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        console.log('[profile]', message);
-        Alert.alert('Error:', message);
-    }
-    
-    await AsyncStorage.removeItem('authToken');
-    
-    router.replace('/login');
-    */
     router.replace('/logout');
   };
 
