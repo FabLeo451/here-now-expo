@@ -2,7 +2,7 @@
   "expo": {
     "name": "here-now-expo",
     "slug": "here-now-expo",
-    "version": "1.0.0-alpha1",
+    "version": "1.0.0-alpha2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "herenowexpo",
@@ -34,6 +34,18 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "147b4eb8-10fe-47dc-b57a-3d902c2fd6c2"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/147b4eb8-10fe-47dc-b57a-3d902c2fd6c2"
     }
   }
 }

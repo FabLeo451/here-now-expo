@@ -13,9 +13,13 @@ type LatLng = {
 type MapProps = {
 	markerCoords: LatLng;
 	hotspots: Hotspot[];
+	onRegionChangeCompleteBounds?: (bounds: {
+		northEast: LatLng;
+		southWest: LatLng;
+	}) => void;
 };
 
-export default function Map({ markerCoords, hotspots }: MapProps) {
+export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBounds }: MapProps) {
 	const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string }>({
 		visible: false,
 		id: '',
@@ -59,16 +63,35 @@ export default function Map({ markerCoords, hotspots }: MapProps) {
 					setMapMoving(true);
 				}}
 				onRegionChangeComplete={async () => {
-					if (!mapRef.current) return;
+					const map = mapRef.current;
+
+					if (!map) return;
+
 					const newPositions: typeof screenPositions = {};
-					for (const h of hotspots) {
-						const point = await mapRef.current?.pointForCoordinate(h.position);
-						if (point) {
-							newPositions[h.id] = point;
+
+					if (hotspots) {
+						for (const h of hotspots) {
+							const point = await map?.pointForCoordinate(h.position);
+							if (point) {
+								newPositions[h.id] = point;
+							}
 						}
 					}
+
 					setScreenPositions(newPositions);
+
 					setMapMoving(false);
+
+					const boundaries = await map.getMapBoundaries();
+					// boundaries:
+					// {
+					//   northEast: { latitude, longitude },
+					//   southWest: { latitude, longitude }
+					// }
+
+					if (typeof onRegionChangeCompleteBounds === 'function') {
+						onRegionChangeCompleteBounds(boundaries);
+					}
 				}}
 			>
 				{/* Marker user */}

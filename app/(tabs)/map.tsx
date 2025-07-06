@@ -7,6 +7,18 @@ import { useFocusEffect } from '@react-navigation/native';
 import Map from '@/components/Map';
 import { Hotspot } from '@/lib/hotspot'
 
+
+type LatLng = {
+	latitude: number;
+	longitude: number;
+};
+
+type Boundaries = {
+	northEast: LatLng;
+	southWest: LatLng;
+};
+
+
 export default function MapTab() {
 	const socket = useRef<WebSocket | null>(null);
 
@@ -74,7 +86,8 @@ export default function MapTab() {
 						longitude: loc.coords.longitude,
 					});
 
-					sendUserPosition(loc.coords.latitude, loc.coords.longitude);
+					// Hotspots updated by boundaries, not user position
+					//sendUserPosition(loc.coords.latitude, loc.coords.longitude);
 				});
 			};
 
@@ -133,7 +146,8 @@ export default function MapTab() {
 		if (socket.current && socket.current.readyState === WebSocket.OPEN) {
 			const payload = {
 				appId: process.env.EXPO_PUBLIC_APP_ID,
-				type: 'position',
+				type: 'hotspots',
+				subtype: 'byPosition',
 				text: JSON.stringify({
 					latitude: latitude,
 					longitude: longitude
@@ -143,9 +157,33 @@ export default function MapTab() {
 		}
 	}
 
+	function sendMapBoundaries(boundaries: Boundaries) {
+		if (socket.current && socket.current.readyState === WebSocket.OPEN) {
+			const payload = {
+				appId: process.env.EXPO_PUBLIC_APP_ID,
+				type: 'hotspots',
+				subtype: 'byBoundaries',
+				text: JSON.stringify({
+					northEast: { latitude: boundaries.northEast.latitude, longitude: boundaries.northEast.longitude },
+					southWest: { latitude: boundaries.southWest.latitude, longitude: boundaries.southWest.longitude }
+				}),
+			};
+			socket.current.send(JSON.stringify(payload));
+		}
+	}
+
 	return (
 		<View style={{ flex: 1 }}>
-			{markerCoords && (<Map markerCoords={markerCoords} hotspots={hotspots} />)}
+			{markerCoords && (
+				<Map 
+					markerCoords={markerCoords} 
+					hotspots={hotspots}
+					onRegionChangeCompleteBounds={(boundaries: Boundaries) => {
+						//console.log("Visible map:", boundaries);
+						sendMapBoundaries(boundaries)
+					}}
+				/>
+			)}
 		</View>
 	);
 }
