@@ -95,12 +95,13 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 				}}
 			>
 				{/* Marker user */}
-<Marker coordinate={markerCoords} title="Your position">
-        <Image
-          source={require('../assets/images/user.png')}
-          style={{ width: 35, height: 35 }}
-        />
-</Marker>
+				<Marker coordinate={markerCoords} title="Your position">
+					<Image
+						source={require('../assets/images/user.png')}
+						style={{ width: 38, height: 38 }}
+					/>
+				</Marker>
+
 				{hotspots && (
 					hotspots.map((h) => (
 						<View key={h.id}>
