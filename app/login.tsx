@@ -131,7 +131,8 @@ export default function LoginScreen() {
 		} catch (error) {
 			//console.log('[login]', error)
 			const message = error instanceof Error ? error.message : 'Unknown error';
-			Alert.alert('Access error:', message);
+			const cause = error instanceof Error ? error.cause : 'Unknown cause';
+			Alert.alert('Access error:', message + '\n' + cause);
 		} finally {
 			setLoading(false);
 		}

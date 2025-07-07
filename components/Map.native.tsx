@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, Alert, Linking, Platform } from 'react-native';
+import { View, Text, Image, StyleSheet, Dimensions, Alert, Linking, Platform } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import PulsingCircle from '@/components/PulsingCircle'
 import ModalHotspot from '@/components/ModalHotspot'
@@ -95,8 +95,12 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 				}}
 			>
 				{/* Marker user */}
-				<Marker coordinate={markerCoords} title="Your position" />
-
+<Marker coordinate={markerCoords} title="Your position">
+        <Image
+          source={require('../assets/images/user.png')}
+          style={{ width: 35, height: 35 }}
+        />
+</Marker>
 				{hotspots && (
 					hotspots.map((h) => (
 						<View key={h.id}>
