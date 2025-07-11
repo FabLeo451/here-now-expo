@@ -36,9 +36,8 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 	const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 	useEffect(() => {
-		//console.log("Hotspots updated in <Map />:", hotspots);
+		console.log("[Map.native] Hotspots updated in <Map />:", hotspots);
 		repositionHotspots();
-		setMapMoving(false);
 	}, [mapReady, hotspots]);
 
 	/**
@@ -119,6 +118,8 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 					if (typeof onRegionChangeCompleteBounds === 'function') {
 						onRegionChangeCompleteBounds(boundaries);
 					}
+
+					setMapMoving(false);
 				}}
 			>
 				{/* Marker user */}
