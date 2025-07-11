@@ -35,8 +35,35 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 	const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 	useEffect(() => {
-
+		//console.log("Hotspots updated in <Map />:", hotspots);
+		repositionHotspots();
+		setMapMoving(false);
 	}, [hotspots]);
+
+	/**
+	 * Used on Android to get around the cutted text issue
+	 */
+	async function repositionHotspots() {
+
+		if (Platform.OS !== 'android')
+			return;
+		
+		console.log('[Map.native] repositionHotspots, hotspots:', hotspots.length)
+
+		const newPositions: typeof screenPositions = {};
+
+		if (hotspots) {
+			for (const h of hotspots) {
+				const point = await mapRef.current?.pointForCoordinate(h.position);
+				if (point) {
+					newPositions[h.id] = point;
+				}
+			}
+		}
+
+		setScreenPositions(newPositions);
+
+	}
 
 	return (
 		<View style={styles.mapContainer}>
@@ -48,7 +75,6 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 				}}
 			/>
 
-
 			<MapView
 				ref={mapRef}
 				provider="google"
@@ -59,6 +85,16 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 					latitudeDelta: LATITUDE_DELTA,
 					longitudeDelta: LONGITUDE_DELTA,
 				}}
+				onMapReady={async () => {
+
+					console.log('[Map.native] Map loaded');
+					const boundaries = await mapRef.current?.getMapBoundaries();
+
+					if (boundaries && typeof onRegionChangeCompleteBounds === 'function') {
+						onRegionChangeCompleteBounds(boundaries);
+					}
+
+				}}
 				onRegionChange={() => {
 					setMapMoving(true);
 				}}
@@ -67,20 +103,8 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 
 					if (!map) return;
 
-					const newPositions: typeof screenPositions = {};
-
-					if (hotspots) {
-						for (const h of hotspots) {
-							const point = await map?.pointForCoordinate(h.position);
-							if (point) {
-								newPositions[h.id] = point;
-							}
-						}
-					}
-
-					setScreenPositions(newPositions);
-
-					setMapMoving(false);
+					//repositionHotspots();
+					
 
 					const boundaries = await map.getMapBoundaries();
 					// boundaries:

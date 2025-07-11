@@ -109,6 +109,7 @@ export default function MapTab() {
 					try {
 						const message = JSON.parse(event.data);
 						const parsed: Hotspot[] = JSON.parse(message.Text);
+						console.log('[map] Updating hotspots...', parsed.length);
 						setHotspots(parsed);
 					} catch (e) {
 						console.log('[websocket-reply]', e);
@@ -159,6 +160,9 @@ export default function MapTab() {
 
 	function sendMapBoundaries(boundaries: Boundaries) {
 		if (socket.current && socket.current.readyState === WebSocket.OPEN) {
+
+			console.log('[map] Querying for hotspots by boundaries...');
+			
 			const payload = {
 				appId: process.env.EXPO_PUBLIC_APP_ID,
 				type: 'hotspots',
@@ -174,15 +178,19 @@ export default function MapTab() {
 
 	return (
 		<View style={{ flex: 1 }}>
-			{markerCoords && (
+			{markerCoords ? (
 				<Map 
 					markerCoords={markerCoords} 
 					hotspots={hotspots}
 					onRegionChangeCompleteBounds={(boundaries: Boundaries) => {
 						//console.log("Visible map:", boundaries);
-						sendMapBoundaries(boundaries)
+						sendMapBoundaries(boundaries);
 					}}
 				/>
+			) : (
+				<View>
+					<Text>Loading map...</Text>
+				</View>
 			)}
 		</View>
 	);
