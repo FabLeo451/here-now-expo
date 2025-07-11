@@ -162,7 +162,7 @@ export default function MapTab() {
 		if (socket.current && socket.current.readyState === WebSocket.OPEN) {
 
 			console.log('[map] Querying for hotspots by boundaries...');
-			
+
 			const payload = {
 				appId: process.env.EXPO_PUBLIC_APP_ID,
 				type: 'hotspots',

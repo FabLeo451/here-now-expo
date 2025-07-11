@@ -28,6 +28,7 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 	const mapRef = useRef<MapView>(null);
 	const [screenPositions, setScreenPositions] = useState<{ [key: string]: { x: number; y: number } }>({});
 	const [mapMoving, setMapMoving] = useState(false);
+	const [mapReady, setMapReady] = useState<boolean>(false);
 
 	const { width, height } = Dimensions.get('window');
 	const ASPECT_RATIO = width / height;
@@ -38,7 +39,7 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 		//console.log("Hotspots updated in <Map />:", hotspots);
 		repositionHotspots();
 		setMapMoving(false);
-	}, [hotspots]);
+	}, [mapReady, hotspots]);
 
 	/**
 	 * Used on Android to get around the cutted text issue
@@ -93,6 +94,8 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 					if (boundaries && typeof onRegionChangeCompleteBounds === 'function') {
 						onRegionChangeCompleteBounds(boundaries);
 					}
+
+					setMapReady(true);
 
 				}}
 				onRegionChange={() => {
