@@ -217,8 +217,14 @@ const HomeTab: React.FC = () => {
                 <View>
                   <Text style={styles.listItemTitle}>{h.name}</Text>
 
-                  <View style={styles.row}>
-                    {isActive(h) ? (<><Ionicons name="radio-outline" size={16} color="forestgreen" /><Text style={{ color: "forestgreen", marginLeft: 5 }}>Active</Text></>) : (<><Ionicons name="radio-outline" size={16} color="gray" /><Text style={{ color: "gray", marginLeft: 5 }}>Inactive</Text></>)}
+                  <View style={[styles.row, { gap: 20 }]}>
+                    <View style={styles.row}>
+                      {isActive(h) ? (<><Ionicons name="radio-outline" size={16} color="forestgreen" /><Text style={{ color: "forestgreen", marginLeft: 5 }}>Active</Text></>) : (<><Ionicons name="radio-outline" size={16} color="gray" /><Text style={{ color: "gray", marginLeft: 5 }}>Inactive</Text></>)}
+                    </View>
+                    <View style={styles.row}>
+                      {h.likes == 0 ? (<Ionicons name="thumbs-up-outline" size={16} color="lightgray" style={{ marginRight:5 }}/>) : (<Ionicons name="thumbs-up" size={16} color="royalblue" style={{ marginRight:5 }} />) }
+                      <Text style={{ color:"gray" }} >{h.likes}</Text>
+                    </View>
                   </View>
 
                 </View>
