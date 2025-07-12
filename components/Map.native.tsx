@@ -36,7 +36,7 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 	const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 	useEffect(() => {
-		console.log("[Map.native] Hotspots updated in <Map />:", hotspots);
+		//console.log("[Map.native] Hotspots updated in <Map />:", hotspots);
 		repositionHotspots();
 	}, [mapReady, hotspots]);
 
@@ -48,7 +48,7 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 		if (Platform.OS !== 'android')
 			return;
 		
-		console.log('[Map.native] repositionHotspots, hotspots:', hotspots.length)
+		//console.log('[Map.native] repositionHotspots, hotspots:', hotspots.length)
 
 		const newPositions: typeof screenPositions = {};
 

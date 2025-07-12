@@ -23,7 +23,6 @@ function openInGoogleMaps(latitude: number, longitude: number) {
 	Linking.openURL(url ?? '');
 }
 
-
 type Props = {
 	visible: boolean;
 	id: string;
@@ -32,6 +31,8 @@ type Props = {
 
 export default function ModalHotspot({ visible, id, onClose }: Props) {
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
+	const [likes, setLikes] = useState<number>(0);
+	const [likedByMe, setLikedByMe] = useState<boolean>(false);
 	const [loading, setLoading] = useState(true);
 	const [loaded, setLoaded] = useState(false);
 
@@ -50,6 +51,49 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 
 		init();
 	}, [visible, id]);
+
+	useEffect(() => {
+
+		if (hotspots[0]) {
+			setLikes(hotspots[0].likes);
+			setLikedByMe(hotspots[0].likedByMe);
+		}
+
+	}, [hotspots]);
+
+	const handleLike = async (like: boolean) => {
+
+		console.log('[ModalHotspot.Like] ', like);
+
+		const token = await AsyncStorage.getItem('authToken');
+
+		if (!token)
+			return;
+
+		try {
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}/like`, {
+				method: like ? 'POST' : 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: token,
+				},
+			});
+
+			if (!response.ok) {
+				//console.log('[ModalHotspot.Like] ', response);
+				throw new Error('Error ' + response.status + ' ' + response.statusText);
+			}
+
+			setLikedByMe(like);
+			setLikes(prev => like ? prev + 1 : prev - 1);
+
+		} catch (error: any) {
+			console.log('[ModalHotspot.Like] ', error);
+			Alert.alert('Error', error.message);
+		} finally {
+
+		}
+	}
 
 	const getHotspot = async (token: string, id: string) => {
 
@@ -132,9 +176,30 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 						<TouchableOpacity onPress={() => onClose()} style={stylesModal.closeButton}>
 							<Ionicons name="close" size={24} color="black" />
 						</TouchableOpacity>
-						<Text style={{ fontWeight: "bold", marginBottom: 20 }}>{hotspots[0].name}</Text>
+
+						<Text style={{ fontWeight: "bold", marginBottom: 5 }}>{hotspots[0].name}</Text>
+						<Text style={{ fontStyle: "italic", marginBottom: 10 }}>{hotspots[0].owner}</Text>
+
+						{/* Likes */}
+						<View style={[styles.rowLeft, { marginVertical: 10 }]}>
+							<TouchableOpacity
+								onPress={() => {
+									handleLike(!likedByMe);
+								}}
+							>
+								{likedByMe ? (
+									<Ionicons name="thumbs-up" size={25} color="royalblue" />
+								) : (
+									<Ionicons name="thumbs-up-outline" size={25} color="lightgray" />
+								)}
+
+							</TouchableOpacity>
+							<Text>{likes}</Text>
+						</View>
+
+						{/* Open in Maps */}
 						<TouchableOpacity
-							style={styles.rowLeft}
+							style={[styles.rowLeft, { marginVertical: 10 }]}
 							onPress={() => {
 								const { latitude, longitude } = hotspots[0].position;
 								openInGoogleMaps(latitude, longitude);
@@ -143,6 +208,7 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 							<Ionicons name="location-outline" size={25} color="steelblue" />
 							<Text>Open in Maps</Text>
 						</TouchableOpacity>
+
 					</View>
 				</View>
 			)}
