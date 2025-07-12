@@ -177,11 +177,11 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 							<Ionicons name="close" size={24} color="black" />
 						</TouchableOpacity>
 
-						<Text style={{ fontWeight: "bold", marginBottom: 5 }}>{hotspots[0].name}</Text>
-						<Text style={{ fontStyle: "italic", marginBottom: 10 }}>{hotspots[0].owner}</Text>
+						<Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 5 }}>{hotspots[0].name}</Text>
+						<Text style={{ fontStyle: "italic", marginBottom: 10 }}>Created by {hotspots[0].owner}</Text>
 
 						{/* Likes */}
-						<View style={[styles.rowLeft, { marginVertical: 10 }]}>
+						<View style={[styles.rowLeft, { marginVertical: 8 }]}>
 							<TouchableOpacity
 								onPress={() => {
 									handleLike(!likedByMe);
@@ -199,7 +199,7 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 
 						{/* Open in Maps */}
 						<TouchableOpacity
-							style={[styles.rowLeft, { marginVertical: 10 }]}
+							style={[styles.rowLeft, { marginVertical: 8 }]}
 							onPress={() => {
 								const { latitude, longitude } = hotspots[0].position;
 								openInGoogleMaps(latitude, longitude);
