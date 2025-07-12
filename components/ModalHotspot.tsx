@@ -177,8 +177,8 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 							<Ionicons name="close" size={24} color="black" />
 						</TouchableOpacity>
 
-						<Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 5 }}>{hotspots[0].name}</Text>
-						<Text style={{ fontStyle: "italic", marginBottom: 10 }}>Created by {hotspots[0].owner}</Text>
+						<Text style={{ fontSize: 18, fontWeight: "bold", marginVertical: 5 }}>{hotspots[0].name}</Text>
+						<Text style={{ fontSize: 12, fontStyle: "italic", marginBottom: 10, color:"dimgray" }}>Created by {hotspots[0].owner}</Text>
 
 						{/* Likes */}
 						<View style={[styles.rowLeft, { marginVertical: 8 }]}>
