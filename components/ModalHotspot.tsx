@@ -30,6 +30,8 @@ type Props = {
 };
 
 export default function ModalHotspot({ visible, id, onClose }: Props) {
+	const [context, setContext] = useState(null);
+	const [authenticated, setAuthenticated] = useState<boolean>(false);
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
 	const [likes, setLikes] = useState<number>(0);
 	const [likedByMe, setLikedByMe] = useState<boolean>(false);
@@ -44,6 +46,11 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 
 			if (!visible)
 				return;
+
+			const contextStr = await AsyncStorage.getItem('context');
+			const ctx = contextStr ? JSON.parse(contextStr) : {};
+			setContext(ctx);
+			setAuthenticated(ctx.user.isAuthenticated);
 
 			if (token)
 				getHotspot(token, id);
@@ -67,7 +74,7 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 
 		const token = await AsyncStorage.getItem('authToken');
 
-		if (!token)
+		if (!token || !authenticated)
 			return;
 
 		try {
@@ -97,7 +104,7 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 
 	const getHotspot = async (token: string, id: string) => {
 
-		console.log(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}`);
+		//console.log(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}`);
 
 		try {
 			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}`, {
@@ -109,7 +116,8 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 			});
 
 			if (!response.ok) {
-				throw new Error('Failed to fetch hotspots');
+				console.log('[ModalHotspot.Like] ', response);
+				throw new Error('Error ' + response.status + ' ' + response.statusText);
 			}
 
 			const data: Hotspot[] = await response.json();
@@ -118,7 +126,7 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 
 			//Alert.alert('', JSON.stringify(data))
 		} catch (error: any) {
-			console.log('[getMyHotspots] ', error);
+			console.log('[ModalHotspot] ', error);
 			Alert.alert('Error', error.message);
 		} finally {
 			setLoading(false);
