@@ -219,6 +219,7 @@ export default function LoginScreen() {
 				textContentType="password"
 				status={passwordError ? 'danger' : 'basic'}
 				caption={passwordError}
+				autoCapitalize="none"
 			/>
 
 			<Button
@@ -241,12 +242,13 @@ export default function LoginScreen() {
 			<Text category="h6" style={styles.divider}>Or</Text>
 
 			<Input
-				placeholder="Nome (Guest)"
+				placeholder="Name (Guest)"
 				style={[styles.input, { marginBottom: 10 }]}
 				value={guestName}
 				onChangeText={setGuestName}
 				status={guestNameError ? 'danger' : 'basic'}
 				caption={guestNameError}
+				autoCapitalize="words"
 			/>
 
 			<Button

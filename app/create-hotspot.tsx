@@ -239,7 +239,7 @@ const CreateHotspot: React.FC = () => {
 					style={styles.input}
 					value={name}
 					onChangeText={setName}
-					autoCapitalize="none"
+					autoCapitalize="sentences"
 				/>
 
 				<Text style={styles.label}>Location</Text>

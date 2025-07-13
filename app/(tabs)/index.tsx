@@ -13,6 +13,7 @@ import { router } from 'expo-router';
 import { styles } from "@/Style";
 import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
+import DropdownHotspot from '@/components/DropdownHotspot'
 import { Hotspot } from '@/lib/hotspot'
 
 const isTokenValid = async (token: string): Promise<boolean> => {
@@ -145,7 +146,7 @@ const HomeTab: React.FC = () => {
       "Are you sure you want to delete this item?",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "OK", onPress: () => handleDelete(id) }
+        { text: "Yes", onPress: () => handleDelete(id) }
       ]
     );
   };
@@ -228,12 +229,27 @@ const HomeTab: React.FC = () => {
                   </View>
 
                 </View>
-                <TouchableOpacity
+
+                {/*<TouchableOpacity
                   onPress={() => confirmDelete(h.id)}
                   style={styles.deleteButton}
                 >
                   <Ionicons name="trash" size={24} />
-                </TouchableOpacity>
+                </TouchableOpacity>*/}
+
+                <DropdownHotspot
+                  onSelect={(value: string) => {
+                    
+                    //console.log(`Selected from '${h.id}': ${value}`);
+
+                    switch(value) {
+                      case 'delete':
+                        confirmDelete(h.id)
+                        break;
+                    }
+                  }}
+                />
+
 
               </View>
             </TouchableOpacity>
