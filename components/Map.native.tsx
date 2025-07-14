@@ -11,6 +11,7 @@ type LatLng = {
 };
 
 type MapProps = {
+	initialCoords: LatLng;
 	markerCoords: LatLng;
 	hotspots: Hotspot[];
 	onRegionChangeCompleteBounds?: (bounds: {
@@ -19,7 +20,7 @@ type MapProps = {
 	}) => void;
 };
 
-export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBounds }: MapProps) {
+export default function Map({ initialCoords, markerCoords, hotspots, onRegionChangeCompleteBounds }: MapProps) {
 	const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string }>({
 		visible: false,
 		id: '',
@@ -39,6 +40,17 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 		//console.log("[Map.native] Hotspots updated in <Map />:", hotspots);
 		repositionHotspots();
 	}, [mapReady, hotspots]);
+
+	useEffect(() => {
+		if (mapRef.current && initialCoords) {
+		mapRef.current.animateToRegion({
+			latitude: initialCoords.latitude,
+			longitude: initialCoords.longitude,
+			latitudeDelta: 0.01,
+			longitudeDelta: 0.01,
+		}, 1000);
+		}
+	}, [initialCoords]);
 
 	/**
 	 * Used on Android to get around the cutted text issue
@@ -80,8 +92,8 @@ export default function Map({ markerCoords, hotspots, onRegionChangeCompleteBoun
 				provider="google"
 				style={styles.map}
 				initialRegion={{
-					latitude: markerCoords.latitude,
-					longitude: markerCoords.longitude,
+					latitude: initialCoords.latitude,
+					longitude: initialCoords.longitude,
 					latitudeDelta: LATITUDE_DELTA,
 					longitudeDelta: LONGITUDE_DELTA,
 				}}

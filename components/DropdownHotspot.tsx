@@ -20,13 +20,14 @@ export default function DropdownHotspot({ onSelect }: DropdownMenuProps): JSX.El
   const [visible, setVisible] = useState(false);
 
   const options = [
+    { label: 'View on map', value: 'view_on_map' },
     { label: 'Delete', value: 'delete' },
   ];
 
   return (
     <View style={styles.wrapper}>
       <TouchableOpacity onPress={() => setVisible(true)}>
-        <Ionicons name="ellipsis-vertical" size={28} color="#000" />
+        <Ionicons name="ellipsis-vertical" size={20} color="#000" />
       </TouchableOpacity>
 
       <Modal transparent visible={visible} animationType="fade">

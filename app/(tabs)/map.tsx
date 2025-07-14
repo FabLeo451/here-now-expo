@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
+import { useLocalSearchParams } from 'expo-router';
 import Map from '@/components/Map';
 import { Hotspot } from '@/lib/hotspot'
 
@@ -18,15 +19,32 @@ type Boundaries = {
 	southWest: LatLng;
 };
 
+type Params = {
+  hotspotId?: string;
+  initLatitude?: string;
+  initLongitude?: string;
+};
 
 export default function MapTab() {
+
+	const { hotspotId, initLatitude, initLongitude } = useLocalSearchParams<Params>();
+	
 	const socket = useRef<WebSocket | null>(null);
 
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
 	const [gpsPermission, setGPSPermission] = useState<boolean>(false);
 	const [authToken, setAuthToken] = useState<string | null>('');
 	const [location, setLocation] = useState<Location.LocationObject | null>(null);
+	const [initialCoords, setInitialCoords] = useState(null);
 	const [markerCoords, setMarkerCoords] = useState(null);
+
+	useEffect(() => {
+		if (initLatitude && initLongitude)
+			setInitialCoords({
+				latitude: parseFloat(initLatitude),
+				longitude: parseFloat(initLongitude),
+			});
+	}, [initLatitude, initLongitude]);
 
 	// Start once on mount: auth + WebSocket
 	useEffect(() => {
@@ -180,6 +198,7 @@ export default function MapTab() {
 		<View style={{ flex: 1 }}>
 			{markerCoords ? (
 				<Map 
+					initialCoords={initialCoords ? initialCoords : markerCoords} 
 					markerCoords={markerCoords} 
 					hotspots={hotspots}
 					onRegionChangeCompleteBounds={(boundaries: Boundaries) => {
@@ -188,7 +207,7 @@ export default function MapTab() {
 					}}
 				/>
 			) : (
-				<View>
+				<View style={{ margin: 10 }}>
 					<Text>Loading map...</Text>
 				</View>
 			)}
