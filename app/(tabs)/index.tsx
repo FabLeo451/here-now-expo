@@ -248,8 +248,8 @@ const HomeTab: React.FC = () => {
 													pathname: '/map',
 													params: { 
 														hotspotId: h.id, 
-														initLatitude: h.position.latitude, 
-														initLongitude: h.position.longitude 
+														targetLatitude: h.position.latitude, 
+														targetLongitude: h.position.longitude 
 													}
 												});
 												break;

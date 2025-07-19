@@ -40,7 +40,7 @@ export default function Map({ initialCoords, markerCoords, hotspots, onRegionCha
 		//console.log("[Map.native] Hotspots updated in <Map />:", hotspots);
 		repositionHotspots();
 	}, [mapReady, hotspots]);
-
+/*
 	useEffect(() => {
 		if (mapRef.current && initialCoords) {
 
@@ -54,7 +54,7 @@ export default function Map({ initialCoords, markerCoords, hotspots, onRegionCha
 		}, 1000);
 		}
 	}, [initialCoords]);
-
+*/
 	/**
 	 * Used on Android to get around the cutted text issue
 	 */

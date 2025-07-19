@@ -21,13 +21,13 @@ type Boundaries = {
 
 type Params = {
   hotspotId?: string;
-  initLatitude?: string;
-  initLongitude?: string;
+  targetLatitude?: string;
+  targetLongitude?: string;
 };
 
 export default function MapTab() {
 
-	const { hotspotId, initLatitude, initLongitude } = useLocalSearchParams<Params>();
+	const { hotspotId, targetLatitude, targetLongitude } = useLocalSearchParams<Params>();
 	
 	const socket = useRef<WebSocket | null>(null);
 
@@ -39,12 +39,12 @@ export default function MapTab() {
 	const [markerCoords, setMarkerCoords] = useState(null);
 
 	useEffect(() => {
-		if (initLatitude && initLongitude)
+		if (targetLatitude && targetLongitude)
 			setInitialCoords({
-				latitude: parseFloat(initLatitude),
-				longitude: parseFloat(initLongitude),
+				latitude: parseFloat(targetLatitude),
+				longitude: parseFloat(targetLongitude),
 			});
-	}, [initLatitude, initLongitude]);
+	}, [targetLatitude, targetLongitude]);
 
 	// Start once on mount: auth + WebSocket
 	useEffect(() => {
@@ -136,7 +136,7 @@ export default function MapTab() {
 						console.log('[map] Updating hotspots...', parsed.length);
 						setHotspots(parsed);
 					} catch (e) {
-						console.log('[map/onmessage]', e);
+						console.log('[map][onmessage]', e);
 					}
 				};
 
