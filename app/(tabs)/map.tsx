@@ -126,11 +126,17 @@ export default function MapTab() {
 				socket.current.onmessage = (event) => {
 					try {
 						const message = JSON.parse(event.data);
-						const parsed: Hotspot[] = JSON.parse(message.Text);
+						let parsed: Hotspot[] = JSON.parse(message.Text);
+
+						console.log('[map] message.Text =', message.Text);
+
+						if (!parsed)
+							parsed = [];
+
 						console.log('[map] Updating hotspots...', parsed.length);
 						setHotspots(parsed);
 					} catch (e) {
-						console.log('[websocket-reply]', e);
+						console.log('[map/onmessage]', e);
 					}
 				};
 

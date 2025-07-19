@@ -43,6 +43,9 @@ export default function Map({ initialCoords, markerCoords, hotspots, onRegionCha
 
 	useEffect(() => {
 		if (mapRef.current && initialCoords) {
+
+		console.log('[Map.native] useEffect / animateToRegion');
+		
 		mapRef.current.animateToRegion({
 			latitude: initialCoords.latitude,
 			longitude: initialCoords.longitude,
