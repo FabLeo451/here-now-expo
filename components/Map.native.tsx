@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, Dimensions, Alert, Linking, Platform } from 'react-native';
+import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, Linking, Platform } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
+import { Ionicons } from '@expo/vector-icons';
 import PulsingCircle from '@/components/PulsingCircle'
 import ModalHotspot from '@/components/ModalHotspot'
 import { Hotspot } from '@/lib/hotspot'
@@ -80,6 +81,17 @@ export default function Map({ initialCoords, markerCoords, hotspots, onRegionCha
 
 	}
 
+	const handleMoveToMyPosition = async () => {
+		console.log('[Map.native] Repositioning map on user');
+
+		mapRef.current.animateToRegion({
+			latitude: markerCoords.latitude,
+			longitude: initialCoords.longitude,
+			latitudeDelta: 0.005,
+			longitudeDelta: 0.005,
+		}, 1000);
+	}
+
 	return (
 		<View style={styles.mapContainer}>
 			<ModalHotspot
@@ -89,6 +101,11 @@ export default function Map({ initialCoords, markerCoords, hotspots, onRegionCha
 					setModalVisible({ visible: false, id: 'dummyId' });
 				}}
 			/>
+
+			<TouchableOpacity style={styles.fab} onPress={() => handleMoveToMyPosition()}>
+				<Ionicons name="person" size={25} color="#fff" />
+			</TouchableOpacity>
+
 
 			<MapView
 				ref={mapRef}
@@ -233,4 +250,25 @@ const styles = StyleSheet.create({
 		fontWeight: '500',
 	},
 
+	fab: {
+		position: 'absolute',
+		right: 20,
+		bottom: 20,
+		backgroundColor: '#2196F3',
+		width: 50,
+		height: 50,
+		borderRadius: 30,
+		justifyContent: 'center',
+		alignItems: 'center',
+
+		// Ombra per Android
+		elevation: 5,
+
+		// Ombra per iOS
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.3,
+		shadowRadius: 3,
+		zIndex: 5
+	},
 });
