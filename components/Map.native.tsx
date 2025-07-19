@@ -86,7 +86,7 @@ export default function Map({ initialCoords, markerCoords, hotspots, onRegionCha
 
 		mapRef.current.animateToRegion({
 			latitude: markerCoords.latitude,
-			longitude: initialCoords.longitude,
+			longitude: markerCoords.longitude,
 			latitudeDelta: 0.005,
 			longitudeDelta: 0.005,
 		}, 1000);
