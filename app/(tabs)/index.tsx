@@ -171,7 +171,7 @@ const HomeTab: React.FC = () => {
 	}
 
 	function isActive(h: Hotspot): boolean {
-		if (!h.startTime || !h.endTime) return false;
+		if (!h.enabled || !h.startTime || !h.endTime) return false;
 
 		const now = new Date();
 		const start = new Date(h.startTime);
@@ -221,6 +221,9 @@ const HomeTab: React.FC = () => {
 									<View style={[styles.row, { gap: 20 }]}>
 										<View style={styles.row}>
 											{isActive(h) ? (<><Ionicons name="radio-outline" size={16} color="forestgreen" /><Text style={{ color: "forestgreen", marginLeft: 5 }}>Active</Text></>) : (<><Ionicons name="radio-outline" size={16} color="gray" /><Text style={{ color: "gray", marginLeft: 5 }}>Inactive</Text></>)}
+										</View>
+										<View style={styles.row}>
+											{h.private ? (<><Ionicons name="lock-closed-outline" size={16} color="dimgray" /><Text style={{ color: "dimgray", marginLeft: 5 }}>Private</Text></>) : (<><Ionicons name="globe-outline" size={16} color="steelblue" /><Text style={{ color: "steelblue", marginLeft: 5 }}>Public</Text></>)}
 										</View>
 										<View style={styles.row}>
 											{h.likes == 0 ? (<Ionicons name="thumbs-up-outline" size={16} color="lightgray" style={{ marginRight: 5 }} />) : (<Ionicons name="thumbs-up" size={16} color="royalblue" style={{ marginRight: 5 }} />)}

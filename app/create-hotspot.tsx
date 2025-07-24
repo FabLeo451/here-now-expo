@@ -5,8 +5,7 @@ import {
 	ScrollView,
 	TouchableOpacity,
 	Platform,
-	Modal,
-	StyleSheet
+	Switch
 } from 'react-native';
 import { router } from 'expo-router';
 import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
@@ -28,6 +27,8 @@ const CreateHotspot: React.FC = () => {
 	const [authToken, setAuthToken] = useState('');
 	const [id, setId] = useState('');
 	const [name, setName] = useState('');
+	const [enabled, setEnabled] = useState(true);
+	const [isPrivate, setPrivate] = useState(false);
 	const [startDate, setStartDate] = useState(new Date());
 	const [showStartDatePicker, setShowStartDatePicker] = useState(false);
 	const [showStartTimePicker, setShowStartTimePicker] = useState(false);
@@ -61,6 +62,8 @@ const CreateHotspot: React.FC = () => {
 				setId(hotspot.id);
 				setName(hotspot.name);
 				setPosition(hotspot.position.latitude.toFixed(6) + ', ' + hotspot.position.longitude.toFixed(6));
+				setEnabled(hotspot.enabled);
+				setPrivate(hotspot.private);
 				setStartDate(new Date(hotspot.startTime));
 				setEndDate(new Date(hotspot.endTime));
 
@@ -130,6 +133,8 @@ const CreateHotspot: React.FC = () => {
 
 		const hotspot: Omit<Hotspot, 'id'> = {
 			name,
+			enabled,
+			private: isPrivate,
 			position: {
 				latitude: location?.latitude || 0,
 				longitude: location?.longitude || 0,
@@ -137,6 +142,8 @@ const CreateHotspot: React.FC = () => {
 			startTime: startDate.toISOString(),
 			endTime: endDate.toISOString(),
 		};
+
+		console.log('[edit-hotspot] Updating', hotspot);
 
 		try {
 			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}`, {
@@ -168,6 +175,8 @@ const CreateHotspot: React.FC = () => {
 
 		const hotspot: Omit<Hotspot, 'id'> = {
 			name,
+			enabled,
+			private: isPrivate,
 			position: {
 				latitude: location?.latitude || 0,
 				longitude: location?.longitude || 0,
@@ -175,6 +184,8 @@ const CreateHotspot: React.FC = () => {
 			startTime: startDate.toISOString(),
 			endTime: endDate.toISOString(),
 		};
+
+		console.log('[edit-hotspot] Creating', hotspot);
 
 		try {
 			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
@@ -258,6 +269,24 @@ const CreateHotspot: React.FC = () => {
 					<TouchableOpacity style={styles.selectButton} onPress={() => setModalVisible(true)}>
 						<Ionicons name="locate" size={25} color="#fff" />
 					</TouchableOpacity>
+				</View>
+
+				{/* Enabled */}
+				<View style={styles.row}>
+					<Text style={styles.label}>Enabled</Text>
+					<Switch
+						value={enabled}
+						onValueChange={setEnabled}
+					/>
+				</View>
+
+				{/* Private */}
+				<View style={styles.row}>
+					<Text style={styles.label}>Private</Text>
+					<Switch
+						value={isPrivate}
+						onValueChange={setPrivate}
+					/>
 				</View>
 
 				{/* Start time */}
