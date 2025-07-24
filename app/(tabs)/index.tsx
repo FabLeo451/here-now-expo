@@ -140,6 +140,29 @@ const HomeTab: React.FC = () => {
 		}
 	};
 
+	const handleClone = async (id: string) => {
+		const token = await AsyncStorage.getItem('authToken');
+
+		try {
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}/clone`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: token ?? '',
+				},
+			});
+
+			if (!response.ok) {
+				console.log(response);
+				throw new Error('Failed to clone');
+			}
+
+			onRefresh();
+		} catch (error: any) {
+			Alert.alert('Error on clone', error.message);
+		}
+	};
+
 	const confirmDelete = (id: string) => {
 		Alert.alert(
 			"Delete hotspot",
@@ -246,6 +269,10 @@ const HomeTab: React.FC = () => {
 										//console.log(`Selected from '${h.id}': ${value}`);
 
 										switch (value) {
+											case 'clone':
+												handleClone(h.id);
+												break;
+
 											case 'view_on_map':
 												router.push({
 													pathname: '/map',
