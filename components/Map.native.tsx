@@ -82,6 +82,10 @@ export default function Map({ initialCoords, markerCoords, hotspots, onRegionCha
 	}
 
 	const handleMoveToMyPosition = async () => {
+
+		if (!mapRef.current)
+			return;
+		
 		console.log('[Map.native] Repositioning map on user');
 
 		mapRef.current.animateToRegion({
