@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, Linking, Platform } from 'react-native';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
+import type { MapView as MapViewType } from 'react-native-maps'; 
 import { Ionicons } from '@expo/vector-icons';
 import PulsingCircle from '@/components/PulsingCircle'
 import ModalHotspot from '@/components/ModalHotspot'
@@ -12,22 +13,24 @@ type LatLng = {
 };
 
 type MapProps = {
+	mapRef: React.RefObject<MapViewType>;
 	initialCoords: LatLng;
 	markerCoords: LatLng;
 	hotspots: Hotspot[];
+	onMapReady?: () => void;
 	onRegionChangeCompleteBounds?: (bounds: {
 		northEast: LatLng;
 		southWest: LatLng;
 	}) => void;
 };
 
-export default function Map({ initialCoords, markerCoords, hotspots, onRegionChangeCompleteBounds }: MapProps) {
+export default function Map({ mapRef, initialCoords, markerCoords, hotspots, onMapReady, onRegionChangeCompleteBounds }: MapProps) {
 	const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string }>({
 		visible: false,
 		id: '',
 	});
 
-	const mapRef = useRef<MapView>(null);
+	//const mapRef = useRef<MapView>(null);
 	const [screenPositions, setScreenPositions] = useState<{ [key: string]: { x: number; y: number } }>({});
 	const [mapMoving, setMapMoving] = useState(false);
 	const [mapReady, setMapReady] = useState<boolean>(false);
@@ -123,14 +126,19 @@ export default function Map({ initialCoords, markerCoords, hotspots, onRegionCha
 				}}
 				onMapReady={async () => {
 
-					console.log('[Map.native] Map loaded');
+					console.log('[Map.native] Map ready');
+					/*
 					const boundaries = await mapRef.current?.getMapBoundaries();
 
 					if (boundaries && typeof onRegionChangeCompleteBounds === 'function') {
 						onRegionChangeCompleteBounds(boundaries);
 					}
-
+					*/
+						
 					setMapReady(true);
+					
+					if (typeof onMapReady === 'function')
+						onMapReady();
 
 				}}
 				onRegionChange={() => {

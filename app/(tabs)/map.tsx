@@ -6,6 +6,7 @@ import * as Location from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams } from 'expo-router';
 import Map from '@/components/Map';
+import type { MapView } from 'react-native-maps';
 import { Hotspot } from '@/lib/hotspot'
 
 
@@ -27,24 +28,54 @@ type Params = {
 
 export default function MapTab() {
 
-	const { hotspotId, targetLatitude, targetLongitude } = useLocalSearchParams<Params>();
-	
+	const mapRef = useRef<MapView>(null);
+
+	let { hotspotId, targetLatitude, targetLongitude } = useLocalSearchParams<Params>();
+/*
+	if (targetLatitude && targetLongitude) {
+		console.log('[map] targetLatitude = ', targetLatitude);
+		console.log('[map] targetLongitude = ', targetLongitude);
+	}
+*/
 	const socket = useRef<WebSocket | null>(null);
 
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
 	const [gpsPermission, setGPSPermission] = useState<boolean>(false);
 	const [authToken, setAuthToken] = useState<string | null>('');
 	const [location, setLocation] = useState<Location.LocationObject | null>(null);
-	const [initialCoords, setInitialCoords] = useState(null);
+	const [targetCoords, setTargetCoords] = useState(null);
 	const [markerCoords, setMarkerCoords] = useState(null);
+	const [mapReady, setMapReady] = useState<boolean>(false);
 
 	useEffect(() => {
-		if (targetLatitude && targetLongitude)
-			setInitialCoords({
+		if (targetLatitude && targetLongitude) {
+			//console.log('[map] targetLatitude = ', targetLatitude);
+			//console.log('[map] targetLongitude = ', targetLongitude);
+
+			setTargetCoords({
 				latitude: parseFloat(targetLatitude),
 				longitude: parseFloat(targetLongitude),
 			});
+		}
 	}, [targetLatitude, targetLongitude]);
+
+	useEffect(() => {
+		if (mapReady && targetCoords && mapRef.current) {
+			console.log('[map] Animating to target coordinates...');
+			mapRef.current.animateToRegion(
+				{
+					latitude: targetCoords.latitude,
+					longitude: targetCoords.longitude,
+					latitudeDelta: 0.01,
+					longitudeDelta: 0.01,
+				},
+				1000 // duration in ms
+			);
+			setTargetCoords(null);
+			targetLatitude = "";
+			targetLongitude = "";
+		}
+	}, [mapReady, targetCoords]);
 
 	// Start once on mount: auth + WebSocket
 	useEffect(() => {
@@ -128,7 +159,7 @@ export default function MapTab() {
 						const message = JSON.parse(event.data);
 						let parsed: Hotspot[] = JSON.parse(message.Text);
 
-						console.log('[map] message.Text =', message.Text);
+						//console.log('[map] message.Text =', message.Text);
 
 						if (!parsed)
 							parsed = [];
@@ -203,10 +234,15 @@ export default function MapTab() {
 	return (
 		<View style={{ flex: 1 }}>
 			{markerCoords ? (
-				<Map 
-					initialCoords={initialCoords ? initialCoords : markerCoords} 
+				<Map
+					mapRef={mapRef}
+					initialCoords={targetCoords ? targetCoords : markerCoords} 
 					markerCoords={markerCoords} 
 					hotspots={hotspots}
+					onMapReady= {() => {
+						console.log('[map] Map ready');
+						setMapReady(true);
+					}}
 					onRegionChangeCompleteBounds={(boundaries: Boundaries) => {
 						//console.log("Visible map:", boundaries);
 						sendMapBoundaries(boundaries);
