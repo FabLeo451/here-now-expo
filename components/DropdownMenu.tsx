@@ -32,11 +32,11 @@ export default function DropdownMenu(): JSX.Element {
         Alert.alert("HereNow", `Version ${version}\n\nThis is an app by ekhoes.com`);
         break;
       case 'debug':
-        Alert.alert('Debug',
-          `API base URL: ${process.env.EXPO_PUBLIC_API_BASE_URL}
+        let text = `API base URL: ${process.env.EXPO_PUBLIC_API_BASE_URL}
 Websocket URL: ${process.env.EXPO_PUBLIC_WEBSOCKET_URL}
 `
-        )
+        console.log(text);
+        Alert.alert('Debug', text);
         break;
       case 'logout':
         handleLogout();
