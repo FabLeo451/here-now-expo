@@ -149,8 +149,8 @@ function generateLeafletHTML({
       }
 
       .pulsing-circle {
-        width: 20px;
-        height: 20px;
+        width: 30px;
+        height: 30px;
         background: rgba(0,122,255,0.7);
         border-radius: 50%;
         animation: pulse 1.5s infinite;
@@ -159,8 +159,8 @@ function generateLeafletHTML({
 
       .pulsing-circle::after {
         content: '';
-        width: 20px;
-        height: 20px;
+        width: 30px;
+        height: 30px;
         position: absolute;
         top: 0;
         left: 0;
