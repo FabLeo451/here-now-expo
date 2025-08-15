@@ -185,7 +185,7 @@ function generateLeafletHTML({
 
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script>
-      const map = L.map('map').setView([${initialCoords.latitude}, ${initialCoords.longitude}], 18);
+      const map = L.map('map').setView([${initialCoords.latitude}, ${initialCoords.longitude}], 19);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
@@ -220,6 +220,9 @@ function generateLeafletHTML({
                 font-weight: bold;
                 white-space: nowrap;
                 pointer-events: none;
+                background: white;
+                padding: 2px 5px 2px 5px;
+                border: 1px solid gray;
               ">
                 \${h.label || h.name || ''}
               </div>
