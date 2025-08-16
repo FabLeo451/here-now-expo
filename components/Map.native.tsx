@@ -223,6 +223,7 @@ function generateLeafletHTML({
                 background: white;
                 padding: 2px 5px 2px 5px;
                 border: 1px solid gray;
+                border-radius: 3px;
               ">
                 \${h.label || h.name || ''}
               </div>
