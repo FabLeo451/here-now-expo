@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
 	Alert,
 	View,
-	ScrollView,
+	TextInput,
 	TouchableOpacity,
 	Platform,
 	Switch
@@ -27,6 +27,7 @@ const CreateHotspot: React.FC = () => {
 	const [authToken, setAuthToken] = useState('');
 	const [id, setId] = useState('');
 	const [name, setName] = useState('');
+	const [description, setDescription] = useState('');
 	const [enabled, setEnabled] = useState(true);
 	const [isPrivate, setPrivate] = useState(false);
 	const [startDate, setStartDate] = useState(new Date());
@@ -54,13 +55,14 @@ const CreateHotspot: React.FC = () => {
 				return;
 			}
 
-			let coords = { latitude: 0, longitude: 0};
+			let coords = { latitude: 0, longitude: 0 };
 
 			if (action == 'update' && typeof hotspotEnc === 'string') {
 				const hotspot = JSON.parse(hotspotEnc);
 				//Alert.alert('', hotspotEnc)
 				setId(hotspot.id);
 				setName(hotspot.name);
+				setDescription(hotspot.description);
 				setPosition(hotspot.position.latitude.toFixed(6) + ', ' + hotspot.position.longitude.toFixed(6));
 				setEnabled(hotspot.enabled);
 				setPrivate(hotspot.private);
@@ -133,6 +135,7 @@ const CreateHotspot: React.FC = () => {
 
 		const hotspot: Omit<Hotspot, 'id'> = {
 			name,
+			description,
 			enabled,
 			private: isPrivate,
 			position: {
@@ -175,6 +178,7 @@ const CreateHotspot: React.FC = () => {
 
 		const hotspot: Omit<Hotspot, 'id'> = {
 			name,
+			description,
 			enabled,
 			private: isPrivate,
 			position: {
@@ -189,22 +193,22 @@ const CreateHotspot: React.FC = () => {
 
 		try {
 			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: authToken,
-			},
-			body: JSON.stringify(hotspot),
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: authToken,
+				},
+				body: JSON.stringify(hotspot),
 			});
-	
+
 			if (!response.ok) {
 				throw new Error('Failed to create hotspot');
 			}
-	
+
 			const newHotspot: Hotspot = await response.json();
 
 			router.replace("/");
-	
+
 		} catch (error: any) {
 			Alert.alert('Error', error.message);
 		}
@@ -220,30 +224,31 @@ const CreateHotspot: React.FC = () => {
 			backgroundColor: '#f0f0f0',
 		}}>
 			<View style={styles.rowLeft}>
-				<TouchableOpacity style={{ marginHorizontal: 10, marginVertical: 10}} onPress={() => router.replace("/")}>
+				<TouchableOpacity style={{ marginHorizontal: 10, marginVertical: 10 }} onPress={() => router.replace("/")}>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 				<Text style={styles.sectionTitle}>{action == 'create' ? "Create" : "Update"} hotspot</Text>
 			</View>
 			<View style={styles.container}>
-				<ModalMapSelect 
-					visible={modalVisible} 
-					latitude={location?.latitude ?? 0} 
-					longitude={location?.longitude ?? 0} 
+				<ModalMapSelect
+					visible={modalVisible}
+					latitude={location?.latitude ?? 0}
+					longitude={location?.longitude ?? 0}
 					onSelect={(coords: { latitude: number; longitude: number } | null) => {
-        				
+
 						//Alert.alert(JSON.stringify(coords))
-        				setModalVisible(false);
+						setModalVisible(false);
 						if (coords) {
 							setLocation(coords);
 							setPosition(coords.latitude.toFixed(6) + ', ' + coords.longitude.toFixed(6));
 						}
-							
-      				}}
+
+					}}
 				/>
 
 				{/*<Input value={id} style={{ display: 'none' }} />*/}
 
+				{/* Name */}
 				<Text style={styles.label}>Name</Text>
 				<Input
 					placeholder="Name"
@@ -251,6 +256,16 @@ const CreateHotspot: React.FC = () => {
 					value={name}
 					onChangeText={setName}
 					autoCapitalize="sentences"
+				/>
+
+				{/* Description */}
+				<Text style={styles.label}>Description</Text>
+				<TextInput
+					style={styles.textArea}
+					multiline={true}
+					numberOfLines={3}
+					value={description}
+					onChangeText={setDescription}
 				/>
 
 				<Text style={styles.label}>Location</Text>
@@ -264,7 +279,7 @@ const CreateHotspot: React.FC = () => {
 					{position ? (
 						<View style={styles.rowLeft}><Text>Selected</Text><Ionicons name="checkmark-sharp" size={25} color="#0b0" /></View>
 					) : (
-						<View style={styles.rowLeft}><Text style={{ color:"darkgray"}}>Not selected</Text><Ionicons name="help-circle-outline" size={25} color="darkgray" /></View>
+						<View style={styles.rowLeft}><Text style={{ color: "darkgray" }}>Not selected</Text><Ionicons name="help-circle-outline" size={25} color="darkgray" /></View>
 					)}
 					<TouchableOpacity style={styles.selectButton} onPress={() => setModalVisible(true)}>
 						<Ionicons name="locate" size={25} color="#fff" />

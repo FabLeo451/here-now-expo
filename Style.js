@@ -146,6 +146,14 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     paddingVertical: 16,
   },
+  textArea: {
+    height: 120,
+    borderColor: 'lightgray',
+    borderWidth: 1,
+    padding: 10,
+    textAlignVertical: 'top', // necessario per multiline su Android
+    borderRadius: 8,
+  },
 });
 
 export { styles }

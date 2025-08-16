@@ -1,6 +1,7 @@
 interface Hotspot {
   id: string;
   name: string;
+  description: string;
   owner: string;
   enabled: boolean;
   private: boolean;

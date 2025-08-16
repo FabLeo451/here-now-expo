@@ -186,7 +186,8 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 						</TouchableOpacity>
 
 						<Text style={{ fontSize: 18, fontWeight: "bold", marginVertical: 5 }}>{hotspots[0].name}</Text>
-						<Text style={{ fontSize: 12, fontStyle: "italic", marginBottom: 10, color:"dimgray" }}>Created by {hotspots[0].owner}</Text>
+						<Text style={{ fontSize: 10, fontStyle: "italic", marginBottom: 8, color:"gray" }}>Created by {hotspots[0].owner}</Text>
+						<Text style={{ fontSize: 12, marginBottom: 8, color:"slategray" }}>{hotspots[0].description}</Text>
 
 						{/* Likes */}
 						<View style={[styles.rowLeft, { marginVertical: 8 }]}>
