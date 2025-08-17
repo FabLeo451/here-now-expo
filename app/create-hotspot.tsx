@@ -11,13 +11,14 @@ import { router } from 'expo-router';
 import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
 import { styles } from "@/Style";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import RNPickerSelect from 'react-native-picker-select';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import ModalMapSelect from '@/components/ModalMapSelect'
-import { Hotspot } from '@/lib/hotspot'
+import { Hotspot, Category } from '@/lib/hotspot'
 
 const CreateHotspot: React.FC = () => {
 
@@ -28,6 +29,7 @@ const CreateHotspot: React.FC = () => {
 	const [id, setId] = useState('');
 	const [name, setName] = useState('');
 	const [description, setDescription] = useState('');
+	const [category, setCategory] = useState(null);
 	const [enabled, setEnabled] = useState(true);
 	const [isPrivate, setPrivate] = useState(false);
 	const [startDate, setStartDate] = useState(new Date());
@@ -42,6 +44,8 @@ const CreateHotspot: React.FC = () => {
 		longitude: 12.4964,
 	});
 	const [position, setPosition] = useState(''); // On screen
+
+	const [confCategories, setConfCategories] = useState<Category[]>([]);
 
 	useEffect(() => {
 
@@ -63,6 +67,7 @@ const CreateHotspot: React.FC = () => {
 				setId(hotspot.id);
 				setName(hotspot.name);
 				setDescription(hotspot.description);
+				setCategory(hotspot.category);
 				setPosition(hotspot.position.latitude.toFixed(6) + ', ' + hotspot.position.longitude.toFixed(6));
 				setEnabled(hotspot.enabled);
 				setPrivate(hotspot.private);
@@ -90,8 +95,34 @@ const CreateHotspot: React.FC = () => {
 		}
 
 		init();
+		getCategories();
 
 	}, [hotspotEnc, action]);
+
+	const getCategories = async () => {
+
+		try {
+			setConfCategories([]);
+
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/categories`, {
+				method: 'GET',
+			});
+
+			if (!response.ok) {
+				console.log(response)
+				throw new Error('Failed to fetch: ' + response.status + ' ' + response.statusText);
+			}
+
+			const data: Category[] = await response.json();
+			setConfCategories(data);
+			//console.log('[create-hotspot]', JSON.stringify(data))
+		} catch (error: any) {
+			console.log('[getCategories] ', error);
+			Alert.alert('Error getting categories', error.message);
+		} finally {
+
+		}
+	};
 
 	const onChangeStartDate = (event: any, selectedDate?: Date) => {
 		if (selectedDate && selectedDate < endDate) setStartDate(selectedDate);
@@ -144,6 +175,7 @@ const CreateHotspot: React.FC = () => {
 			},
 			startTime: startDate.toISOString(),
 			endTime: endDate.toISOString(),
+			category
 		};
 
 		console.log('[edit-hotspot] Updating', hotspot);
@@ -187,6 +219,7 @@ const CreateHotspot: React.FC = () => {
 			},
 			startTime: startDate.toISOString(),
 			endTime: endDate.toISOString(),
+			category
 		};
 
 		console.log('[edit-hotspot] Creating', hotspot);
@@ -263,11 +296,12 @@ const CreateHotspot: React.FC = () => {
 				<TextInput
 					style={styles.textArea}
 					multiline={true}
-					numberOfLines={3}
+					numberOfLines={4}
 					value={description}
 					onChangeText={setDescription}
 				/>
 
+				{/* Location */}
 				<Text style={styles.label}>Location</Text>
 				<View style={styles.rowLeft}>
 					{/*<Input
@@ -286,6 +320,18 @@ const CreateHotspot: React.FC = () => {
 					</TouchableOpacity>
 				</View>
 
+				{/* Category */}
+				<View >
+					<Text style={styles.label}>Category</Text>
+					<RNPickerSelect
+						onValueChange={(value) => setCategory(value)}
+						items={confCategories}
+						placeholder={{ label: 'Select a category...', value: null }}
+						style={pickerSelectStyles}
+						value={category}
+					/>
+				</View>
+				
 				{/* Enabled */}
 				<View style={styles.row}>
 					<Text style={styles.label}>Enabled</Text>
@@ -383,6 +429,30 @@ const CreateHotspot: React.FC = () => {
 			</View>
 		</View >
 	);
+};
+
+const pickerSelectStyles = {
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 4,
+    color: 'black',
+    paddingRight: 30,
+    backgroundColor: '#f0f0f0',
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 0,
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 4,
+    color: 'black',
+    backgroundColor: '#f0f0f0',
+  },
 };
 
 export default CreateHotspot;

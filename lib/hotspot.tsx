@@ -1,3 +1,8 @@
+interface Category {
+  value: string;
+  label: string;
+}
+
 interface Hotspot {
   id: string;
   name: string;
@@ -13,6 +18,7 @@ interface Hotspot {
   endTime?: string;
   likes: number;
   likedByMe: boolean;
+  category: string|null;
 }
 
-export { Hotspot }
+export { Hotspot, Category }

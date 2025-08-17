@@ -216,7 +216,7 @@ const HomeTab: React.FC = () => {
 		)
 
 	if (refreshing)
-		return (<View><Text>Loading...</Text></View>)
+		return (<View style={{ margin: 10 }}><Text>Loading...</Text></View>)
 
 	return (
 		<View style={styles.containerList}>

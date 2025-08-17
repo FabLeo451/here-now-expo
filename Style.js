@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: 'bold',
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 5,
   },
   sectionTitle: {
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   textArea: {
-    height: 120,
+    height: 90,
     borderColor: 'lightgray',
     borderWidth: 1,
     padding: 10,
