@@ -1,7 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system';
+import { Asset } from 'expo-asset';
+
 import ModalHotspot from '@/components/ModalHotspot';
 import type { Hotspot } from '@/lib/hotspot';
 
@@ -33,6 +36,8 @@ export default function Map({
   onRegionChangeCompleteBounds
 }: MapProps) {
   const webViewRef = useRef(null);
+  const [userIconBase64, setUserIconBase64] = useState<string | null>(null);
+
   const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string }>({
     visible: false,
     id: '',
@@ -61,9 +66,23 @@ export default function Map({
     `);
   };
 
-  // Aggiorna dinamicamente il marker utente (es. GPS)
+  // Carica l'immagine utente (PNG) come base64
   useEffect(() => {
-    if (webViewRef.current) {
+    const loadUserIcon = async () => {
+      const asset = Asset.fromModule(require('../assets/images/user.png'));
+      await asset.downloadAsync();
+      const base64 = await FileSystem.readAsStringAsync(asset.localUri!, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      setUserIconBase64(`data:image/png;base64,${base64}`);
+    };
+
+    loadUserIcon();
+  }, []);
+
+  // Aggiorna posizione utente
+  useEffect(() => {
+    if (webViewRef.current && markerCoords) {
       const js = `
         if (typeof updateUserPosition === 'function') {
           updateUserPosition(${markerCoords.latitude}, ${markerCoords.longitude});
@@ -72,11 +91,10 @@ export default function Map({
       webViewRef.current.injectJavaScript(js);
     }
 
-	console.log('[Map.native]', markerCoords);
-
+    console.log('[Map.native] markerCoords:', markerCoords);
   }, [markerCoords]);
 
-  // Aggiorna dinamicamente gli hotspot
+  // Aggiorna gli hotspot
   useEffect(() => {
     if (webViewRef.current && hotspots?.length) {
       const hotspotData = JSON.stringify(hotspots);
@@ -88,12 +106,18 @@ export default function Map({
       webViewRef.current.injectJavaScript(js);
     }
 
-	console.log('[Map.native] hotspots: ', hotspots.length);
-
+    console.log('[Map.native] hotspots:', hotspots.length);
   }, [hotspots]);
 
+  // Genera HTML una volta che l'icona è pronta
+  const htmlContentRef = useRef<string | null>(null);
+  if (!htmlContentRef.current && userIconBase64) {
+    htmlContentRef.current = generateLeafletHTML({ initialCoords, markerCoords, hotspots, userIconBase64 });
+  }
 
-	const htmlContentRef = useRef(generateLeafletHTML({ initialCoords, markerCoords, hotspots }));
+  if (!htmlContentRef.current) {
+    return null; // oppure mostra un loading spinner
+  }
 
   return (
     <View style={styles.mapContainer}>
@@ -126,10 +150,12 @@ function generateLeafletHTML({
   initialCoords,
   markerCoords,
   hotspots,
+  userIconBase64,
 }: {
   initialCoords: LatLng;
   markerCoords: LatLng;
   hotspots: Hotspot[];
+  userIconBase64: string;
 }): string {
   const hotspotJSArray = JSON.stringify(hotspots);
 
@@ -191,7 +217,13 @@ function generateLeafletHTML({
         attribution: '© OpenStreetMap contributors'
       }).addTo(map);
 
-      let userMarker = L.marker([${markerCoords.latitude}, ${markerCoords.longitude}])
+      const userIcon = L.icon({
+        iconUrl: '${userIconBase64}',
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+      });
+
+      let userMarker = L.marker([${markerCoords.latitude}, ${markerCoords.longitude}], { icon: userIcon })
         .addTo(map)
         .bindPopup("La tua posizione");
 
@@ -205,7 +237,7 @@ function generateLeafletHTML({
 
       let hotspotMarkers = [];
 
- function addHotspotMarker(h) {
+      function addHotspotMarker(h) {
         const el = L.divIcon({
           html: \`
             <div style="position: relative; text-align: center;">
@@ -221,7 +253,7 @@ function generateLeafletHTML({
                 white-space: nowrap;
                 pointer-events: none;
                 background: white;
-                padding: 2px 5px 2px 5px;
+                padding: 2px 5px;
                 border: 1px solid gray;
                 border-radius: 3px;
               ">
