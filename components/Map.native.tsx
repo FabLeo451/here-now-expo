@@ -2,8 +2,9 @@ import React, { useRef, useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system';
+//import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
+import * as FileSystem from 'expo-file-system/legacy';
 
 import ModalHotspot from '@/components/ModalHotspot';
 import type { Hotspot } from '@/lib/hotspot';
@@ -71,9 +72,11 @@ export default function Map({
     const loadUserIcon = async () => {
       const asset = Asset.fromModule(require('../assets/images/user.png'));
       await asset.downloadAsync();
+
       const base64 = await FileSystem.readAsStringAsync(asset.localUri!, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: 'base64',
       });
+
       setUserIconBase64(`data:image/png;base64,${base64}`);
     };
 
