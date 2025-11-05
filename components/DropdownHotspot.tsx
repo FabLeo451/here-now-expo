@@ -9,60 +9,38 @@ import {
   Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import Constants from 'expo-constants';
 
-export default function DropdownMenu(): JSX.Element {
+type DropdownMenuProps = {
+  onSelect: (value: string) => void;
+};
+
+export default function DropdownHotspot({ onSelect }: DropdownMenuProps): JSX.Element {
   const [visible, setVisible] = useState(false);
 
   const options = [
-    { label: 'About', value: 'about' },
-    { label: 'Debug', value: 'debug' },
-    { label: 'Log out', value: 'logout' },
+    { label: 'Clone', value: 'clone' },
+    { label: 'View on map', value: 'view_on_map' },
+    { label: 'Delete', value: 'delete' },
   ];
-
-  const handleSelect = (value: string) => {
-    setVisible(false);
-    console.log('Selected:', value);
-
-    switch (value) {
-      case 'about':
-        const version = Constants.expoConfig?.version ?? 'N/A';
-        Alert.alert("HereNow", `Version ${version}\n\nThis is an app by ekhoes.com`);
-        break;
-      case 'debug':
-        let text = `API base URL: ${process.env.EXPO_PUBLIC_API_BASE_URL}
-Websocket URL: ${process.env.EXPO_PUBLIC_WEBSOCKET_URL}
-`
-        console.log(text);
-        Alert.alert('Debug', text);
-        break;
-      case 'logout':
-        handleLogout();
-        break;
-    }
-  };
-
-  const handleLogout = async () => {
-    router.replace('/logout');
-  };
 
   return (
     <View style={styles.wrapper}>
-      {/* ICONA HAMBURGER */}
       <TouchableOpacity onPress={() => setVisible(true)}>
-        <Ionicons name="menu" size={28} color="#000" />
+        <Ionicons name="ellipsis-vertical" size={20} color="#000" />
       </TouchableOpacity>
 
-      {/* MODALE MENU */}
       <Modal transparent visible={visible} animationType="fade">
         <Pressable style={styles.backdrop} onPress={() => setVisible(false)}>
           <View style={styles.menu}>
             {options.map((option) => (
               <TouchableOpacity
                 key={option.value}
-                onPress={() => handleSelect(option.value)}
+                onPress={() => {
+                  setVisible(false);
+                  onSelect(option.value);
+                }}
                 style={styles.menuItem}
               >
                 <Text style={styles.menuText}>{option.label}</Text>
