@@ -55,6 +55,13 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="hotspots"
+          options={{
+            title: 'Hotspots',
+            tabBarIcon: ({ color }) => <TabBarIcon name="wifi" color={color} />,
+          }}
+        />
+        <Tabs.Screen
           name="map"
           options={{
             title: 'Map',
