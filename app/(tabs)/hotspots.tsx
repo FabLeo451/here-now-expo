@@ -48,10 +48,10 @@ const HotspotsTab: React.FC = () => {
 				if (!token)
 					return;
 
-				console.log('[index] Checking token validity...')
+				console.log('[hotspots] Checking token validity...')
 				const valid = await isTokenValid(token);
 				if (!valid) {
-					console.log('[index] Invalid token')
+					console.log('[hotspots] Invalid token')
 					router.replace('/logout');
 				}
 			};
@@ -62,10 +62,10 @@ const HotspotsTab: React.FC = () => {
 	useEffect(() => {
 		const checkAuth = async () => {
 			const token = await AsyncStorage.getItem('authToken');
-			//console.log('[index] Token found: ', !!token);
+			//console.log('[hotspots] Token found: ', !!token);
 
 			if (!token) {
-				console.log('[index] Redirecting to login...');
+				console.log('[hotspots] Redirecting to login...');
 				router.replace('/login');
 			} else {
 
@@ -104,7 +104,7 @@ const HotspotsTab: React.FC = () => {
 
 			const data: Hotspot[] = await response.json();
 			setHotspots(data);
-			//console.log('[index]', JSON.stringify(data))
+			//console.log('[hotspots]', JSON.stringify(data))
 		} catch (error: any) {
 			console.log('[getMyHotspots] ', error);
 			Alert.alert('Error getting my hotspots', error.message);

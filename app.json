@@ -2,7 +2,7 @@
   "expo": {
     "name": "here-now-expo",
     "slug": "here-now-expo",
-    "version": "1.0.0-alpha-8",
+    "version": "1.0.0-alpha1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "herenowexpo",
