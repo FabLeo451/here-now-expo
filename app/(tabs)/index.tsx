@@ -12,7 +12,7 @@ import { router } from 'expo-router';
 import { styles } from "@/Style";
 import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
-import { Hotspot } from '@/lib/hotspot'
+import { Hotspot, isActive } from '@/lib/hotspot'
 
 const isTokenValid = async (token: string): Promise<boolean> => {
 
@@ -33,6 +33,8 @@ const isTokenValid = async (token: string): Promise<boolean> => {
 
 const HomeTab: React.FC = () => {
 	const [total, setTotal] = useState<number | null>(null);
+	const [active, setActive] = useState<number | null>(null);
+	const [inactive, setInactive] = useState<number | null>(null);
 	const [context, setContext] = useState(null);
 	const [authToken, setAuthToken] = useState('');
 
@@ -105,7 +107,21 @@ const HomeTab: React.FC = () => {
 			//console.log('[index]', response);
 			//console.log('[index]', hotspots);
 
-			setTotal(hotspots ? hotspots.length : 0);
+			let total = hotspots ? hotspots.length : 0, nActive = 0, nInactive = 0;
+
+			setTotal(total);
+
+			if (total > 0) {
+				for (var i=0; i<hotspots.length; i++) {
+					if (isActive(hotspots[i]))
+						nActive ++;
+					else
+						nInactive ++;
+				}
+			}
+
+			setActive(nActive);
+			setInactive(nInactive);
 
 		} catch (error: any) {
 			console.log('[getMyHotspots] ', error);
@@ -130,13 +146,13 @@ const HomeTab: React.FC = () => {
 				<View style={stylesTable.row}>
 					<Text style={stylesTable.iconCell}><Ionicons name="power-outline" size={18} color="forestgreen" /></Text>
 					<Text style={stylesTable.cell}>Active hotspots</Text>
-					<Text style={stylesTable.cell}><ActivityIndicator size="small" color="#3B82F6" /></Text>
+					<Text style={stylesTable.cell}>{typeof total === 'number' ? (<Text>{active}</Text>) : (<ActivityIndicator size="small" color="#3B82F6" />)}</Text>
 				</View>
 
 				<View style={stylesTable.row}>
 					<Text style={stylesTable.iconCell}><Ionicons name="power-outline" size={18} color="gray" /></Text>
 					<Text style={stylesTable.cell}>Inactive hotspots</Text>
-					<Text style={stylesTable.cell}><ActivityIndicator size="small" color="#3B82F6" /></Text>
+					<Text style={stylesTable.cell}>{typeof total === 'number' ? (<Text>{inactive}</Text>) : (<ActivityIndicator size="small" color="#3B82F6" />)}</Text>
 				</View>
 			</View>
 

@@ -14,7 +14,7 @@ import { styles } from "@/Style";
 import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
 import DropdownHotspot from '@/components/DropdownHotspot'
-import { Hotspot } from '@/lib/hotspot'
+import { Hotspot, isActive } from '@/lib/hotspot'
 
 const isTokenValid = async (token: string): Promise<boolean> => {
 
@@ -192,7 +192,7 @@ const HotspotsTab: React.FC = () => {
 			}
 		});
 	}
-
+/*
 	function isActive(h: Hotspot): boolean {
 		if (!h.enabled || !h.startTime || !h.endTime) return false;
 
@@ -202,7 +202,7 @@ const HotspotsTab: React.FC = () => {
 
 		return now >= start && now <= end;
 	}
-
+*/
 	if (!context)
 		return null;
 
