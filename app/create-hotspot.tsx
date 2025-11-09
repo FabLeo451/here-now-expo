@@ -196,7 +196,7 @@ const CreateHotspot: React.FC = () => {
 
 			//const newHotspot: Hotspot = await response.json();
 
-			router.replace("/");
+			router.replace("/hotspots");
 
 		} catch (error: any) {
 			Alert.alert('Error updating:', error.message);
@@ -240,7 +240,7 @@ const CreateHotspot: React.FC = () => {
 
 			const newHotspot: Hotspot = await response.json();
 
-			router.replace("/");
+			router.replace("/hotspots");
 
 		} catch (error: any) {
 			Alert.alert('Error', error.message);

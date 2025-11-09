@@ -4,26 +4,23 @@ import {
 	View,
 	StyleSheet,
 	ActivityIndicator,
-	Linking
+	Linking,
+	ScrollView
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { styles } from "@/Style";
 import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
-import { Hotspot, isActive } from '@/lib/hotspot'
+import { Hotspot, isActive } from '@/lib/hotspot';
 
 const isTokenValid = async (token: string): Promise<boolean> => {
-
 	try {
 		const payloadBase64 = token.split('.')[1];
 		const payloadJson = atob(payloadBase64);
 		const payload = JSON.parse(payloadJson);
-
 		if (!payload.exp) return true;
-
-		const now = Math.floor(Date.now() / 1000); // current time in seconds
+		const now = Math.floor(Date.now() / 1000);
 		return payload.exp > now;
 	} catch (err) {
 		console.error('Error decoding token JWT:', err);
@@ -35,24 +32,15 @@ const HomeTab: React.FC = () => {
 	const [total, setTotal] = useState<number | null>(null);
 	const [active, setActive] = useState<number | null>(null);
 	const [inactive, setInactive] = useState<number | null>(null);
-	const [context, setContext] = useState(null);
-	const [authToken, setAuthToken] = useState('');
+	const [context, setContext] = useState<any>(null);
 
 	useFocusEffect(
 		useCallback(() => {
 			const checkToken = async () => {
-
 				const token = await AsyncStorage.getItem('authToken');
-
-				if (!token)
-					return;
-
-				console.log('[index] Checking token validity...')
+				if (!token) return;
 				const valid = await isTokenValid(token);
-				if (!valid) {
-					console.log('[index] Invalid token')
-					router.replace('/logout');
-				}
+				if (!valid) router.replace('/logout');
 			};
 			checkToken();
 		}, [])
@@ -61,34 +49,21 @@ const HomeTab: React.FC = () => {
 	useEffect(() => {
 		const checkAuth = async () => {
 			const token = await AsyncStorage.getItem('authToken');
-			//console.log('[index] Token found: ', !!token);
-
 			if (!token) {
-				console.log('[index] Redirecting to login...');
 				router.replace('/login');
 			} else {
-
-				setAuthToken(token);
-
 				const contextStr = await AsyncStorage.getItem('context');
 				const ctx = contextStr ? JSON.parse(contextStr) : {};
 				setContext(ctx);
-
-				if (ctx.user.isAuthenticated)
-					getMyHotspots(token);
+				if (ctx.user?.isAuthenticated) getMyHotspots(token);
 			}
 		};
-
 		checkAuth();
 	}, []);
 
 	const getMyHotspots = async (token: string) => {
-
-		console.log('[index] Getting hotspots...');
-
 		try {
 			setTotal(null);
-
 			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
 				method: 'GET',
 				headers: {
@@ -96,64 +71,48 @@ const HomeTab: React.FC = () => {
 					Authorization: token,
 				},
 			});
-
-			if (!response.ok) {
-				console.log(response);
-				throw new Error('Failed to fetch: ' + response.status + ' ' + response.statusText);
-			}
-
+			if (!response.ok) throw new Error('Failed to fetch');
 			const hotspots: Hotspot[] = await response.json();
 
-			//console.log('[index]', response);
-			//console.log('[index]', hotspots);
+			let total = hotspots.length,
+				nActive = 0,
+				nInactive = 0;
 
-			let total = hotspots ? hotspots.length : 0, nActive = 0, nInactive = 0;
+			hotspots.forEach(h => (isActive(h) ? nActive++ : nInactive++));
 
 			setTotal(total);
-
-			if (total > 0) {
-				for (var i=0; i<hotspots.length; i++) {
-					if (isActive(hotspots[i]))
-						nActive ++;
-					else
-						nInactive ++;
-				}
-			}
-
 			setActive(nActive);
 			setInactive(nInactive);
-
 		} catch (error: any) {
-			console.log('[getMyHotspots] ', error);
-			//Alert.alert('Error getting my hotspots', error.message);
-		} finally {
-			//setTotal(null);
+			console.log('[getMyHotspots]', error);
 		}
 	};
 
 	return (
-		<View style={styles.container}>
+		<ScrollView contentContainerStyle={styles.container}>
+			<Text style={styles.header}>Hello, {context?.user?.name || 'Utente'} 👋</Text>
 
-			<Text style={{ marginTop: 30, marginBottom: 50, textAlign: 'center', fontSize: 24, fontWeight: 'bold' }}>Hello, {context?.user.name}</Text>
+			<Text style={styles.subtitle}>Here’s a summary of your hotspots</Text>
 
-			<View style={stylesTable.table}>
-				<View style={stylesTable.row}>				
-					<Text style={stylesTable.iconCell}><Ionicons name="radio-outline" size={18} color="blue" /></Text>
-					<Text style={stylesTable.cell}>Total hotspots</Text>
-					<Text style={stylesTable.cell}>{typeof total === 'number' ? (<Text>{total}</Text>) : (<ActivityIndicator size="small" color="#3B82F6" />)}</Text>
-				</View>
-
-				<View style={stylesTable.row}>
-					<Text style={stylesTable.iconCell}><Ionicons name="power-outline" size={18} color="forestgreen" /></Text>
-					<Text style={stylesTable.cell}>Active hotspots</Text>
-					<Text style={stylesTable.cell}>{typeof total === 'number' ? (<Text>{active}</Text>) : (<ActivityIndicator size="small" color="#3B82F6" />)}</Text>
-				</View>
-
-				<View style={stylesTable.row}>
-					<Text style={stylesTable.iconCell}><Ionicons name="power-outline" size={18} color="gray" /></Text>
-					<Text style={stylesTable.cell}>Inactive hotspots</Text>
-					<Text style={stylesTable.cell}>{typeof total === 'number' ? (<Text>{inactive}</Text>) : (<ActivityIndicator size="small" color="#3B82F6" />)}</Text>
-				</View>
+			<View style={styles.cardContainer}>
+				<StatCard
+					icon="radio-outline"
+					color="#3B82F6"
+					label="Total"
+					value={total}
+				/>
+				<StatCard
+					icon="power-outline"
+					color="forestgreen"
+					label="Active"
+					value={active}
+				/>
+				<StatCard
+					icon="power-outline"
+					color="gray"
+					label="Inactive"
+					value={inactive}
+				/>
 			</View>
 
 			<View style={styles.footer}>
@@ -164,26 +123,95 @@ const HomeTab: React.FC = () => {
 					www.ekhoes.com
 				</Text>
 			</View>
-
-		</View>
+		</ScrollView>
 	);
 };
 
-const stylesTable = StyleSheet.create({
-	table: {
-		margin: 10,
+// 🔹 COMPONENTE CARD RIUTILIZZABILE
+const StatCard = ({
+	icon,
+	label,
+	value,
+	color,
+}: {
+	icon: keyof typeof Ionicons.glyphMap;
+	label: string;
+	value: number | null;
+	color: string;
+}) => (
+	<View style={[styles.card, { borderLeftColor: color }]}>
+		<View style={styles.cardHeader}>
+			<Ionicons name={icon} size={22} color={color} />
+			<Text style={styles.cardTitle}>{label}</Text>
+		</View>
+		{typeof value === 'number' ? (
+			<Text style={styles.cardValue}>{value}</Text>
+		) : (
+			<ActivityIndicator size="small" color={color} />
+		)}
+	</View>
+);
+
+const styles = StyleSheet.create({
+	container: {
+		flexGrow: 1,
+		backgroundColor: '#F8FAFC',
+		alignItems: 'center',
+		paddingVertical: 40,
+		paddingHorizontal: 20,
 	},
-	row: {
+	header: {
+		fontSize: 26,
+		fontWeight: '700',
+		color: '#111827',
+		marginBottom: 50,
+		textAlign: 'center',
+	},
+	subtitle: {
+		fontSize: 16,
+		color: '#6B7280',
+		marginBottom: 30,
+		textAlign: 'center',
+	},
+	cardContainer: {
+		width: '100%',
+		gap: 16,
+	},
+	card: {
+		backgroundColor: '#FFFFFF',
+		borderRadius: 12,
+		padding: 16,
+		borderLeftWidth: 5,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.1,
+		shadowRadius: 4,
+		elevation: 3,
+	},
+	cardHeader: {
 		flexDirection: 'row',
+		alignItems: 'center',
+		marginBottom: 8,
 	},
-	iconCell: {
-		padding: 10,
-		// nessun flex → occupa solo lo spazio dell'icona
+	cardTitle: {
+		fontSize: 18,
+		fontWeight: '600',
+		marginLeft: 8,
+		color: '#374151',
 	},
-	cell: {
-		flex: 1,
-		padding: 10,
-		fontSize: 20
+	cardValue: {
+		fontSize: 28,
+		fontWeight: 'bold',
+		color: '#111827',
+		textAlign: 'right',
+	},
+	footer: {
+		marginTop: 50,
+	},
+	link: {
+		color: '#3B82F6',
+		textDecorationLine: 'underline',
+		fontSize: 16,
 	},
 });
 
