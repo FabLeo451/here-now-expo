@@ -109,7 +109,7 @@ const HomeTab: React.FC = () => {
 				/>
 				<StatCard
 					icon="power-outline"
-					color="gray"
+					color="silver"
 					label="Inactive"
 					value={inactive}
 				/>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
 		fontSize: 26,
 		fontWeight: '700',
 		color: '#111827',
-		marginBottom: 50,
+		marginBottom: 40,
 		textAlign: 'center',
 	},
 	subtitle: {
