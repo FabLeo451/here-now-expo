@@ -37,6 +37,7 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 	const [likedByMe, setLikedByMe] = useState<boolean>(false);
 	const [loading, setLoading] = useState(true);
 	const [loaded, setLoaded] = useState(false);
+	const [subscribed, setSubscribed] = useState<boolean>(false);
 
 	useEffect(() => {
 		const init = async () => {
@@ -96,6 +97,39 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 
 		} catch (error: any) {
 			console.log('[ModalHotspot.Like] ', error);
+			Alert.alert('Error', error.message);
+		} finally {
+
+		}
+	}
+
+	const handleSubscription = async (subscribe: boolean) => {
+
+		console.log('[ModalHotspot.handleSubscription] ', subscribe);
+
+		const token = await AsyncStorage.getItem('authToken');
+
+		if (!token || !authenticated)
+			return;
+
+		try {
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}/subscription`, {
+				method: subscribe ? 'POST' : 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: token,
+				},
+			});
+
+			if (!response.ok) {
+				//console.log('[ModalHotspot.Like] ', response);
+				throw new Error('Error ' + response.status + ' ' + response.statusText);
+			}
+
+			setSubscribed(subscribe);
+
+		} catch (error: any) {
+			console.log('[ModalHotspot.handleSubscription] ', error);
 			Alert.alert('Error', error.message);
 		} finally {
 
@@ -189,21 +223,38 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 						<Text style={{ fontSize: 10, fontStyle: "italic", marginBottom: 8, color:"gray" }}>Created by {hotspots[0].owner}</Text>
 						<Text style={{ fontSize: 12, marginBottom: 8, color:"slategray" }}>{hotspots[0].description}</Text>
 
-						{/* Likes */}
 						<View style={[styles.rowLeft, { marginVertical: 8 }]}>
+
+							{/* Subscribe/unsubscribe */}
 							<TouchableOpacity
 								onPress={() => {
-									handleLike(!likedByMe);
+									handleSubscription(!subscribed);
 								}}
 							>
-								{likedByMe ? (
-									<Ionicons name="thumbs-up" size={25} color="royalblue" />
+								{subscribed ? (
+									<Ionicons name="notifications" size={25} color="royalblue" />
 								) : (
-									<Ionicons name="thumbs-up-outline" size={25} color="lightgray" />
+									<Ionicons name="notifications-outline" size={25} color="lightgray" />
 								)}
 
 							</TouchableOpacity>
-							<Text>{likes}</Text>
+
+							{/* Likes */}
+							<View style={[styles.rowLeft, { marginVertical: 8, marginLeft: 20 }]}>
+								<TouchableOpacity
+									onPress={() => {
+										handleLike(!likedByMe);
+									}}
+								>
+									{likedByMe ? (
+										<Ionicons name="thumbs-up" size={25} color="royalblue" />
+									) : (
+										<Ionicons name="thumbs-up-outline" size={25} color="lightgray" />
+									)}
+
+								</TouchableOpacity>
+								<Text>{likes}</Text>
+							</View>
 						</View>
 
 						{/* Open in Maps */}
