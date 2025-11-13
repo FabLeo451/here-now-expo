@@ -8,6 +8,7 @@ interface Hotspot {
   name: string;
   description: string;
   owner: string;
+  ownedByMe: boolean;
   enabled: boolean;
   private: boolean;
   position: {

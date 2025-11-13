@@ -226,21 +226,27 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 						<View style={[styles.rowLeft, { marginVertical: 8 }]}>
 
 							{/* Subscribe/unsubscribe */}
-							<TouchableOpacity
-								onPress={() => {
-									handleSubscription(!subscribed);
-								}}
-							>
-								{subscribed ? (
-									<Ionicons name="notifications" size={25} color="royalblue" />
-								) : (
-									<Ionicons name="notifications-outline" size={25} color="lightgray" />
-								)}
+							{!hotspots[0].ownedByMe &&
+								(
+									<View style={[styles.rowLeft, { marginVertical: 8, marginRight: 20 }]}>
+										<TouchableOpacity
+											onPress={() => {
+												handleSubscription(!subscribed);
+											}}
+										>
+											{subscribed ? (
+												<Ionicons name="notifications" size={25} color="royalblue" />
+											) : (
+												<Ionicons name="notifications-outline" size={25} color="lightgray" />
+											)}
 
-							</TouchableOpacity>
+										</TouchableOpacity>
+									</View>
+								)
+							}
 
 							{/* Likes */}
-							<View style={[styles.rowLeft, { marginVertical: 8, marginLeft: 20 }]}>
+							<View style={[styles.rowLeft, { marginVertical: 8, marginRight: 20 }]}>
 								<TouchableOpacity
 									onPress={() => {
 										handleLike(!likedByMe);
