@@ -98,18 +98,20 @@ export default function LoginScreen() {
 			}
 
 			type LoginResponse = {
+				id: string;
 				token: string;
 				name: string;
 			};
 
 			const data = await response.json() as LoginResponse;
 
-			console.log('[login] Authenticated');
+			console.log('[login] Authenticated', data);
 
 			await AsyncStorage.setItem('authToken', data.token);
 
 			const context = {
 				user: {
+					id: data.id,
 					name: data.name,
 					isGuest: false,
 					isAuthenticated: true
