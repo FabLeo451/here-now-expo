@@ -32,6 +32,7 @@ const HomeTab: React.FC = () => {
 	const [total, setTotal] = useState<number | null>(null);
 	const [active, setActive] = useState<number | null>(null);
 	const [inactive, setInactive] = useState<number | null>(null);
+	const [subs, setSubs] = useState<number | null>(null);
 	const [context, setContext] = useState<any>(null);
 
 	useFocusEffect(
@@ -55,7 +56,11 @@ const HomeTab: React.FC = () => {
 				const contextStr = await AsyncStorage.getItem('context');
 				const ctx = contextStr ? JSON.parse(contextStr) : {};
 				setContext(ctx);
-				if (ctx.user?.isAuthenticated) getMyHotspots(token);
+
+				if (ctx.user?.isAuthenticated) {
+					getMyHotspots(token);
+					getMyHSubscriptions(token);
+				}
 			}
 		};
 		checkAuth();
@@ -88,30 +93,63 @@ const HomeTab: React.FC = () => {
 		}
 	};
 
+	const getMyHSubscriptions = async (token: string) => {
+		try {
+			setTotal(null);
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/mysubscriptions?count`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: token,
+				},
+			});
+			if (!response.ok) throw new Error('Failed to fetch');
+
+			type PayloadType = {
+				count: number;
+			};
+
+			const payload = await response.json() as PayloadType;
+
+			console.log('[getMyHSubscriptions]', payload);
+
+			setSubs(payload.count);
+
+		} catch (error: any) {
+			console.log('[getMyHSubscriptions]', error);
+		}
+	};
+
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
 			<Text style={styles.header}>Hello, {context?.user?.name || 'Utente'} 👋</Text>
 
-			<Text style={styles.subtitle}>Here’s a summary of your hotspots</Text>
+			<Text style={styles.subtitle}>Here’s your dashboard</Text>
 
 			<View style={styles.cardContainer}>
 				<StatCard
 					icon="radio-outline"
 					color="#3B82F6"
-					label="Total"
+					label="Total hotspots"
 					value={total}
 				/>
 				<StatCard
 					icon="power-outline"
 					color="forestgreen"
-					label="Active"
+					label="Active hotspots"
 					value={active}
 				/>
 				<StatCard
 					icon="power-outline"
 					color="silver"
-					label="Inactive"
+					label="Inactive hotspots"
 					value={inactive}
+				/>
+				<StatCard
+					icon="notifications"
+					color="orange"
+					label="Subscriptions"
+					value={subs}
 				/>
 			</View>
 
@@ -194,13 +232,13 @@ const styles = StyleSheet.create({
 		marginBottom: 8,
 	},
 	cardTitle: {
-		fontSize: 18,
+		fontSize: 16,
 		fontWeight: '600',
 		marginLeft: 8,
 		color: '#374151',
 	},
 	cardValue: {
-		fontSize: 28,
+		fontSize: 24,
 		fontWeight: 'bold',
 		color: '#111827',
 		textAlign: 'right',
