@@ -1,6 +1,6 @@
 interface Category {
-  value: string;
-  label: string;
+    value: string;
+    label: string;
 }
 
 interface Hotspot {
@@ -24,4 +24,15 @@ interface Hotspot {
   category: string|null;
 }
 
-export { Hotspot, Category }
+function isActive(h: Hotspot): boolean {
+    if (!h.enabled || !h.startTime || !h.endTime) return false;
+
+    const now = new Date();
+    const start = new Date(h.startTime);
+    const end = new Date(h.endTime);
+
+    return now >= start && now <= end;
+}
+
+
+export { Hotspot, Category, isActive }
