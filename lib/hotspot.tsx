@@ -4,21 +4,24 @@ interface Category {
 }
 
 interface Hotspot {
-    id: string;
-    name: string;
-    description: string;
-    owner: string;
-    enabled: boolean;
-    private: boolean;
-    position: {
-        latitude: number;
-        longitude: number;
-    };
-    startTime?: string;
-    endTime?: string;
-    likes: number;
-    likedByMe: boolean;
-    category: string | null;
+  id: string;
+  name: string;
+  description: string;
+  owner: string;
+  ownedByMe: boolean;
+  enabled: boolean;
+  private: boolean;
+  position: {
+    latitude: number;
+    longitude: number;
+  };
+  startTime?: string;
+  endTime?: string;
+  likes: number;
+  likedByMe: boolean;
+  subscriptions: number;
+  subscribed: boolean;
+  category: string|null;
 }
 
 function isActive(h: Hotspot): boolean {

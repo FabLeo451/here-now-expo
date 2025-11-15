@@ -14,7 +14,7 @@ import { styles } from "@/Style";
 import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
 import DropdownHotspot from '@/components/DropdownHotspot'
-import { Hotspot, isActive } from '@/lib/hotspot'
+import { Hotspot } from '@/lib/hotspot'
 
 const isTokenValid = async (token: string): Promise<boolean> => {
 
@@ -33,7 +33,7 @@ const isTokenValid = async (token: string): Promise<boolean> => {
 	}
 };
 
-const HotspotsTab: React.FC = () => {
+const HomeTab: React.FC = () => {
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
 	const [context, setContext] = useState(null);
 	const [authToken, setAuthToken] = useState('');
@@ -192,7 +192,7 @@ const HotspotsTab: React.FC = () => {
 			}
 		});
 	}
-/*
+
 	function isActive(h: Hotspot): boolean {
 		if (!h.enabled || !h.startTime || !h.endTime) return false;
 
@@ -202,7 +202,7 @@ const HotspotsTab: React.FC = () => {
 
 		return now >= start && now <= end;
 	}
-*/
+
 	if (!context)
 		return null;
 
@@ -251,6 +251,10 @@ const HotspotsTab: React.FC = () => {
 										<View style={styles.row}>
 											{h.likes == 0 ? (<Ionicons name="thumbs-up-outline" size={16} color="lightgray" style={{ marginRight: 5 }} />) : (<Ionicons name="thumbs-up" size={16} color="royalblue" style={{ marginRight: 5 }} />)}
 											<Text style={{ color: "gray" }} >{h.likes}</Text>
+										</View>
+										<View style={styles.row}>
+											<Ionicons name="people" size={16} color="royalblue" style={{ marginRight: 5 }} />
+											<Text style={{ color: "gray" }} >{h.subscriptions}</Text>
 										</View>
 									</View>
 
@@ -304,4 +308,4 @@ const HotspotsTab: React.FC = () => {
 	);
 };
 
-export default HotspotsTab;
+export default HomeTab;

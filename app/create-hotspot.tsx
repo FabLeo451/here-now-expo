@@ -257,7 +257,7 @@ const CreateHotspot: React.FC = () => {
 			backgroundColor: '#f0f0f0',
 		}}>
 			<View style={styles.rowLeft}>
-				<TouchableOpacity style={{ marginHorizontal: 10, marginVertical: 10 }} onPress={() => router.replace("/")}>
+				<TouchableOpacity style={{ marginHorizontal: 10, marginVertical: 10 }} onPress={() => router.replace("/hotspots")}>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 				<Text style={styles.sectionTitle}>{action == 'create' ? "Create" : "Update"} hotspot</Text>

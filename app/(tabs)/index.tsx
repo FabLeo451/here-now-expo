@@ -79,11 +79,12 @@ const HomeTab: React.FC = () => {
 			if (!response.ok) throw new Error('Failed to fetch');
 			const hotspots: Hotspot[] = await response.json();
 
-			let total = hotspots.length,
+			let total = hotspots ? hotspots.length : 0,
 				nActive = 0,
 				nInactive = 0;
 
-			hotspots.forEach(h => (isActive(h) ? nActive++ : nInactive++));
+			if (total > 0)
+				hotspots.forEach(h => (isActive(h) ? nActive++ : nInactive++));
 
 			setTotal(total);
 			setActive(nActive);
