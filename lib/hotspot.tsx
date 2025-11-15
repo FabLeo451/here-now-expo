@@ -8,6 +8,7 @@ interface Hotspot {
   name: string;
   description: string;
   owner: string;
+  ownedByMe: boolean;
   enabled: boolean;
   private: boolean;
   position: {
@@ -18,6 +19,8 @@ interface Hotspot {
   endTime?: string;
   likes: number;
   likedByMe: boolean;
+  subscriptions: number;
+  subscribed: boolean;
   category: string|null;
 }
 

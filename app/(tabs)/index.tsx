@@ -252,6 +252,10 @@ const HomeTab: React.FC = () => {
 											{h.likes == 0 ? (<Ionicons name="thumbs-up-outline" size={16} color="lightgray" style={{ marginRight: 5 }} />) : (<Ionicons name="thumbs-up" size={16} color="royalblue" style={{ marginRight: 5 }} />)}
 											<Text style={{ color: "gray" }} >{h.likes}</Text>
 										</View>
+										<View style={styles.row}>
+											<Ionicons name="people" size={16} color="royalblue" style={{ marginRight: 5 }} />
+											<Text style={{ color: "gray" }} >{h.subscriptions}</Text>
+										</View>
 									</View>
 
 								</View>
