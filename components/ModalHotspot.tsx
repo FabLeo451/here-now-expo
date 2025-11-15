@@ -65,6 +65,7 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 		if (hotspots[0]) {
 			setLikes(hotspots[0].likes);
 			setLikedByMe(hotspots[0].likedByMe);
+			setSubscribed(hotspots[0].subscribed);
 		}
 
 	}, [hotspots]);
