@@ -5,7 +5,8 @@ import {
 	StyleSheet,
 	ActivityIndicator,
 	Linking,
-	ScrollView
+	ScrollView,
+	TouchableOpacity
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -71,26 +72,26 @@ const HomeTab: React.FC = () => {
 
 		}, [])
 	);
-/*
-	useEffect(() => {
-		const checkAuth = async () => {
-			const token = await AsyncStorage.getItem('authToken');
-			if (!token) {
-				router.replace('/login');
-			} else {
-				const contextStr = await AsyncStorage.getItem('context');
-				const ctx = contextStr ? JSON.parse(contextStr) : {};
-				setContext(ctx);
-
-				if (ctx.user?.isAuthenticated) {
-					getMyHotspots(token);
-					getMyHSubscriptions(token);
+	/*
+		useEffect(() => {
+			const checkAuth = async () => {
+				const token = await AsyncStorage.getItem('authToken');
+				if (!token) {
+					router.replace('/login');
+				} else {
+					const contextStr = await AsyncStorage.getItem('context');
+					const ctx = contextStr ? JSON.parse(contextStr) : {};
+					setContext(ctx);
+	
+					if (ctx.user?.isAuthenticated) {
+						getMyHotspots(token);
+						getMyHSubscriptions(token);
+					}
 				}
-			}
-		};
-		checkAuth();
-	}, []);
-*/
+			};
+			checkAuth();
+		}, []);
+	*/
 	const getMyHotspots = async (token: string) => {
 		try {
 			setTotal(null);
@@ -158,24 +159,28 @@ const HomeTab: React.FC = () => {
 					color="#3B82F6"
 					label="Total hotspots"
 					value={total}
+					onPress={() => router.replace('/hotspots')}
 				/>
 				<StatCard
 					icon="power-outline"
 					color="forestgreen"
 					label="Active hotspots"
 					value={active}
+					onPress={() => router.replace('/hotspots?filter=active')}
 				/>
 				<StatCard
 					icon="power-outline"
 					color="silver"
 					label="Inactive hotspots"
 					value={inactive}
+					onPress={() => router.replace('/hotspots?filter=inactive')}
 				/>
 				<StatCard
 					icon="notifications"
 					color="orange"
 					label="Subscriptions"
 					value={subs}
+					onPress={() => console.log('Go to subscriptions') }
 				/>
 			</View>
 
@@ -191,29 +196,37 @@ const HomeTab: React.FC = () => {
 	);
 };
 
-// 🔹 COMPONENTE CARD RIUTILIZZABILE
 const StatCard = ({
 	icon,
 	label,
 	value,
 	color,
+	onPress,
 }: {
 	icon: keyof typeof Ionicons.glyphMap;
 	label: string;
 	value: number | null;
 	color: string;
+	onPress?: () => void;
 }) => (
-	<View style={[styles.card, { borderLeftColor: color }]}>
+	<TouchableOpacity
+		activeOpacity={0.7}
+		onPress={onPress}
+		style={[styles.card, { borderLeftColor: color }]}
+	>
 		<View style={styles.cardHeader}>
 			<Ionicons name={icon} size={22} color={color} />
 			<Text style={styles.cardTitle}>{label}</Text>
 		</View>
-		{typeof value === 'number' ? (
-			<Text style={[styles.cardValue, { color: color }]}>{value}</Text>
-		) : (
-			<ActivityIndicator size="small" color={color} />
-		)}
-	</View>
+
+		<View style={styles.cardValueContainer}>
+			{typeof value === 'number' ? (
+				<Text style={[styles.cardValue, { color: color }]}>{value}</Text>
+			) : (
+				<ActivityIndicator size="small" color={color} />
+			)}
+		</View>
+	</TouchableOpacity>
 );
 
 const styles = StyleSheet.create({
@@ -256,6 +269,11 @@ const styles = StyleSheet.create({
 		shadowRadius: 4,
 		elevation: 3,
 	},
+	cardRow: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+	},
 	cardHeader: {
 		flexDirection: 'row',
 		alignItems: 'center',
@@ -271,6 +289,10 @@ const styles = StyleSheet.create({
 		fontSize: 40,
 		fontWeight: 'bold',
 		textAlign: 'center',
+	},
+	cardValueContainer: {
+		marginTop: 8,
+		alignItems: 'center', // centra orizzontalmente
 	},
 	footer: {
 		marginTop: 50,
