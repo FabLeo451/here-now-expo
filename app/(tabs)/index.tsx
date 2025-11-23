@@ -36,17 +36,42 @@ const HomeTab: React.FC = () => {
 	const [context, setContext] = useState<any>(null);
 
 	useFocusEffect(
+
 		useCallback(() => {
-			const checkToken = async () => {
+			const checkAuth = async () => {
+
+				console.log('[index] Home page focused. Checking authorization and refreshing data...');
+
+				// Get token
 				const token = await AsyncStorage.getItem('authToken');
-				if (!token) return;
+				if (!token) {
+					router.replace('/login');
+					return;
+				}
+
+				// Check token validity
 				const valid = await isTokenValid(token);
-				if (!valid) router.replace('/logout');
+				if (!valid) {
+					router.replace('/logout');
+					return;
+				}
+
+				// Get context
+				const contextStr = await AsyncStorage.getItem('context');
+				const ctx = contextStr ? JSON.parse(contextStr) : {};
+				setContext(ctx);
+
+				if (ctx.user?.isAuthenticated) {
+					getMyHotspots(token);
+					getMyHSubscriptions(token);
+				}
 			};
-			checkToken();
+
+			checkAuth();
+
 		}, [])
 	);
-
+/*
 	useEffect(() => {
 		const checkAuth = async () => {
 			const token = await AsyncStorage.getItem('authToken');
@@ -65,7 +90,7 @@ const HomeTab: React.FC = () => {
 		};
 		checkAuth();
 	}, []);
-
+*/
 	const getMyHotspots = async (token: string) => {
 		try {
 			setTotal(null);
