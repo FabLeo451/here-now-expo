@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   listItem: {
-    backgroundColor: '#fff',
+    backgroundColor: '#fafafaff',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderBottomColor: 'gainsboro',

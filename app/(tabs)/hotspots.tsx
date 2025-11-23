@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { styles } from "@/Style";
 import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
@@ -39,7 +39,15 @@ const HomeTab: React.FC = () => {
 	const [context, setContext] = useState(null);
 	const [authToken, setAuthToken] = useState('');
 	const [refreshing, setRefreshing] = useState(false);
-	const [statusFilter, setStatusFilter] = useState('all');
+	const [filterValue, setFilterValue] = useState('all');
+
+	const { filter } = useLocalSearchParams();
+
+	useEffect(() => {
+		if (filter) {
+			setFilterValue(filter.toString());
+		}
+	}, [filter]);
 
 	useFocusEffect(
 		useCallback(() => {
@@ -117,7 +125,7 @@ const HomeTab: React.FC = () => {
 
 	const handleFilterChange = (value) => {
 		console.log('Filter:', value);
-		setStatusFilter(value);
+		setFilterValue(value);
 		/*setSelectedSessions(new Set()); // reset selezione al cambio filtro
 		setSelectAll(false);*/
 	};
@@ -125,7 +133,7 @@ const HomeTab: React.FC = () => {
 	// Applica il filtro sulle sessioni
 
 	const filteredHotspots = hotspots?.filter((hotspot) => {
-		switch(statusFilter) {
+		switch(filterValue) {
 			case 'active':
 				return isActive(hotspot);
 			case 'inactive':
@@ -136,7 +144,6 @@ const HomeTab: React.FC = () => {
 				return hotspot.private;
 			default:
 				return true;
-				
 		}
 	});
 
@@ -254,7 +261,7 @@ const HomeTab: React.FC = () => {
 
 			<View style={{ backgroundColor: 'ghostwhite', paddingVertical: 6, paddingHorizontal: 5, borderBottomColor: 'gainsboro', borderBottomWidth: 1}}>
 				<Picker
-					selectedValue={statusFilter}
+					selectedValue={filterValue}
 					onValueChange={(value) => handleFilterChange(value)}
 					style={{ backgroundColor: 'lightgray', width: '35%' }}
 				>
