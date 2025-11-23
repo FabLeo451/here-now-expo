@@ -9,12 +9,13 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { styles } from "@/Style";
 import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
+import { Picker } from '@react-native-picker/picker';
 import DropdownHotspot from '@/components/DropdownHotspot'
-import { Hotspot } from '@/lib/hotspot'
+import { Hotspot, isActive } from '@/lib/hotspot'
 
 const isTokenValid = async (token: string): Promise<boolean> => {
 
@@ -38,6 +39,15 @@ const HomeTab: React.FC = () => {
 	const [context, setContext] = useState(null);
 	const [authToken, setAuthToken] = useState('');
 	const [refreshing, setRefreshing] = useState(false);
+	const [filterValue, setFilterValue] = useState('all');
+
+	const { filter } = useLocalSearchParams();
+
+	useEffect(() => {
+		if (filter) {
+			setFilterValue(filter.toString());
+		}
+	}, [filter]);
 
 	useFocusEffect(
 		useCallback(() => {
@@ -112,6 +122,30 @@ const HomeTab: React.FC = () => {
 			setRefreshing(false);
 		}
 	};
+
+	const handleFilterChange = (value) => {
+		console.log('Filter:', value);
+		setFilterValue(value);
+		/*setSelectedSessions(new Set()); // reset selezione al cambio filtro
+		setSelectAll(false);*/
+	};
+
+	// Applica il filtro sulle sessioni
+
+	const filteredHotspots = hotspots?.filter((hotspot) => {
+		switch(filterValue) {
+			case 'active':
+				return isActive(hotspot);
+			case 'inactive':
+				return !isActive(hotspot);
+			case 'public':
+				return !hotspot.private;
+			case 'private':
+				return hotspot.private;
+			default:
+				return true;
+		}
+	});
 
 	const onRefresh = useCallback(() => {
 		getMyHotspots(authToken);
@@ -192,7 +226,7 @@ const HomeTab: React.FC = () => {
 			}
 		});
 	}
-
+/*
 	function isActive(h: Hotspot): boolean {
 		if (!h.enabled || !h.startTime || !h.endTime) return false;
 
@@ -202,7 +236,7 @@ const HomeTab: React.FC = () => {
 
 		return now >= start && now <= end;
 	}
-
+*/
 	if (!context)
 		return null;
 
@@ -225,6 +259,19 @@ const HomeTab: React.FC = () => {
 				<Ionicons name="add" size={25} color="#fff" />
 			</TouchableOpacity>
 
+			<View style={{ backgroundColor: 'ghostwhite', paddingVertical: 6, paddingHorizontal: 5, borderBottomColor: 'gainsboro', borderBottomWidth: 1}}>
+				<Picker
+					selectedValue={filterValue}
+					onValueChange={(value) => handleFilterChange(value)}
+					style={{ backgroundColor: 'lightgray', width: '35%' }}
+				>
+					<Picker.Item label="All" value="all" />
+					<Picker.Item label="Active" value="active" />
+					<Picker.Item label="Inactive" value="inactive" />
+					<Picker.Item label="Public" value="public" />
+					<Picker.Item label="Private" value="private" />
+				</Picker>
+			</View>
 
 			<ScrollView
 				contentContainerStyle={styles.scrollContent}
@@ -233,8 +280,8 @@ const HomeTab: React.FC = () => {
 				}
 			>
 
-				{hotspots && hotspots.length > 0 ? (
-					hotspots.map((h) => (
+				{filteredHotspots && filteredHotspots.length > 0 ? (
+					filteredHotspots.map((h) => (
 						<TouchableOpacity key={h.id} style={styles.listItem} onPress={() => handleUpdate(h)}>
 							<View style={styles.row}>
 
