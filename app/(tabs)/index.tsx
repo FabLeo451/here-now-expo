@@ -5,7 +5,8 @@ import {
 	StyleSheet,
 	ActivityIndicator,
 	Linking,
-	ScrollView
+	ScrollView,
+	TouchableOpacity
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -36,23 +37,27 @@ const HomeTab: React.FC = () => {
 	const [context, setContext] = useState<any>(null);
 
 	useFocusEffect(
-		useCallback(() => {
-			const checkToken = async () => {
-				const token = await AsyncStorage.getItem('authToken');
-				if (!token) return;
-				const valid = await isTokenValid(token);
-				if (!valid) router.replace('/logout');
-			};
-			checkToken();
-		}, [])
-	);
 
-	useEffect(() => {
-		const checkAuth = async () => {
-			const token = await AsyncStorage.getItem('authToken');
-			if (!token) {
-				router.replace('/login');
-			} else {
+		useCallback(() => {
+			const checkAuth = async () => {
+
+				console.log('[index] Home page focused. Checking authorization and refreshing data...');
+
+				// Get token
+				const token = await AsyncStorage.getItem('authToken');
+				if (!token) {
+					router.replace('/login');
+					return;
+				}
+
+				// Check token validity
+				const valid = await isTokenValid(token);
+				if (!valid) {
+					router.replace('/logout');
+					return;
+				}
+
+				// Get context
 				const contextStr = await AsyncStorage.getItem('context');
 				const ctx = contextStr ? JSON.parse(contextStr) : {};
 				setContext(ctx);
@@ -61,11 +66,32 @@ const HomeTab: React.FC = () => {
 					getMyHotspots(token);
 					getMyHSubscriptions(token);
 				}
-			}
-		};
-		checkAuth();
-	}, []);
+			};
 
+			checkAuth();
+
+		}, [])
+	);
+	/*
+		useEffect(() => {
+			const checkAuth = async () => {
+				const token = await AsyncStorage.getItem('authToken');
+				if (!token) {
+					router.replace('/login');
+				} else {
+					const contextStr = await AsyncStorage.getItem('context');
+					const ctx = contextStr ? JSON.parse(contextStr) : {};
+					setContext(ctx);
+	
+					if (ctx.user?.isAuthenticated) {
+						getMyHotspots(token);
+						getMyHSubscriptions(token);
+					}
+				}
+			};
+			checkAuth();
+		}, []);
+	*/
 	const getMyHotspots = async (token: string) => {
 		try {
 			setTotal(null);
@@ -133,24 +159,28 @@ const HomeTab: React.FC = () => {
 					color="#3B82F6"
 					label="Total hotspots"
 					value={total}
+					onPress={() => router.replace('/hotspots')}
 				/>
 				<StatCard
 					icon="power-outline"
 					color="forestgreen"
 					label="Active hotspots"
 					value={active}
+					onPress={() => router.replace('/hotspots?filter=active')}
 				/>
 				<StatCard
 					icon="power-outline"
 					color="silver"
 					label="Inactive hotspots"
 					value={inactive}
+					onPress={() => router.replace('/hotspots?filter=inactive')}
 				/>
 				<StatCard
 					icon="notifications"
 					color="orange"
 					label="Subscriptions"
 					value={subs}
+					onPress={() => console.log('Go to subscriptions') }
 				/>
 			</View>
 
@@ -166,29 +196,37 @@ const HomeTab: React.FC = () => {
 	);
 };
 
-// 🔹 COMPONENTE CARD RIUTILIZZABILE
 const StatCard = ({
 	icon,
 	label,
 	value,
 	color,
+	onPress,
 }: {
 	icon: keyof typeof Ionicons.glyphMap;
 	label: string;
 	value: number | null;
 	color: string;
+	onPress?: () => void;
 }) => (
-	<View style={[styles.card, { borderLeftColor: color }]}>
+	<TouchableOpacity
+		activeOpacity={0.7}
+		onPress={onPress}
+		style={[styles.card, { borderLeftColor: color }]}
+	>
 		<View style={styles.cardHeader}>
 			<Ionicons name={icon} size={22} color={color} />
 			<Text style={styles.cardTitle}>{label}</Text>
 		</View>
-		{typeof value === 'number' ? (
-			<Text style={styles.cardValue}>{value}</Text>
-		) : (
-			<ActivityIndicator size="small" color={color} />
-		)}
-	</View>
+
+		<View style={styles.cardValueContainer}>
+			{typeof value === 'number' ? (
+				<Text style={[styles.cardValue, { color: color }]}>{value}</Text>
+			) : (
+				<ActivityIndicator size="small" color={color} />
+			)}
+		</View>
+	</TouchableOpacity>
 );
 
 const styles = StyleSheet.create({
@@ -214,9 +252,13 @@ const styles = StyleSheet.create({
 	},
 	cardContainer: {
 		width: '100%',
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		justifyContent: 'space-between',
 		gap: 16,
 	},
 	card: {
+		width: '48%',
 		backgroundColor: '#FFFFFF',
 		borderRadius: 12,
 		padding: 16,
@@ -226,6 +268,11 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.1,
 		shadowRadius: 4,
 		elevation: 3,
+	},
+	cardRow: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
 	},
 	cardHeader: {
 		flexDirection: 'row',
@@ -239,10 +286,13 @@ const styles = StyleSheet.create({
 		color: '#374151',
 	},
 	cardValue: {
-		fontSize: 24,
+		fontSize: 40,
 		fontWeight: 'bold',
-		color: '#111827',
-		textAlign: 'right',
+		textAlign: 'center',
+	},
+	cardValueContainer: {
+		marginTop: 8,
+		alignItems: 'center', // centra orizzontalmente
 	},
 	footer: {
 		marginTop: 50,
