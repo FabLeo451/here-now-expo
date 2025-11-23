@@ -209,7 +209,7 @@ const StatCard = ({
 			<Text style={styles.cardTitle}>{label}</Text>
 		</View>
 		{typeof value === 'number' ? (
-			<Text style={styles.cardValue}>{value}</Text>
+			<Text style={[styles.cardValue, { color: color }]}>{value}</Text>
 		) : (
 			<ActivityIndicator size="small" color={color} />
 		)}
@@ -239,9 +239,13 @@ const styles = StyleSheet.create({
 	},
 	cardContainer: {
 		width: '100%',
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		justifyContent: 'space-between',
 		gap: 16,
 	},
 	card: {
+		width: '48%',
 		backgroundColor: '#FFFFFF',
 		borderRadius: 12,
 		padding: 16,
@@ -264,10 +268,9 @@ const styles = StyleSheet.create({
 		color: '#374151',
 	},
 	cardValue: {
-		fontSize: 24,
+		fontSize: 40,
 		fontWeight: 'bold',
-		color: '#111827',
-		textAlign: 'right',
+		textAlign: 'center',
 	},
 	footer: {
 		marginTop: 50,
