@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
-//import * as FileSystem from 'expo-file-system';
+import { useFocusEffect } from '@react-navigation/native';
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system/legacy';
 
@@ -37,6 +37,8 @@ export default function Map({
   onRegionChangeCompleteBounds
 }: MapProps) {
   const webViewRef = useRef(null);
+
+  const [mapReady, setMapReady] = useState(false);
   const [userIconBase64, setUserIconBase64] = useState<string | null>(null);
 
   const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string }>({
@@ -47,6 +49,13 @@ export default function Map({
   const handleWebViewMessage = (event: any) => {
     try {
       const message = JSON.parse(event.nativeEvent.data);
+
+      if (message.type === 'MAP_READY') {
+        console.log("[map] MAP_READY received");
+        setMapReady(true);
+        onMapReady?.();
+      }
+
       if (message.type === 'HOTSPOT_CLICKED') {
         setModalVisible({ visible: true, id: message.id });
       }
@@ -60,6 +69,8 @@ export default function Map({
   };
 
   const moveToMyPosition = () => {
+    if (!mapReady) return;
+
     webViewRef.current?.injectJavaScript(`
       if (typeof moveToUser === 'function') {
         moveToUser();
@@ -67,7 +78,24 @@ export default function Map({
     `);
   };
 
-  // Carica l'immagine utente (PNG) come base64
+  // Move to initialCoords when map is ready or when initialCoords changes
+  useFocusEffect(
+    useCallback(() => {
+      if (!mapReady) return;
+
+      const js = `
+        if (typeof moveToLocation === 'function') {
+          moveToLocation([${initialCoords.latitude}, ${initialCoords.longitude}]);
+        }
+      `;
+
+      console.log("[map] Centering map on initialCoords:", initialCoords);
+      webViewRef.current?.injectJavaScript(js);
+
+    }, [mapReady, initialCoords])
+  );
+
+  // Load PNG icon for user position
   useEffect(() => {
     const loadUserIcon = async () => {
       const asset = Asset.fromModule(require('../assets/images/user.png'));
@@ -83,22 +111,25 @@ export default function Map({
     loadUserIcon();
   }, []);
 
-  // Aggiorna posizione utente
+  // Update user position
   useEffect(() => {
-    if (webViewRef.current && markerCoords) {
-      const js = `
-        if (typeof updateUserPosition === 'function') {
-          updateUserPosition(${markerCoords.latitude}, ${markerCoords.longitude});
-        }
-      `;
-      webViewRef.current.injectJavaScript(js);
-    }
+    if (!mapReady) return;
+    if (!webViewRef.current || !markerCoords) return;
+
+    const js = `
+      if (typeof updateUserPosition === 'function') {
+        updateUserPosition(${markerCoords.latitude}, ${markerCoords.longitude});
+      }
+    `;
+    webViewRef.current.injectJavaScript(js);
 
     console.log('[Map.native] markerCoords:', markerCoords);
-  }, [markerCoords]);
+  }, [mapReady, markerCoords]);
 
-  // Aggiorna gli hotspot
+  // Update hotspots
   useEffect(() => {
+    if (!mapReady) return;
+
     if (webViewRef.current && hotspots?.length) {
       const hotspotData = JSON.stringify(hotspots);
       const js = `
@@ -110,16 +141,16 @@ export default function Map({
     }
 
     console.log('[Map.native] hotspots:', hotspots.length);
-  }, [hotspots]);
+  }, [mapReady, hotspots]);
 
-  // Genera HTML una volta che l'icona è pronta
+  // Generate HTML after user icon is ready
   const htmlContentRef = useRef<string | null>(null);
   if (!htmlContentRef.current && userIconBase64) {
     htmlContentRef.current = generateLeafletHTML({ initialCoords, markerCoords, hotspots, userIconBase64 });
   }
 
   if (!htmlContentRef.current) {
-    return null; // oppure mostra un loading spinner
+    return null; // or a loader
   }
 
   return (
@@ -220,6 +251,11 @@ function generateLeafletHTML({
         attribution: '© OpenStreetMap contributors'
       }).addTo(map);
 
+      // notify React Native that the map is ready
+      window.ReactNativeWebView?.postMessage(JSON.stringify({
+        type: 'MAP_READY'
+      }));
+
       const userIcon = L.icon({
         iconUrl: '${userIconBase64}',
         iconSize: [40, 40],
@@ -228,7 +264,7 @@ function generateLeafletHTML({
 
       let userMarker = L.marker([${markerCoords.latitude}, ${markerCoords.longitude}], { icon: userIcon })
         .addTo(map)
-        .bindPopup("La tua posizione");
+        .bindPopup("Your position");
 
       function updateUserPosition(lat, lng) {
         userMarker.setLatLng([lat, lng]);
@@ -236,6 +272,11 @@ function generateLeafletHTML({
 
       function moveToUser() {
         map.setView(userMarker.getLatLng(), map.getZoom());
+      }
+
+      function moveToLocation(loc) {
+        console.log('[moveToLocation]', loc);
+        map.setView(loc, map.getZoom());
       }
 
       let hotspotMarkers = [];
@@ -285,10 +326,11 @@ function generateLeafletHTML({
         hotspots.forEach(h => addHotspotMarker(h));
       }
 
-      // Inizializzazione iniziale
+      // Initialize hotspots
       const initialHotspots = ${hotspotJSArray};
       updateHotspots(initialHotspots);
 
+      // Send region change events
       map.on('moveend', () => {
         const bounds = map.getBounds();
         window.ReactNativeWebView?.postMessage(JSON.stringify({

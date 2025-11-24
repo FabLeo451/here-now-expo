@@ -31,12 +31,7 @@ export default function MapTab() {
 	const mapRef = useRef<MapView>(null);
 
 	let { hotspotId, targetLatitude, targetLongitude } = useLocalSearchParams<Params>();
-/*
-	if (targetLatitude && targetLongitude) {
-		console.log('[map] targetLatitude = ', targetLatitude);
-		console.log('[map] targetLongitude = ', targetLongitude);
-	}
-*/
+
 	const socket = useRef<WebSocket | null>(null);
 
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
@@ -47,17 +42,29 @@ export default function MapTab() {
 	const [markerCoords, setMarkerCoords] = useState(null);
 	const [mapReady, setMapReady] = useState<boolean>(false);
 
-	useEffect(() => {
-		if (targetLatitude && targetLongitude) {
-			//console.log('[map] targetLatitude = ', targetLatitude);
-			//console.log('[map] targetLongitude = ', targetLongitude);
+	useFocusEffect(
+		useCallback(() => {
 
-			setTargetCoords({
-				latitude: parseFloat(targetLatitude),
-				longitude: parseFloat(targetLongitude),
-			});
-		}
-	}, [targetLatitude, targetLongitude]);
+			const updateLatLong = () => {
+
+				console.log('[map] targetLatitude  = ', targetLatitude);
+				console.log('[map] targetLongitude = ', targetLongitude);
+				
+				if (targetLatitude && targetLongitude) {
+					setTargetCoords({
+						latitude: parseFloat(targetLatitude),
+						longitude: parseFloat(targetLongitude),
+					});
+				}
+			};
+
+			updateLatLong();
+
+			// optional cleanup function
+			return () => { };
+
+		}, [targetLatitude, targetLongitude])
+	);
 
 	useEffect(() => {
 		if (mapReady && targetCoords && mapRef.current) {
@@ -197,7 +204,7 @@ export default function MapTab() {
 			};
 		}, [authToken])
 	);
-
+/*
 	function sendUserPosition(latitude: number, longitude: number) {
 		if (socket.current && socket.current.readyState === WebSocket.OPEN) {
 			const payload = {
@@ -212,7 +219,7 @@ export default function MapTab() {
 			socket.current.send(JSON.stringify(payload));
 		}
 	}
-
+*/
 	function sendMapBoundaries(boundaries: Boundaries) {
 		if (socket.current && socket.current.readyState === WebSocket.OPEN) {
 
