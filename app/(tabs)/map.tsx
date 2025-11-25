@@ -178,9 +178,12 @@ export default function MapTab() {
 					}
 				};
 
-				socket.current.onerror = (error) => {
-					console.error('WebSocket error:', error);
-					//Alert.alert('Error', "Server disconnected:\n" + error);
+				socket.current.onerror = (event) => {
+					console.log("WebSocket error:", {
+						message: event?.message,
+						readyState: socket.current?.readyState,
+						url: socket.current?.url
+					});
 				};
 
 				socket.current.onclose = () => {
