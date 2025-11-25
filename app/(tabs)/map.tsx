@@ -186,9 +186,8 @@ export default function MapTab() {
 					});
 				};
 
-				socket.current.onclose = () => {
-					console.log('WebSocket disconnected');
-
+				socket.current.onclose = (event) => {
+					console.warn("WebSocket closed:", event.code, event.reason);
 				};
 
 			}
