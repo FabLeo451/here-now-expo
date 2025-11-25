@@ -10,190 +10,205 @@ import ModalHotspot from '@/components/ModalHotspot';
 import type { Hotspot } from '@/lib/hotspot';
 
 type LatLng = {
-  latitude: number;
-  longitude: number;
+	latitude: number;
+	longitude: number;
 };
 
 type Boundaries = {
-  northEast: LatLng;
-  southWest: LatLng;
+	northEast: LatLng;
+	southWest: LatLng;
 };
 
 type MapProps = {
-  mapRef: React.RefObject<any>;
-  initialCoords: LatLng;
-  markerCoords: LatLng;
-  hotspots: Hotspot[];
-  onMapReady?: () => void;
-  onRegionChangeCompleteBounds?: (bounds: Boundaries) => void;
+	mapRef: React.RefObject<any>;
+	initialCoords: LatLng;
+	markerCoords: LatLng;
+	hotspots: Hotspot[];
+	onMapReady?: () => void;
+	onRegionChangeCompleteBounds?: (bounds: Boundaries) => void;
 };
 
 export default function Map({
-  mapRef,
-  initialCoords,
-  markerCoords,
-  hotspots,
-  onMapReady,
-  onRegionChangeCompleteBounds
+	mapRef,
+	initialCoords,
+	markerCoords,
+	hotspots,
+	onMapReady,
+	onRegionChangeCompleteBounds
 }: MapProps) {
-  const webViewRef = useRef(null);
+	const webViewRef = useRef(null);
 
-  const [mapReady, setMapReady] = useState(false);
-  const [userIconBase64, setUserIconBase64] = useState<string | null>(null);
+	const [mapReady, setMapReady] = useState(false);
+	const [userIconBase64, setUserIconBase64] = useState<string | null>(null);
+	const [hasCenteredOnce, setHasCenteredOnce] = useState(false);
 
-  const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string }>({
-    visible: false,
-    id: '',
-  });
+	const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string }>({
+		visible: false,
+		id: '',
+	});
 
-  const handleWebViewMessage = (event: any) => {
-    try {
-      const message = JSON.parse(event.nativeEvent.data);
+	const handleWebViewMessage = (event: any) => {
+		try {
+			const message = JSON.parse(event.nativeEvent.data);
 
-      if (message.type === 'MAP_READY') {
-        console.log("[map] MAP_READY received");
-        setMapReady(true);
-        onMapReady?.();
-      }
+			if (message.type === 'MAP_READY') {
+				console.log("[map] MAP_READY received");
+				setMapReady(true);
+				onMapReady?.();
+			}
 
-      if (message.type === 'HOTSPOT_CLICKED') {
-        setModalVisible({ visible: true, id: message.id });
-      }
+			if (message.type === 'HOTSPOT_CLICKED') {
+				setModalVisible({ visible: true, id: message.id });
+			}
 
-      if (message.type === 'REGION_CHANGED' && typeof onRegionChangeCompleteBounds === 'function') {
-        onRegionChangeCompleteBounds(message.bounds);
-      }
-    } catch (e) {
-      console.warn('Invalid WebView message', e);
-    }
-  };
+			if (message.type === 'REGION_CHANGED' && typeof onRegionChangeCompleteBounds === 'function') {
+				onRegionChangeCompleteBounds(message.bounds);
+			}
+		} catch (e) {
+			console.warn('Invalid WebView message', e);
+		}
+	};
 
-  const moveToMyPosition = () => {
-    if (!mapReady) return;
+	const moveToMyPosition = () => {
+		if (!mapReady) return;
 
-    webViewRef.current?.injectJavaScript(`
+		webViewRef.current?.injectJavaScript(`
       if (typeof moveToUser === 'function') {
         moveToUser();
       }
     `);
-  };
+	};
 
-  // Move to initialCoords when map is ready or when initialCoords changes
-  useFocusEffect(
-    useCallback(() => {
-      if (!mapReady) return;
+	// Move to initialCoords when map is ready or when initialCoords changes
+	useFocusEffect(
+		useCallback(() => {
+			if (!mapReady) return;
 
-      const js = `
-        if (typeof moveToLocation === 'function') {
-          moveToLocation([${initialCoords.latitude}, ${initialCoords.longitude}]);
-        }
-      `;
+			console.log("[map] Centering map on initialCoords:", initialCoords);
 
-      console.log("[map] Centering map on initialCoords:", initialCoords);
-      webViewRef.current?.injectJavaScript(js);
+			if (initialCoords) {
+				const js = `
+					if (typeof moveToLocation === 'function') {
+					moveToLocation([${initialCoords.latitude}, ${initialCoords.longitude}]);
+					}
+				`;
 
-    }, [mapReady, initialCoords])
-  );
+				webViewRef.current?.injectJavaScript(js);
+			}
 
-  // Load PNG icon for user position
-  useEffect(() => {
-    const loadUserIcon = async () => {
-      const asset = Asset.fromModule(require('../assets/images/user.png'));
-      await asset.downloadAsync();
+		}, [mapReady, initialCoords])
+	);
 
-      const base64 = await FileSystem.readAsStringAsync(asset.localUri!, {
-        encoding: 'base64',
-      });
+	// Load PNG icon for user position
+	useEffect(() => {
+		const loadUserIcon = async () => {
+			const asset = Asset.fromModule(require('../assets/images/user.png'));
+			await asset.downloadAsync();
 
-      setUserIconBase64(`data:image/png;base64,${base64}`);
-    };
+			const base64 = await FileSystem.readAsStringAsync(asset.localUri!, {
+				encoding: 'base64',
+			});
 
-    loadUserIcon();
-  }, []);
+			setUserIconBase64(`data:image/png;base64,${base64}`);
+		};
 
-  // Update user position
-  useEffect(() => {
-    if (!mapReady) return;
-    if (!webViewRef.current || !markerCoords) return;
+		loadUserIcon();
+	}, []);
 
-    const js = `
-      if (typeof updateUserPosition === 'function') {
-        updateUserPosition(${markerCoords.latitude}, ${markerCoords.longitude});
-      }
-    `;
-    webViewRef.current.injectJavaScript(js);
+	// Update user position
+	useEffect(() => {
+		if (!mapReady) return;
+		if (!webViewRef.current || !markerCoords) return;
 
-    console.log('[Map.native] markerCoords:', markerCoords);
-  }, [mapReady, markerCoords]);
+		console.log('[Map.native] markerCoords:', markerCoords);
 
-  // Update hotspots
-  useEffect(() => {
-    if (!mapReady) return;
+		// update only marker position
+		webViewRef.current.injectJavaScript(`
+			if (typeof updateUserPosition === 'function') {
+			updateUserPosition(${markerCoords.latitude}, ${markerCoords.longitude});
+			}
+		`);
 
-    if (webViewRef.current && hotspots?.length) {
-      const hotspotData = JSON.stringify(hotspots);
-      const js = `
+		// center ONLY the first time
+		if (!hasCenteredOnce) {
+			webViewRef.current.injectJavaScript(`
+				if (typeof moveToLocation === 'function') {
+					moveToLocation([${markerCoords.latitude}, ${markerCoords.longitude}]);
+				}
+			`);
+			setHasCenteredOnce(true);
+			console.log("[map] first centering on marker");
+		}
+	}, [mapReady, markerCoords]);
+
+	// Update hotspots
+	useEffect(() => {
+		if (!mapReady) return;
+
+		if (webViewRef.current && hotspots?.length) {
+			const hotspotData = JSON.stringify(hotspots);
+			const js = `
         if (typeof updateHotspots === 'function') {
           updateHotspots(${hotspotData});
         }
       `;
-      webViewRef.current.injectJavaScript(js);
-    }
+			webViewRef.current.injectJavaScript(js);
+		}
 
-    console.log('[Map.native] hotspots:', hotspots.length);
-  }, [mapReady, hotspots]);
+		console.log('[Map.native] hotspots:', hotspots.length);
+	}, [mapReady, hotspots]);
 
-  // Generate HTML after user icon is ready
-  const htmlContentRef = useRef<string | null>(null);
-  if (!htmlContentRef.current && userIconBase64) {
-    htmlContentRef.current = generateLeafletHTML({ initialCoords, markerCoords, hotspots, userIconBase64 });
-  }
+	// Generate HTML after user icon is ready
+	const htmlContentRef = useRef<string | null>(null);
+	if (!htmlContentRef.current && userIconBase64) {
+		htmlContentRef.current = generateLeafletHTML({ initialCoords, markerCoords, hotspots, userIconBase64 });
+	}
 
-  if (!htmlContentRef.current) {
-    return null; // or a loader
-  }
+	if (!htmlContentRef.current) {
+		return null; // or a loader
+	}
 
-  return (
-    <View style={styles.mapContainer}>
-      <ModalHotspot
-        visible={modalVisible.visible}
-        id={modalVisible.id}
-        onClose={() => setModalVisible({ visible: false, id: 'dummyId' })}
-      />
+	return (
+		<View style={styles.mapContainer}>
+			<ModalHotspot
+				visible={modalVisible.visible}
+				id={modalVisible.id}
+				onClose={() => setModalVisible({ visible: false, id: 'dummyId' })}
+			/>
 
-      <TouchableOpacity style={styles.fab} onPress={moveToMyPosition}>
-        <Ionicons name="person" size={25} color="#fff" />
-      </TouchableOpacity>
+			<TouchableOpacity style={styles.fab} onPress={moveToMyPosition}>
+				<Ionicons name="person" size={25} color="#fff" />
+			</TouchableOpacity>
 
-      <WebView
-        ref={webViewRef}
-        originWhitelist={['*']}
-        source={{ html: htmlContentRef.current }}
-        style={styles.map}
-        onMessage={handleWebViewMessage}
-        javaScriptEnabled={true}
-        domStorageEnabled={true}
-        allowFileAccess={true}
-        allowUniversalAccessFromFileURLs={true}
-      />
-    </View>
-  );
+			<WebView
+				ref={webViewRef}
+				originWhitelist={['*']}
+				source={{ html: htmlContentRef.current }}
+				style={styles.map}
+				onMessage={handleWebViewMessage}
+				javaScriptEnabled={true}
+				domStorageEnabled={true}
+				allowFileAccess={true}
+				allowUniversalAccessFromFileURLs={true}
+			/>
+		</View>
+	);
 }
 
 function generateLeafletHTML({
-  initialCoords,
-  markerCoords,
-  hotspots,
-  userIconBase64,
+	initialCoords,
+	markerCoords,
+	hotspots,
+	userIconBase64,
 }: {
-  initialCoords: LatLng;
-  markerCoords: LatLng;
-  hotspots: Hotspot[];
-  userIconBase64: string;
+	initialCoords: LatLng;
+	markerCoords: LatLng;
+	hotspots: Hotspot[];
+	userIconBase64: string;
 }): string {
-  const hotspotJSArray = JSON.stringify(hotspots);
+	const hotspotJSArray = JSON.stringify(hotspots);
 
-  return `
+	return `
 <!DOCTYPE html>
 <html>
   <head>
@@ -354,28 +369,28 @@ function generateLeafletHTML({
 }
 
 const styles = StyleSheet.create({
-  mapContainer: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  map: {
-    flex: 1,
-  },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 20,
-    backgroundColor: '#2196F3',
-    width: 50,
-    height: 50,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    zIndex: 5,
-  },
+	mapContainer: {
+		flex: 1,
+		justifyContent: 'center',
+	},
+	map: {
+		flex: 1,
+	},
+	fab: {
+		position: 'absolute',
+		right: 20,
+		bottom: 20,
+		backgroundColor: '#2196F3',
+		width: 50,
+		height: 50,
+		borderRadius: 30,
+		justifyContent: 'center',
+		alignItems: 'center',
+		elevation: 5,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.3,
+		shadowRadius: 3,
+		zIndex: 5,
+	},
 });
