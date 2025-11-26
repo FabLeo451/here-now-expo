@@ -245,7 +245,8 @@ export default function MapTab() {
 			{markerCoords ? (
 				<Map
 					mapRef={mapRef}
-					initialCoords={targetCoords ? targetCoords : markerCoords} 
+					//initialCoords={targetCoords ? targetCoords : markerCoords} 
+					initialCoords={targetCoords} 
 					markerCoords={markerCoords} 
 					hotspots={hotspots}
 					onMapReady= {() => {

@@ -130,6 +130,7 @@ export default function Map({
 		`);
 
 		// center ONLY the first time
+		/*
 		if (!hasCenteredOnce) {
 			webViewRef.current.injectJavaScript(`
 				if (typeof moveToLocation === 'function') {
@@ -139,7 +140,13 @@ export default function Map({
 			setHasCenteredOnce(true);
 			console.log("[map] first centering on marker");
 		}
+			*/
 	}, [mapReady, markerCoords]);
+
+	useEffect(() => {
+		console.log("[map] first centering on marker");
+		moveToMyPosition();
+	}, [mapReady]);
 
 	// Update hotspots
 	useEffect(() => {
@@ -157,6 +164,12 @@ export default function Map({
 
 		console.log('[Map.native] hotspots:', hotspots.length);
 	}, [mapReady, hotspots]);
+
+	if (!initialCoords)
+		initialCoords = {
+			latitude: markerCoords.latitude,
+			longitude: markerCoords.longitude
+	};
 
 	// Generate HTML after user icon is ready
 	const htmlContentRef = useRef<string | null>(null);
