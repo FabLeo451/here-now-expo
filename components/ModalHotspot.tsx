@@ -17,7 +17,7 @@ import { Hotspot } from '@/lib/hotspot'
 function openInGoogleMaps(latitude: number, longitude: number) {
 	const url = Platform.select({
 		ios: `http://maps.apple.com/?q=${latitude},${longitude}&ll=${latitude},${longitude}`,
-		android: `geo:${latitude},${longitude}?q=${latitude},${longitude}`, 
+		android: `geo:${latitude},${longitude}?q=${latitude},${longitude}`,
 	});
 
 	Linking.openURL(url ?? '');
@@ -221,13 +221,13 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 						</TouchableOpacity>
 
 						<Text style={{ fontSize: 18, fontWeight: "bold", marginVertical: 5 }}>{hotspots[0].name}</Text>
-						<Text style={{ fontSize: 10, fontStyle: "italic", marginBottom: 8, color:"gray" }}>Created by {hotspots[0].owner}</Text>
-						<Text style={{ fontSize: 12, marginBottom: 8, color:"slategray" }}>{hotspots[0].description}</Text>
+						<Text style={{ fontSize: 10, fontStyle: "italic", marginBottom: 8, color: "gray" }}>Created by {hotspots[0].owner}</Text>
+						<Text style={{ fontSize: 12, marginBottom: 8, color: "slategray" }}>{hotspots[0].description}</Text>
 
 						<View style={[styles.rowLeft, { marginVertical: 8 }]}>
 
 							{/* Subscribe/unsubscribe */}
-							{!hotspots[0].ownedByMe &&
+							{(!hotspots[0].ownedByMe && authenticated) &&
 								(
 									<View style={[styles.rowLeft, { marginVertical: 8, marginRight: 20 }]}>
 										<TouchableOpacity
@@ -247,23 +247,27 @@ export default function ModalHotspot({ visible, id, onClose }: Props) {
 							}
 
 							{/* Likes */}
-							<View style={[styles.rowLeft, { marginVertical: 8, marginRight: 20 }]}>
-								<TouchableOpacity
-									onPress={() => {
-										handleLike(!likedByMe);
-									}}
-								>
-									{likedByMe ? (
-										<Ionicons name="thumbs-up" size={25} color="royalblue" />
-									) : (
-										<Ionicons name="thumbs-up-outline" size={25} color="lightgray" />
-									)}
+							{authenticated &&
+								(
+									<View style={[styles.rowLeft, { marginVertical: 8, marginRight: 20 }]}>
+										<TouchableOpacity
+											onPress={() => {
+												handleLike(!likedByMe);
+											}}
+										>
+											{likedByMe ? (
+												<Ionicons name="thumbs-up" size={25} color="royalblue" />
+											) : (
+												<Ionicons name="thumbs-up-outline" size={25} color="lightgray" />
+											)}
 
-								</TouchableOpacity>
-								<Text>{likes}</Text>
-							</View>
+										</TouchableOpacity>
+										<Text>{likes}</Text>
+									</View>
+
+								)
+							}
 						</View>
-
 						{/* Open in Maps */}
 						<TouchableOpacity
 							style={[styles.rowLeft, { marginVertical: 8 }]}
