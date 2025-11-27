@@ -30,10 +30,10 @@ const isTokenValid = async (token: string): Promise<boolean> => {
 };
 
 const HomeTab: React.FC = () => {
-	const [total, setTotal] = useState<number | null>(null);
-	const [active, setActive] = useState<number | null>(null);
-	const [inactive, setInactive] = useState<number | null>(null);
-	const [subs, setSubs] = useState<number | null>(null);
+	const [total, setTotal] = useState<number | null>(0);
+	const [active, setActive] = useState<number | null>(0);
+	const [inactive, setInactive] = useState<number | null>(0);
+	const [subs, setSubs] = useState<number | null>(0);
 	const [context, setContext] = useState<any>(null);
 
 	useFocusEffect(
@@ -72,26 +72,7 @@ const HomeTab: React.FC = () => {
 
 		}, [])
 	);
-	/*
-		useEffect(() => {
-			const checkAuth = async () => {
-				const token = await AsyncStorage.getItem('authToken');
-				if (!token) {
-					router.replace('/login');
-				} else {
-					const contextStr = await AsyncStorage.getItem('context');
-					const ctx = contextStr ? JSON.parse(contextStr) : {};
-					setContext(ctx);
-	
-					if (ctx.user?.isAuthenticated) {
-						getMyHotspots(token);
-						getMyHSubscriptions(token);
-					}
-				}
-			};
-			checkAuth();
-		}, []);
-	*/
+
 	const getMyHotspots = async (token: string) => {
 		try {
 			setTotal(null);
@@ -258,10 +239,10 @@ const styles = StyleSheet.create({
 		gap: 16,
 	},
 	card: {
-		width: '48%',
+		width: '45%',
 		backgroundColor: '#FFFFFF',
 		borderRadius: 12,
-		padding: 16,
+		padding: 8,
 		borderLeftWidth: 5,
 		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 2 },
@@ -280,7 +261,7 @@ const styles = StyleSheet.create({
 		marginBottom: 8,
 	},
 	cardTitle: {
-		fontSize: 16,
+		fontSize: 13,
 		fontWeight: '600',
 		marginLeft: 8,
 		color: '#374151',
@@ -291,7 +272,7 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 	},
 	cardValueContainer: {
-		marginTop: 8,
+		marginTop: 0,
 		alignItems: 'center', // centra orizzontalmente
 	},
 	footer: {
