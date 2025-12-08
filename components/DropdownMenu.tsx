@@ -29,7 +29,14 @@ export default function DropdownMenu(): JSX.Element {
     switch (value) {
       case 'about':
         const version = Constants.expoConfig?.version ?? 'N/A';
-        Alert.alert("HereNow", `Version ${version}\n\nThis is an app by ekhoes.com`);
+        Alert.alert("HereNow", 
+          `by Ekhoes\nVersion ${version}
+
+Map data © OpenStreetMap contributors
+
+Map rendering powered by Leaflet
+          `
+        );
         break;
       case 'debug':
         let text = `API base URL: ${process.env.EXPO_PUBLIC_API_BASE_URL}
