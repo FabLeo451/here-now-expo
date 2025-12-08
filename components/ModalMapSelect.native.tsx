@@ -11,6 +11,7 @@ import { Text, Button } from '@ui-kitten/components';
 import { Ionicons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import type { WebViewMessageEvent } from 'react-native-webview';
+import { ActivityIndicator } from "react-native";
 
 type Props = {
 	token: string;
@@ -30,9 +31,10 @@ export default function ModalMapSelect({
 	const webViewRef = useRef(null);
 	const selectedCoords = useRef<{ latitude: number; longitude: number } | null>(null);
 	const [query, setQuery] = useState("");
+	const [searching, setSearching] = useState(false);
 
 	const onSearch = async () => {
-		console.log("Searching:", query);
+		setSearching(true);
 
 		try {
 			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/search?q=` + encodeURIComponent(query), {
@@ -62,7 +64,7 @@ export default function ModalMapSelect({
 
 			const lat = Number(payload.lat);
 			const lon = Number(payload.lon);
-			
+
 			selectedCoords.current = {
 				latitude: lat,
 				longitude: lon,
@@ -72,7 +74,9 @@ export default function ModalMapSelect({
 
 		} catch (error: any) {
 			console.log('[onSearch]', error);
-		}
+		} finally {
+        	setSearching(false);
+    	}
 	};
 
 	const handleMessage = (event: WebViewMessageEvent) => {
@@ -202,9 +206,14 @@ export default function ModalMapSelect({
 							onChangeText={setQuery}
 						/>
 
-						<Pressable style={stylesModal.button} onPress={onSearch}>
-							<Ionicons name="search" size={22} color="#333" />
+						<Pressable style={stylesModal.searchButton} onPress={onSearch} disabled={searching}>
+							{searching ? (
+								<ActivityIndicator size="small" color="#333" />
+							) : (
+								<Ionicons name="search" size={22} color="#333" />
+							)}
 						</Pressable>
+
 					</View>
 
 					<WebView

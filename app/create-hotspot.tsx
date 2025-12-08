@@ -423,7 +423,7 @@ const CreateHotspot: React.FC = () => {
 					</Button>
 				) : (
 					<Button style={{ marginTop: 30 }} onPress={updateHotspot}>
-						Update
+						Save
 					</Button>
 				)}
 
