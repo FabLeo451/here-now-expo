@@ -1,10 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
-  View,
-  TouchableOpacity,
-  Modal,
-  StyleSheet,
-  Dimensions,
+	View,
+	TouchableOpacity,
+	Modal,
+	StyleSheet,
+	TextInput, 
+	Pressable,
 } from 'react-native';
 import { Text, Button } from '@ui-kitten/components';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,58 +13,123 @@ import { WebView } from 'react-native-webview';
 import type { WebViewMessageEvent } from 'react-native-webview';
 
 type Props = {
-  visible: boolean;
-  latitude: number;
-  longitude: number;
-  onSelect: (coords: { latitude: number; longitude: number } | null) => void;
+	token: string;
+	visible: boolean;
+	latitude: number;
+	longitude: number;
+	onSelect: (coords: { latitude: number; longitude: number } | null) => void;
 };
 
 export default function ModalMapSelect({
-  visible,
-  latitude,
-  longitude,
-  onSelect,
+	token,
+	visible,
+	latitude,
+	longitude,
+	onSelect,
 }: Props) {
-  const webViewRef = useRef(null);
-  const selectedCoords = useRef<{ latitude: number; longitude: number } | null>(null);
+	const webViewRef = useRef(null);
+	const selectedCoords = useRef<{ latitude: number; longitude: number } | null>(null);
+	const [query, setQuery] = useState("");
 
-  const handleMessage = (event: WebViewMessageEvent) => {
-    const data = JSON.parse(event.nativeEvent.data);
-    if (data?.latitude && data?.longitude) {
-      selectedCoords.current = {
-        latitude: data.latitude,
-        longitude: data.longitude,
-      };
-    }
-  };
+	const onSearch = async () => {
+		console.log("Searching:", query);
 
-  const stylesModal = StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    content: {
-      padding: 10,
-      backgroundColor: 'white',
-      borderRadius: 10,
-      elevation: 5,
-      alignItems: 'center',
-    },
-    map: {
-      width: 350,
-      height: 200,
-    },
-    closeButton: {
-      position: 'absolute',
-      top: 10,
-      right: 10,
-      zIndex: 1,
-    },
-  });
+		try {
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/search?q=` + encodeURIComponent(query), {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: token,
+				},
+			});
+			if (!response.ok) throw new Error('Failed to fetch');
 
-  const htmlContent = `
+			type PayloadType = {
+				lat: number;
+				lon: number;
+				display_name: string;
+			};
+
+			const payload = await response.json() as PayloadType;
+
+			console.log('[onSearch]', payload);
+
+			const jsCode = `
+				moveTo(${payload.lat}, ${payload.lon});
+				true;
+			`;
+			webViewRef.current?.injectJavaScript(jsCode);
+
+			const lat = Number(payload.lat);
+			const lon = Number(payload.lon);
+			
+			selectedCoords.current = {
+				latitude: lat,
+				longitude: lon,
+			};
+
+			setQuery("");
+
+		} catch (error: any) {
+			console.log('[onSearch]', error);
+		}
+	};
+
+	const handleMessage = (event: WebViewMessageEvent) => {
+		const data = JSON.parse(event.nativeEvent.data);
+		if (data?.latitude && data?.longitude) {
+			selectedCoords.current = {
+				latitude: data.latitude,
+				longitude: data.longitude,
+			};
+		}
+	};
+
+	const stylesModal = StyleSheet.create({
+		overlay: {
+			flex: 1,
+			backgroundColor: 'rgba(0,0,0,0.5)',
+			justifyContent: 'center',
+			alignItems: 'center',
+		},
+		content: {
+			padding: 5,
+			backgroundColor: 'white',
+			borderRadius: 10,
+			elevation: 5,
+			alignItems: 'center',
+		},
+		map: {
+			width: 350,
+			height: 150,
+		},
+		closeButton: {
+			position: 'absolute',
+			top: 10,
+			right: 10,
+			zIndex: 1,
+		},
+		searchContainer: {
+			flexDirection: "row",
+			alignItems: "center",
+			borderWidth: 1,
+			borderColor: "#ccc",
+			borderRadius: 10,
+			backgroundColor: "#fff",
+			paddingHorizontal: 5,
+			height: 45,
+			margin: 8,
+		},
+		input: {
+			flex: 1,
+			fontSize: 16,
+		},
+		searchButton: {
+			padding: 6,
+		},
+	});
+
+	const htmlContent = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -101,46 +167,65 @@ export default function ModalMapSelect({
           window.ReactNativeWebView.postMessage(JSON.stringify({ latitude: lat, longitude: lng }));
         });
 
-        // Send initial location on load
+		function moveTo(lat, lon) {
+			map.setView([lat, lon], zoom);
+			marker.setLatLng([lat, lon]);
+		}
+
+		// Send initial location on load
         window.ReactNativeWebView.postMessage(JSON.stringify({ latitude: ${latitude}, longitude: ${longitude} }));
       </script>
     </body>
     </html>
   `;
 
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent
-      onRequestClose={() => onSelect(null)}
-    >
-      <View style={stylesModal.overlay}>
-        <View style={stylesModal.content}>
-          <TouchableOpacity onPress={() => onSelect(null)} style={stylesModal.closeButton}>
-            <Ionicons name="close" size={24} color="black" />
-          </TouchableOpacity>
+	return (
+		<Modal
+			visible={visible}
+			animationType="slide"
+			transparent
+			onRequestClose={() => onSelect(null)}
+		>
+			<View style={stylesModal.overlay}>
+				<View style={stylesModal.content}>
+					<TouchableOpacity onPress={() => onSelect(null)} style={stylesModal.closeButton}>
+						<Ionicons name="close" size={24} color="black" />
+					</TouchableOpacity>
 
-          <Text style={{ marginBottom: 10 }}>Touch the map, then hit "Select"</Text>
-          <WebView
-            ref={webViewRef}
-            style={stylesModal.map}
-            originWhitelist={['*']}
-            source={{ html: htmlContent }}
-            onMessage={handleMessage}
-            javaScriptEnabled
-            domStorageEnabled
-          />
-          <Button
-            style={{ marginTop: 10 }}
-            onPress={() =>
-              onSelect(selectedCoords.current ?? { latitude, longitude })
-            }
-          >
-            Select
-          </Button>
-        </View>
-      </View>
-    </Modal>
-  );
+					<Text style={{ marginBottom: 10 }}>Touch the map, then hit "Select"</Text>
+
+					<View style={stylesModal.searchContainer}>
+						<TextInput
+							style={stylesModal.input}
+							placeholder="Search..."
+							value={query}
+							onChangeText={setQuery}
+						/>
+
+						<Pressable style={stylesModal.button} onPress={onSearch}>
+							<Ionicons name="search" size={22} color="#333" />
+						</Pressable>
+					</View>
+
+					<WebView
+						ref={webViewRef}
+						style={stylesModal.map}
+						originWhitelist={['*']}
+						source={{ html: htmlContent }}
+						onMessage={handleMessage}
+						javaScriptEnabled
+						domStorageEnabled
+					/>
+					<Button
+						style={{ marginTop: 10 }}
+						onPress={() =>
+							onSelect(selectedCoords.current ?? { latitude, longitude })
+						}
+					>
+						Select
+					</Button>
+				</View>
+			</View>
+		</Modal>
+	);
 }

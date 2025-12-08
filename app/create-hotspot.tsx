@@ -264,6 +264,7 @@ const CreateHotspot: React.FC = () => {
 			</View>
 			<View style={styles.container}>
 				<ModalMapSelect
+					token={authToken}
 					visible={modalVisible}
 					latitude={location?.latitude ?? 0}
 					longitude={location?.longitude ?? 0}
