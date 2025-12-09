@@ -115,7 +115,7 @@ export default function ModalHotspot({ visible, id, hotspot, onClose }: Props) {
 						<TouchableOpacity
 							style={[styles.rowLeft, { marginVertical: 8 }]}
 							onPress={() => {
-								router.replace(`/hotspot-page?id=${id}`);
+								router.navigate(`/hotspot-page?id=${id}`);
 							}}
 						>
 							<Ionicons name="clipboard-outline" size={25} color="green" />
