@@ -20,7 +20,7 @@ export const HotspotSubscriptionButton: React.FC<Props> = ({
   const handleSubscription = async (subscribe: boolean) => {
     if (loading) return;
 
-    console.log('[SubscriptionButton] subscribe=', subscribe);
+    //console.log('[SubscriptionButton] subscribe=', subscribe);
     setLoading(true);
 
     const token = await AsyncStorage.getItem('authToken');

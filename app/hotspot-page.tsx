@@ -16,9 +16,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
 import { Hotspot, Category } from '@/lib/hotspot'
 import { HotspotSubscriptionButton } from '@/components/HotspotSubscriptionButton';
+import { HotspotLikeButton } from '@/components/HotspotLikeButton';
 
 type Params = {
-  id: string;
+	id: string;
 };
 
 const HotspotPage: React.FC = () => {
@@ -98,40 +99,6 @@ const HotspotPage: React.FC = () => {
 		}
 	};
 
-	const handleLike = async (like: boolean) => {
-
-		console.log('[ModalHotspot.Like] ', like);
-
-		const token = await AsyncStorage.getItem('authToken');
-
-		if (!token || !authenticated)
-			return;
-
-		try {
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}/like`, {
-				method: like ? 'POST' : 'DELETE',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: token,
-				},
-			});
-
-			if (!response.ok) {
-				//console.log('[ModalHotspot.Like] ', response);
-				throw new Error('Error ' + response.status + ' ' + response.statusText);
-			}
-
-			setLikedByMe(like);
-			setLikes(prev => like ? prev + 1 : prev - 1);
-
-		} catch (error: any) {
-			console.log('[ModalHotspot.Like] ', error);
-			Alert.alert('Error', error.message);
-		} finally {
-
-		}
-	}
-
 	return (
 		<View style={{
 			paddingTop: insets.top,
@@ -164,42 +131,32 @@ const HotspotPage: React.FC = () => {
 					{/* <Text style={styles.label}>{hotspots[0].category}</Text>*/}
 
 
-						<View style={[styles.rowLeft, { marginVertical: 8 }]}>
+					<View style={[styles.rowLeft, { marginVertical: 8 }]}>
 
-							{/* Subscribe/unsubscribe */}
-							{(!hotspots[0].ownedByMe && authenticated) &&
-								(
-									<HotspotSubscriptionButton
-										hotspotId={hotspots[0].id}
-										initialSubscribed={subscribed}
-										onChange={(value) => console.log("New subscription state:", value)}
-									/>
-								)
-							}
+						{/* Subscribe/unsubscribe */}
+						{(!hotspots[0].ownedByMe && authenticated) &&
+							(
+								<HotspotSubscriptionButton
+									hotspotId={hotspots[0].id}
+									initialSubscribed={subscribed}
+									onChange={(value) => console.log("New subscription state:", value)}
+								/>
+							)
+						}
 
-							{/* Likes */}
-							{authenticated &&
-								(
-									<View style={[styles.rowLeft, { marginVertical: 8, marginRight: 20 }]}>
-										<TouchableOpacity
-											onPress={() => {
-												handleLike(!likedByMe);
-											}}
-										>
-											{likedByMe ? (
-												<Ionicons name="thumbs-up" size={25} color="royalblue" />
-											) : (
-												<Ionicons name="thumbs-up-outline" size={25} color="lightgray" />
-											)}
+						{/* Likes */}
+						{authenticated &&
+							(
+								<HotspotLikeButton
+									hotspotId={hotspots[0].id}
+									initialLikedByMe={likedByMe}
+									initialLikes={likes}
+									onChange={(value) => console.log("Liked by me:", value)}
+								/>
+							)
+						}
+					</View>
 
-										</TouchableOpacity>
-										<Text>{likes}</Text>
-									</View>
-
-								)
-							}
-						</View>
-						
 				</View>
 			)}
 		</View >
