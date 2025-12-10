@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
 import { Hotspot, Category } from '@/lib/hotspot'
+import { HotspotSubscriptionButton } from '@/components/HotspotSubscriptionButton';
 
 type Params = {
   id: string;
@@ -131,39 +132,6 @@ const HotspotPage: React.FC = () => {
 		}
 	}
 
-	const handleSubscription = async (subscribe: boolean) => {
-
-		console.log('[ModalHotspot.handleSubscription] ', subscribe);
-
-		const token = await AsyncStorage.getItem('authToken');
-
-		if (!token || !authenticated)
-			return;
-
-		try {
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}/subscription`, {
-				method: subscribe ? 'POST' : 'DELETE',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: token,
-				},
-			});
-
-			if (!response.ok) {
-				//console.log('[ModalHotspot.Like] ', response);
-				throw new Error('Error ' + response.status + ' ' + response.statusText);
-			}
-
-			setSubscribed(subscribe);
-
-		} catch (error: any) {
-			console.log('[ModalHotspot.handleSubscription] ', error);
-			Alert.alert('Error', error.message);
-		} finally {
-
-		}
-	}
-
 	return (
 		<View style={{
 			paddingTop: insets.top,
@@ -201,20 +169,11 @@ const HotspotPage: React.FC = () => {
 							{/* Subscribe/unsubscribe */}
 							{(!hotspots[0].ownedByMe && authenticated) &&
 								(
-									<View style={[styles.rowLeft, { marginVertical: 8, marginRight: 20 }]}>
-										<TouchableOpacity
-											onPress={() => {
-												handleSubscription(!subscribed);
-											}}
-										>
-											{subscribed ? (
-												<Ionicons name="notifications" size={25} color="royalblue" />
-											) : (
-												<Ionicons name="notifications-outline" size={25} color="lightgray" />
-											)}
-
-										</TouchableOpacity>
-									</View>
+									<HotspotSubscriptionButton
+										hotspotId={hotspots[0].id}
+										initialSubscribed={subscribed}
+										onChange={(value) => console.log("New subscription state:", value)}
+									/>
 								)
 							}
 
