@@ -38,6 +38,7 @@ const HotspotPage: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [loaded, setLoaded] = useState(false);
 	const [subscribed, setSubscribed] = useState<boolean>(false);
+	const [notFound, setNotFound] = useState<boolean>(false);
 
 	useEffect(() => {
 
@@ -81,19 +82,25 @@ const HotspotPage: React.FC = () => {
 				},
 			});
 
-			if (!response.ok) {
-				console.log('[HotspotPage.getHotspot] ', response);
+			//console.log('[HotspotPage.getHotspot] response =', response);
+
+			if (response.ok) {
+				const data: Hotspot[] = await response.json();
+				setHotspots(data);
+				setLoaded(true);
+
+			} else {
+				//console.log('[HotspotPage.getHotspot] ', response);
+
+				if (response.status == 404)
+					setNotFound(true);
+
 				throw new Error('Error ' + response.status + ' ' + response.statusText);
 			}
 
-			const data: Hotspot[] = await response.json();
-			setHotspots(data);
-			setLoaded(true);
-
 			//Alert.alert('', JSON.stringify(data))
 		} catch (error: any) {
-			console.log('[ModalHotspot.getHotspot] ', error);
-			Alert.alert('Error', error.message);
+			console.log('[HotspotPage.getHotspot] ', error);
 		} finally {
 			setLoading(false);
 		}
@@ -117,7 +124,13 @@ const HotspotPage: React.FC = () => {
 
 			{loading && (<View><Text>Loading...</Text></View>)}
 
-			{loaded && (
+			{notFound && (
+				<View style={{ marginTop:50, justifyContent: 'center', alignItems: 'center'}}>
+					<Text style={{ fontSize: 25, fontWeight: "bold" }}>Not found</Text>
+				</View>
+			)}
+
+			{(loaded && !notFound) && (
 				<View style={styles.container}>
 
 					{/* Name */}
