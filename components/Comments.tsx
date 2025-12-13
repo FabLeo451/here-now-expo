@@ -183,20 +183,22 @@ export const Comments: React.FC<Props> = ({
 				}
 			</View>
 
-			{loading ? (<View style={{ margin: 10 }}><Text>Loading comments...</Text></View>) : (
-				<Pressable
-					onPress={() => getComments(hotspotId)}
-					style={{
-						backgroundColor: '#969696ff',
-						padding: 2,
-						borderRadius: 4,
-						justifyContent: 'center',
-						alignItems: 'center',
-					}}
-				>
-					<Text>More</Text>
-				</Pressable>
-			)}
+			<View style={{ marginTop: 10 }}>
+				{loading ? (<Text>Loading comments...</Text>) : (
+					<Pressable
+						onPress={() => getComments(hotspotId)}
+						style={{
+							backgroundColor: '#cececeff',
+							padding: 2,
+							borderRadius: 4,
+							justifyContent: 'center',
+							alignItems: 'center',
+						}}
+					>
+						<Ionicons name="chevron-down-outline" size={22} color="#333" />
+					</Pressable>
+				)}
+			</View>
 		</View>
 	);
 };
