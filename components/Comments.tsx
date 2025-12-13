@@ -24,6 +24,7 @@ export const Comments: React.FC<Props> = ({
 }) => {
 	const [loading, setLoading] = useState(false);
 	const [updating, setUpdating] = useState(false);
+	const [offset, setOffset] = useState(-1);
 	const [message, setMessage] = useState('');
 	const [comments, setComments] = useState<HotspotComment[]>([]);
 	const [context, setContext] = useState(null);
@@ -48,10 +49,9 @@ export const Comments: React.FC<Props> = ({
 	const getComments = async (hotspotId: string) => {
 
 		try {
-			setComments([]);
 			setLoading(true);
 
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${hotspotId}/comments`, {
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${hotspotId}/comments?limit=2&offset=${offset}`, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
@@ -65,8 +65,24 @@ export const Comments: React.FC<Props> = ({
 			}
 
 			const data: HotspotComment[] = await response.json();
-			setComments(data);
-			console.log('[comments]', JSON.stringify(data))
+
+			if (data) {
+				setComments(prev => [...prev, ...data]);
+				//console.log('[comments]', JSON.stringify(data))
+
+				// Update offset
+
+				let minOffset = offset;
+
+				for (let i=0; i<data.length; i++) {
+					if (data[i].id < minOffset || minOffset == -1)
+						minOffset = data[i].id
+				}
+
+				setOffset(minOffset);
+				console.log('[Comments] minOffset =', minOffset);
+			}
+			
 		} catch (error: any) {
 			console.log('[getMyHotspots] ', error);
 			Alert.alert('Error getting my hotspots', error.message);
@@ -159,14 +175,27 @@ export const Comments: React.FC<Props> = ({
 				</View>
 			)}
 
+			<View>
+				{
+					comments?.map((c) => (
+						<CommentComponent key={c.id} comment={c} />
+					))
+				}
+			</View>
+
 			{loading ? (<View style={{ margin: 10 }}><Text>Loading comments...</Text></View>) : (
-				<View>
-					{
-						comments.map((c) => (
-							<CommentComponent key={c.id} comment={c} />
-						))
-					}
-				</View>
+				<Pressable
+					onPress={() => getComments(hotspotId)}
+					style={{
+						backgroundColor: '#969696ff',
+						padding: 2,
+						borderRadius: 4,
+						justifyContent: 'center',
+						alignItems: 'center',
+					}}
+				>
+					<Text>More</Text>
+				</Pressable>
 			)}
 		</View>
 	);
