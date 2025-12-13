@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from "@/Style";
+import { AppButton } from '@/components/AppButton';
 
 interface HotspotComment {
 	id: number;
@@ -149,28 +150,11 @@ export const Comments: React.FC<Props> = ({
 						onChangeText={setMessage}
 					/>
 					<View style={{ marginVertical: 10, width: 150 }}>
-						<Pressable
-							onPress={handleAddComment}
+						<AppButton
+							title="Add comment"
 							disabled={updating}
-							style={{
-								backgroundColor: '#007bff',
-								padding: 10,
-								borderRadius: 4,
-								justifyContent: 'center',
-								alignItems: 'center',
-							}}
-						>
-							{updating ?
-								(
-									<ActivityIndicator size="small" color="#333" />
-								) :
-								(
-									<Text style={{ color: 'white', textTransform: 'none' }}>
-										Add comment
-									</Text>
-								)}
-						</Pressable>
-
+							onPress={handleAddComment}
+						/>
 					</View>
 				</View>
 			)}

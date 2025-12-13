@@ -17,6 +17,7 @@ import { Hotspot, Category } from '@/lib/hotspot'
 import { HotspotSubscriptionButton } from '@/components/HotspotSubscriptionButton';
 import { HotspotLikeButton } from '@/components/HotspotLikeButton';
 import { Comments } from '@/components/Comments';
+import { AppButton } from '@/components/AppButton';
 
 type Params = {
 	id: string;
@@ -39,6 +40,7 @@ const HotspotPage: React.FC = () => {
 	const [loaded, setLoaded] = useState(false);
 	const [subscribed, setSubscribed] = useState<boolean>(false);
 	const [notFound, setNotFound] = useState<boolean>(false);
+	const [error, setError] = useState<boolean>(false);
 
 	useEffect(() => {
 
@@ -73,6 +75,8 @@ const HotspotPage: React.FC = () => {
 
 		console.log(`[HotspotPage.getHotspot] Getting hotspot ${id}`);
 
+		setError(false)
+
 		try {
 			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}`, {
 				method: 'GET',
@@ -88,19 +92,19 @@ const HotspotPage: React.FC = () => {
 				const data: Hotspot[] = await response.json();
 				setHotspots(data);
 				setLoaded(true);
-
 			} else {
 				//console.log('[HotspotPage.getHotspot] ', response);
 
 				if (response.status == 404)
 					setNotFound(true);
-
-				throw new Error('Error ' + response.status + ' ' + response.statusText);
+				else
+					setError(true);
 			}
 
 			//Alert.alert('', JSON.stringify(data))
 		} catch (error: any) {
 			console.log('[HotspotPage.getHotspot] ', error);
+			setError(true);
 		} finally {
 			setLoading(false);
 		}
@@ -124,13 +128,34 @@ const HotspotPage: React.FC = () => {
 
 			{loading && (<View><Text>Loading...</Text></View>)}
 
-			{notFound && (
-				<View style={{ marginTop:50, justifyContent: 'center', alignItems: 'center'}}>
-					<Text style={{ fontSize: 25, fontWeight: "bold" }}>Not found</Text>
+			{error && (
+				<View style={{ marginTop: 50, justifyContent: 'center', alignItems: 'center', gap:20 }}>
+					<Ionicons name="alert-circle-outline" size={30} color="red" />
+					<Text style={{ fontSize: 20, fontWeight: "bold" }}>Unable to retrieve hotspot</Text>
+					<AppButton
+						title="Retry"
+						icon={<Ionicons name="refresh-outline" size={18} color="white" />}
+						onPress={() => {
+							getHotspot(authToken, id);
+						}}
+					/>
 				</View>
 			)}
 
-			{(loaded && !notFound) && (
+			{notFound && (
+				<View style={{ marginTop: 50, justifyContent: 'center', alignItems: 'center', gap: 10 }}>
+					<Text style={{ fontSize: 25, fontWeight: "bold" }}>Not found</Text>
+					<AppButton
+						title="Home"
+						icon={<Ionicons name="home-outline" size={18} color="white" />}
+						onPress={() => {
+							router.replace('/(tabs)')
+						}}
+					/>
+				</View>
+			)}
+
+			{(loaded) && (
 				<View style={styles.container}>
 
 					{/* Name */}
@@ -146,36 +171,21 @@ const HotspotPage: React.FC = () => {
 
 					<View style={[styles.row, { marginVertical: 8 }]}>
 
-<Pressable
-    disabled={!hotspots?.length}
-    onPress={() => {
-        const h = hotspots[0];
-        router.push({
-            pathname: '/map',
-            params: {
-                hotspotId: String(h.id),
-                targetLatitude: String(h.position.latitude),
-                targetLongitude: String(h.position.longitude),
-            },
-        });
-    }}
-    style={({ pressed }) => [
-        {
-            backgroundColor: pressed ? '#0056b3' : '#007bff',
-            padding: 10,
-            borderRadius: 4,
-            justifyContent: 'center',
-            alignItems: 'center',
-            opacity: !hotspots?.length ? 0.5 : 1,
-        },
-    ]}
->
-    <View style={styles.row}>
-        <Ionicons name="map-outline" size={18} color="white" />
-        <Text style={{ color: 'white' }}>View on map</Text>
-    </View>
-</Pressable>
-
+						<AppButton
+							title="View on map"
+							icon={<Ionicons name="map-outline" size={18} color="white" />}
+							onPress={() => {
+								const h = hotspots[0];
+								router.push({
+									pathname: '/map',
+									params: {
+										hotspotId: String(h.id),
+										targetLatitude: String(h.position.latitude),
+										targetLongitude: String(h.position.longitude),
+									},
+								});
+							}}
+						/>
 
 						{/* Likes */}
 						{authenticated &&
