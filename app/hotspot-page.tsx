@@ -18,6 +18,7 @@ import { HotspotSubscriptionButton } from '@/components/HotspotSubscriptionButto
 import { HotspotLikeButton } from '@/components/HotspotLikeButton';
 import { Comments } from '@/components/Comments';
 import { AppButton } from '@/components/AppButton';
+import { Share } from 'react-native';
 
 type Params = {
 	id: string;
@@ -110,6 +111,22 @@ const HotspotPage: React.FC = () => {
 		}
 	};
 
+	const shareHotspot = async (hotspot: Hotspot) => {
+		try {
+			const message = `📍 Take a look at this hotspot!
+				${hotspot.name}
+
+				https://ekhoes.com/herenow/hotspot/${hotspot.id}
+				`;
+
+			await Share.share({
+				message,
+			});
+		} catch (error) {
+			console.log('Share error:', error);
+		}
+	};
+
 	return (
 		<View style={{
 			paddingTop: insets.top,
@@ -168,12 +185,11 @@ const HotspotPage: React.FC = () => {
 					{/* Category */}
 					{/* <Text style={styles.label}>{hotspots[0].category}</Text>*/}
 
-
 					<View style={[styles.row, { marginVertical: 8 }]}>
 
 						<AppButton
 							title="View on map"
-							icon={<Ionicons name="map-outline" size={18} color="white" />}
+							icon={<Ionicons name="map-outline" size={15} color="white" />}
 							onPress={() => {
 								const h = hotspots[0];
 								router.push({
@@ -198,6 +214,12 @@ const HotspotPage: React.FC = () => {
 								/>
 							)
 						}
+
+						{/* Share */}
+						<TouchableOpacity onPress={() => { shareHotspot(hotspots[0]) }} >
+							<Ionicons name="share-social-outline" size={25} color="green" />
+						</TouchableOpacity>
+
 
 						{/* Subscribe/unsubscribe */}
 						{(!hotspots[0].ownedByMe && authenticated) &&

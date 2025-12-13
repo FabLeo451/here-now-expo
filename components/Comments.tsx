@@ -143,9 +143,9 @@ export const Comments: React.FC<Props> = ({
 			{context?.user.isAuthenticated && (
 				<View>
 					<TextInput
-						style={styles.textArea}
+						style={[styles.textArea, {height: 70,}]}
 						multiline={true}
-						numberOfLines={4}
+						numberOfLines={3}
 						value={message}
 						onChangeText={setMessage}
 					/>
@@ -153,6 +153,7 @@ export const Comments: React.FC<Props> = ({
 						<AppButton
 							title="Add comment"
 							disabled={updating}
+							loading={updating}
 							onPress={handleAddComment}
 						/>
 					</View>
