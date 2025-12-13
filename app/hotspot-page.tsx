@@ -17,6 +17,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { Hotspot, Category } from '@/lib/hotspot'
 import { HotspotSubscriptionButton } from '@/components/HotspotSubscriptionButton';
 import { HotspotLikeButton } from '@/components/HotspotLikeButton';
+import { Comments } from '@/components/Comments';
 
 type Params = {
 	id: string;
@@ -121,28 +122,17 @@ const HotspotPage: React.FC = () => {
 				<View style={styles.container}>
 
 					{/* Name */}
-					<Text style={styles.label}>{hotspots[0].name}</Text>
+					<Text style={styles.sectionTitle}>{hotspots[0].name}</Text>
 					<Text style={{ fontSize: 10, fontStyle: "italic", marginBottom: 8, color: "gray" }}>Created by {hotspots[0].owner}</Text>
 
 					{/* Description */}
-					<Text style={styles.label}>{hotspots[0].description}</Text>
+					<Text>{hotspots[0].description}</Text>
 
 					{/* Category */}
 					{/* <Text style={styles.label}>{hotspots[0].category}</Text>*/}
 
 
-					<View style={[styles.rowLeft, { marginVertical: 8 }]}>
-
-						{/* Subscribe/unsubscribe */}
-						{(!hotspots[0].ownedByMe && authenticated) &&
-							(
-								<HotspotSubscriptionButton
-									hotspotId={hotspots[0].id}
-									initialSubscribed={subscribed}
-									onChange={(value) => console.log("New subscription state:", value)}
-								/>
-							)
-						}
+					<View style={[styles.row, { marginVertical: 8 }]}>
 
 						{/* Likes */}
 						{authenticated &&
@@ -155,7 +145,25 @@ const HotspotPage: React.FC = () => {
 								/>
 							)
 						}
+
+						{/* Subscribe/unsubscribe */}
+						{(!hotspots[0].ownedByMe && authenticated) &&
+							(
+								<HotspotSubscriptionButton
+									hotspotId={hotspots[0].id}
+									initialSubscribed={subscribed}
+									onChange={(value) => console.log("New subscription state:", value)}
+								/>
+							)
+						}
 					</View>
+
+					{/* Comments */}
+					{authenticated &&
+						(
+							<Comments hotspotId={hotspots[0].id} />
+						)
+					}
 
 				</View>
 			)}

@@ -1,0 +1,200 @@
+import React, { useState, useEffect } from 'react';
+import { TouchableOpacity, Alert, View, Text, TextInput, Pressable } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ActivityIndicator } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
+import { styles } from "@/Style";
+
+interface HotspotComment {
+	id: number;
+	hotspotId: string | null;
+	userId: string | null;
+	userName: string | null;
+	message: string;
+	created: string;  // ISO datetime string
+	updated: string;  // ISO datetime string
+}
+
+type Props = {
+	hotspotId: string; // required
+};
+
+export const Comments: React.FC<Props> = ({
+	hotspotId,
+}) => {
+	const [loading, setLoading] = useState(false);
+	const [updating, setUpdating] = useState(false);
+	const [message, setMessage] = useState('');
+	const [comments, setComments] = useState<HotspotComment[]>([]);
+	const [context, setContext] = useState(null);
+
+	useEffect(() => {
+
+		const init = async () => {
+
+			const contextStr = await AsyncStorage.getItem('context');
+			const ctx = contextStr ? JSON.parse(contextStr) : {};
+			setContext(ctx);
+
+			//console.log('[Comments] ctx =', ctx);
+
+			getComments(hotspotId);
+		}
+
+		init();
+
+	}, [hotspotId]);
+
+	const getComments = async (hotspotId: string) => {
+
+		try {
+			setComments([]);
+			setLoading(true);
+
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${hotspotId}/comments`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					//Authorization: token,
+				},
+			});
+
+			if (!response.ok) {
+				console.log(response)
+				throw new Error('Failed to fetch: ' + response.status + ' ' + response.statusText);
+			}
+
+			const data: HotspotComment[] = await response.json();
+			setComments(data);
+			console.log('[comments]', JSON.stringify(data))
+		} catch (error: any) {
+			console.log('[getMyHotspots] ', error);
+			Alert.alert('Error getting my hotspots', error.message);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleAddComment = async () => {
+		if (updating) return;
+
+		//console.log('[Comments] message =', message);
+		setUpdating(true);
+
+		const token = await AsyncStorage.getItem('authToken');
+		if (!token) {
+			setUpdating(false);
+			return;
+		}
+
+		try {
+			const response = await fetch(
+				`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${hotspotId}/comment`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: token,
+					},
+					body: JSON.stringify({
+						userId: context?.user.id,
+						message: message,
+					}),
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error('Error ' + response.status + ' ' + response.statusText);
+			}
+
+			const data: HotspotComment = await response.json();
+			data.userName = context?.user.name;
+			//console.log('[Comments] data:', data);
+
+			setComments(prevComments => [data, ...prevComments]);
+
+		} catch (error: any) {
+			console.log('[Comments] Error:', error);
+			Alert.alert('Error', error.message);
+		} finally {
+			setUpdating(false);
+		}
+	};
+
+	return (
+		<View>
+			{context?.user.isAuthenticated && (
+				<View>
+					<TextInput
+						style={styles.textArea}
+						multiline={true}
+						numberOfLines={4}
+						value={message}
+						onChangeText={setMessage}
+					/>
+					<View style={{ marginVertical: 10, width: 150 }}>
+						<Pressable
+							onPress={handleAddComment}
+							disabled={updating}
+							style={{
+								backgroundColor: '#007bff',
+								padding: 10,
+								borderRadius: 4,
+								justifyContent: 'center',
+								alignItems: 'center',
+							}}
+						>
+							{updating ?
+								(
+									<ActivityIndicator size="small" color="#333" />
+								) :
+								(
+									<Text style={{ color: 'white', textTransform: 'none' }}>
+										Add comment
+									</Text>
+								)}
+						</Pressable>
+
+					</View>
+				</View>
+			)}
+
+			{loading ? (<View style={{ margin: 10 }}><Text>Loading comments...</Text></View>) : (
+				<View>
+					{
+						comments.map((c) => (
+							<CommentComponent key={c.id} comment={c} />
+						))
+					}
+				</View>
+			)}
+		</View>
+	);
+};
+
+function formatDateGlobal(isoString: string): string {
+	const date = new Date(isoString);
+
+	if (isNaN(date.getTime())) {
+		return "Invalid date";
+	}
+
+	return new Intl.DateTimeFormat(undefined, {
+		dateStyle: "medium",
+		timeStyle: "short",
+	}).format(date);
+}
+
+const CommentComponent = ({
+	comment
+}: {
+	comment: HotspotComment;
+}) => (
+	<View style={{ marginTop: 20 }}>
+		<View style={styles.rowLeft}>
+			<Text style={{ fontWeight: 'bold' }}>{comment.userName}</Text>
+			<Text style={{ color: 'gray' }}>{formatDateGlobal(comment.created)}</Text>
+		</View>
+		<Text style={{ marginTop: 5, fontStyle: 'italic' }}>{comment.message}</Text>
+	</View>
+);
