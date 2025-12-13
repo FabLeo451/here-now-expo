@@ -4,8 +4,7 @@ import {
 	View,
 	TextInput,
 	TouchableOpacity,
-	Platform,
-	Switch
+	Pressable
 } from 'react-native';
 import { router } from 'expo-router';
 import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
@@ -133,6 +132,37 @@ const HotspotPage: React.FC = () => {
 
 
 					<View style={[styles.row, { marginVertical: 8 }]}>
+
+<Pressable
+    disabled={!hotspots?.length}
+    onPress={() => {
+        const h = hotspots[0];
+        router.push({
+            pathname: '/map',
+            params: {
+                hotspotId: String(h.id),
+                targetLatitude: String(h.position.latitude),
+                targetLongitude: String(h.position.longitude),
+            },
+        });
+    }}
+    style={({ pressed }) => [
+        {
+            backgroundColor: pressed ? '#0056b3' : '#007bff',
+            padding: 10,
+            borderRadius: 4,
+            justifyContent: 'center',
+            alignItems: 'center',
+            opacity: !hotspots?.length ? 0.5 : 1,
+        },
+    ]}
+>
+    <View style={styles.row}>
+        <Ionicons name="map-outline" size={18} color="white" />
+        <Text style={{ color: 'white' }}>View on map</Text>
+    </View>
+</Pressable>
+
 
 						{/* Likes */}
 						{authenticated &&
