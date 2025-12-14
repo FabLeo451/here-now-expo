@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { styles } from "@/Style";
 import { AppButton } from '@/components/AppButton';
 
+const commentsLimit = process.env.COMMENTS_LIMIT || 10;
+
 interface HotspotComment {
 	id: number;
 	hotspotId: string | null;
@@ -52,7 +54,7 @@ export const Comments: React.FC<Props> = ({
 		try {
 			setLoading(true);
 
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${hotspotId}/comments?limit=10&offset=${offset}`, {
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${hotspotId}/comments?limit=${commentsLimit}&offset=${offset}`, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
