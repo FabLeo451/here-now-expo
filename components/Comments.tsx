@@ -27,6 +27,7 @@ export const Comments: React.FC<Props> = ({
 }) => {
 	const [loading, setLoading] = useState(false);
 	const [updating, setUpdating] = useState(false);
+	const [readMore, setReadMore] = useState(true);
 	const [offset, setOffset] = useState(-1);
 	const [message, setMessage] = useState('');
 	const [comments, setComments] = useState<HotspotComment[]>([]);
@@ -84,7 +85,8 @@ export const Comments: React.FC<Props> = ({
 
 				setOffset(minOffset);
 				console.log('[Comments] minOffset =', minOffset);
-			}
+			} else
+				setReadMore(false);
 			
 		} catch (error: any) {
 			console.log('[getMyHotspots] ', error);
@@ -174,12 +176,12 @@ export const Comments: React.FC<Props> = ({
 						<Text style={{ textAlign: 'center', padding: 8 }}>
 							Loading comments...
 						</Text>
-					) : (
+					) : readMore ? (
 						<Pressable
 							onPress={() => getComments(hotspotId)}
 							style={{
 								backgroundColor: '#cececeff',
-								padding: 8,
+								padding: 2,
 								borderRadius: 4,
 								justifyContent: 'center',
 								alignItems: 'center',
@@ -188,7 +190,7 @@ export const Comments: React.FC<Props> = ({
 						>
 							<Ionicons name="chevron-down-outline" size={22} color="#333" />
 						</Pressable>
-					)
+					) : null
 				}
 			/>
 
