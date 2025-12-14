@@ -42,9 +42,10 @@ export default function Map({
 	const [userIconBase64, setUserIconBase64] = useState<string | null>(null);
 	const [hasCenteredOnce, setHasCenteredOnce] = useState(false);
 
-	const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string }>({
+	const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string, hotspot: Hotspot | null}>({
 		visible: false,
 		id: '',
+		hotspot: null
 	});
 
 	const handleWebViewMessage = (event: any) => {
@@ -58,7 +59,8 @@ export default function Map({
 			}
 
 			if (message.type === 'HOTSPOT_CLICKED') {
-				setModalVisible({ visible: true, id: message.id });
+				console.log('[handleWebViewMessage]', message);
+				setModalVisible({ visible: true, id: message.id, hotspot: message.hotspot });
 			}
 
 			if (message.type === 'REGION_CHANGED' && typeof onRegionChangeCompleteBounds === 'function') {
@@ -128,19 +130,6 @@ export default function Map({
 			updateUserPosition(${markerCoords.latitude}, ${markerCoords.longitude});
 			}
 		`);
-
-		// center ONLY the first time
-		/*
-		if (!hasCenteredOnce) {
-			webViewRef.current.injectJavaScript(`
-				if (typeof moveToLocation === 'function') {
-					moveToLocation([${markerCoords.latitude}, ${markerCoords.longitude}]);
-				}
-			`);
-			setHasCenteredOnce(true);
-			console.log("[map] first centering on marker");
-		}
-			*/
 	}, [mapReady, markerCoords]);
 
 	useEffect(() => {
@@ -186,7 +175,8 @@ export default function Map({
 			<ModalHotspot
 				visible={modalVisible.visible}
 				id={modalVisible.id}
-				onClose={() => setModalVisible({ visible: false, id: 'dummyId' })}
+				hotspot={modalVisible.hotspot}
+				onClose={() => setModalVisible({ visible: false, id: 'dummyId', hotspot: null })}
 			/>
 
 			<TouchableOpacity style={styles.fab} onPress={moveToMyPosition}>
@@ -342,7 +332,8 @@ function generateLeafletHTML({
         marker.on('click', () => {
           window.ReactNativeWebView?.postMessage(JSON.stringify({
             type: 'HOTSPOT_CLICKED',
-            id: h.id
+            id: h.id,
+			hotspot: h
           }));
         });
         hotspotMarkers.push(marker);
