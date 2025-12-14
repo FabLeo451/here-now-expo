@@ -21,6 +21,7 @@ export default function DropdownHotspot({ onSelect }: DropdownMenuProps): JSX.El
 
   const options = [
     { label: 'Clone', value: 'clone' },
+    { label: 'View page', value: 'view_hotspot_page' },
     { label: 'View on map', value: 'view_on_map' },
     { label: 'Delete', value: 'delete' },
   ];

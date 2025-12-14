@@ -324,8 +324,11 @@ const HomeTab: React.FC = () => {
 												handleClone(h.id);
 												break;
 
+											case 'view_hotspot_page':
+												router.push(`/hotspot-page?id=${h.id}`);
+
 											case 'view_on_map':
-												router.push({
+												router.replace({
 													pathname: '/map',
 													params: { 
 														hotspotId: h.id, 
