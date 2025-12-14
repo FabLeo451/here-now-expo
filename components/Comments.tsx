@@ -52,7 +52,7 @@ export const Comments: React.FC<Props> = ({
 		try {
 			setLoading(true);
 
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${hotspotId}/comments?limit=2&offset=${offset}`, {
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${hotspotId}/comments?limit=10&offset=${offset}`, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
