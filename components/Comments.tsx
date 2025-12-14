@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { TouchableOpacity, Alert, View, Text, TextInput, Pressable } from 'react-native';
+import { FlatList, Alert, View, Text, TextInput, Pressable } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from "@/Style";
 import { AppButton } from '@/components/AppButton';
 
-const commentsLimit = process.env.COMMENTS_LIMIT || 10;
+const commentsLimit = Number(process.env.EXPO_PUBLIC_COMMENTS_LIMIT) || 10;
 
 interface HotspotComment {
 	id: number;
@@ -131,6 +131,7 @@ export const Comments: React.FC<Props> = ({
 			//console.log('[Comments] data:', data);
 
 			setComments(prevComments => [data, ...prevComments]);
+			setMessage("");
 
 		} catch (error: any) {
 			console.log('[Comments] Error:', error);
@@ -141,7 +142,7 @@ export const Comments: React.FC<Props> = ({
 	};
 
 	return (
-		<View>
+		<View style={{ flex: 1 }}>
 			{context?.user.isAuthenticated && (
 				<View>
 					<TextInput
@@ -162,30 +163,35 @@ export const Comments: React.FC<Props> = ({
 				</View>
 			)}
 
-			<View>
-				{
-					comments?.map((c) => (
-						<CommentComponent key={c.id} comment={c} />
-					))
-				}
-			</View>
-
-			<View style={{ marginTop: 10 }}>
-				{loading ? (<Text>Loading comments...</Text>) : (
-					<Pressable
-						onPress={() => getComments(hotspotId)}
-						style={{
-							backgroundColor: '#cececeff',
-							padding: 2,
-							borderRadius: 4,
-							justifyContent: 'center',
-							alignItems: 'center',
-						}}
-					>
-						<Ionicons name="chevron-down-outline" size={22} color="#333" />
-					</Pressable>
+			<FlatList
+				data={comments}
+				keyExtractor={(item) => item.id.toString()}
+				renderItem={({ item }) => (
+					<CommentComponent comment={item} />
 				)}
-			</View>
+				ListFooterComponent={
+					loading ? (
+						<Text style={{ textAlign: 'center', padding: 8 }}>
+							Loading comments...
+						</Text>
+					) : (
+						<Pressable
+							onPress={() => getComments(hotspotId)}
+							style={{
+								backgroundColor: '#cececeff',
+								padding: 8,
+								borderRadius: 4,
+								justifyContent: 'center',
+								alignItems: 'center',
+								marginVertical: 8,
+							}}
+						>
+							<Ionicons name="chevron-down-outline" size={22} color="#333" />
+						</Pressable>
+					)
+				}
+			/>
+
 		</View>
 	);
 };
