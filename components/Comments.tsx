@@ -5,13 +5,14 @@ import { ActivityIndicator } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from "@/Style";
 import { AppButton } from '@/components/AppButton';
+import { useAuth } from '@/hooks/useAuth';
 
 const commentsLimit = Number(process.env.EXPO_PUBLIC_COMMENTS_LIMIT) || 10;
 
 interface HotspotComment {
 	id: number;
-	hotspotId: string | null;
-	userId: string | null;
+	hotspotId: string;
+	userId: string;
 	userName: string | null;
 	message: string;
 	created: string;  // ISO datetime string
@@ -31,18 +32,12 @@ export const Comments: React.FC<Props> = ({
 	const [offset, setOffset] = useState(-1);
 	const [message, setMessage] = useState('');
 	const [comments, setComments] = useState<HotspotComment[]>([]);
-	const [context, setContext] = useState(null);
+	//const [context, setContext] = useState(null);
+	const { user, token, isAuthenticated } = useAuth();
 
 	useEffect(() => {
 
 		const init = async () => {
-
-			const contextStr = await AsyncStorage.getItem('context');
-			const ctx = contextStr ? JSON.parse(contextStr) : {};
-			setContext(ctx);
-
-			//console.log('[Comments] ctx =', ctx);
-
 			getComments(hotspotId);
 		}
 
@@ -118,7 +113,7 @@ export const Comments: React.FC<Props> = ({
 						Authorization: token,
 					},
 					body: JSON.stringify({
-						userId: context?.user.id,
+						userId: user?.id,
 						message: message,
 					}),
 				}
@@ -129,7 +124,7 @@ export const Comments: React.FC<Props> = ({
 			}
 
 			const data: HotspotComment = await response.json();
-			data.userName = context?.user.name;
+			data.userName = user?.name ? user?.name : '';
 			//console.log('[Comments] data:', data);
 
 			setComments(prevComments => [data, ...prevComments]);
@@ -145,7 +140,7 @@ export const Comments: React.FC<Props> = ({
 
 	return (
 		<View style={{ flex: 1 }}>
-			{context?.user.isAuthenticated && (
+			{!user?.isGuest && (
 				<View>
 					<TextInput
 						style={[styles.textArea, {height: 70,}]}
