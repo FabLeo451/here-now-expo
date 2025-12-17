@@ -9,6 +9,9 @@ import * as eva from '@eva-design/eva';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useFonts, Dosis_600SemiBold } from '@expo-google-fonts/dosis';
+import { AuthProvider } from '@/context/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
+import { Redirect, useSegments } from 'expo-router';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -28,7 +31,6 @@ export default function RootLayout() {
     Dosis_600SemiBold,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -39,27 +41,44 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
-useEffect(() => {
-  console.log('Fonts loaded:', fontsLoaded);
-}, [fontsLoaded]);
+  if (!fontsLoaded) return null;
 
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
-  return <RootLayoutNav />;
+  return (
+    <AuthProvider>
+      <RootLayoutNav />
+    </AuthProvider>
+  );
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const { user, loading } = useAuth();
+  const segments = useSegments();
+
+  if (loading) return null;
+
+  const inAuthGroup = segments[0] === 'login';
+
+  // 🔐 Non loggato → solo login
+  if (!user && !inAuthGroup) {
+    return <Redirect href="/login" />;
+  }
+
+  // 🔓 Loggato → fuori dal login
+  if (user && inAuthGroup) {
+    return <Redirect href="/(tabs)" />;
+  }
 
   return (
-    <ApplicationProvider {...eva} theme={eva.light}>
+    <>
       <IconRegistry icons={EvaIconsPack} />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    </ApplicationProvider>
+      <ApplicationProvider
+        {...eva}
+        theme={colorScheme === 'dark' ? eva.dark : eva.light}
+      >
+        <Stack screenOptions={{ headerShown: false }} />
+      </ApplicationProvider>
+    </>
   );
 }
+

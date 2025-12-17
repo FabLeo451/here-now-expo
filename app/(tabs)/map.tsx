@@ -8,7 +8,7 @@ import { useLocalSearchParams } from 'expo-router';
 import Map from '@/components/Map';
 import type { MapView } from 'react-native-maps';
 import { Hotspot } from '@/lib/hotspot'
-
+import { useAuth } from '@/hooks/useAuth';
 
 type LatLng = {
 	latitude: number;
@@ -36,12 +36,13 @@ export default function MapTab() {
 
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
 	const [gpsPermission, setGPSPermission] = useState<boolean>(false);
-	const [authToken, setAuthToken] = useState<string | null>('');
+	//const [authToken, setAuthToken] = useState<string | null>('');
 	const [location, setLocation] = useState<Location.LocationObject | null>(null);
 	const [targetCoords, setTargetCoords] = useState(null);
 	const [markerCoords, setMarkerCoords] = useState(null);
 	const [mapReady, setMapReady] = useState<boolean>(false);
-
+	const { user, token } = useAuth();
+	
 	useFocusEffect(
 		useCallback(() => {
 
@@ -87,7 +88,7 @@ export default function MapTab() {
 	// Start once on mount: auth + WebSocket
 	useEffect(() => {
 		const init = async () => {
-			const token = await AsyncStorage.getItem('authToken');
+			//const token = await AsyncStorage.getItem('authToken');
 
 			if (!token) {
 				console.log('[MapTab] Redirecting to login...');
@@ -95,7 +96,7 @@ export default function MapTab() {
 				return;
 			}
 
-			setAuthToken(token);
+			//setAuthToken(token);
 
 			// Request GPS permissions
 			const { status } = await Location.requestForegroundPermissionsAsync();
@@ -125,7 +126,7 @@ export default function MapTab() {
 	// Start/stop location tracking only when tab is focused
 	useFocusEffect(
 		useCallback(() => {
-			if (!authToken) {
+			if (!token) {
 				return;
 			}
 
@@ -149,7 +150,7 @@ export default function MapTab() {
 
 			const connectWebsocket = async () => {
 
-				const wsUrl = `${process.env.EXPO_PUBLIC_WEBSOCKET_URL}?token=${authToken}`;
+				const wsUrl = `${process.env.EXPO_PUBLIC_WEBSOCKET_URL}?token=${token}`;
 				socket.current = new WebSocket(wsUrl);
 
 				socket.current.onopen = () => {
@@ -204,7 +205,7 @@ export default function MapTab() {
 					socket.current.close();
 				}
 			};
-		}, [authToken])
+		}, [token])
 	);
 /*
 	function sendUserPosition(latitude: number, longitude: number) {

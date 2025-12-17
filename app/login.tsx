@@ -11,6 +11,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { styles } from '@/Style';
 
+import { useAuth } from '@/hooks/useAuth'
+
 const getDeviceType = () => {
 	switch (Device.deviceType) {
 		case Device.DeviceType.PHONE:
@@ -34,6 +36,7 @@ const validateEmail = (email: string): boolean => {
 
 
 export default function LoginScreen() {
+	const { login } = useAuth();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [guestName, setGuestName] = useState('');
@@ -44,10 +47,6 @@ export default function LoginScreen() {
 
 	const [loading, setLoading] = useState(false);
 	const insets = useSafeAreaInsets();
-
-
-
-
 
 	const getDeviceInfo = () => {
 		const name = Constants.manifest?.name ?? Constants.expoConfig?.name ?? 'unknown';
@@ -109,25 +108,22 @@ export default function LoginScreen() {
 
 			await AsyncStorage.setItem('authToken', data.token);
 
-			const context = {
-				user: {
-					id: data.id,
-					name: data.name,
-					isGuest: false,
-					isAuthenticated: true
-				}
-			};
+			try {
 
-			console.log('context = ', context);
+				await login(
+					{
+						id: data.id,
+						name: data.name,
+						isAuthenticated: true,
+						isGuest: false,
+					},
+					data.token
+				);
 
-			await AsyncStorage.setItem('context', JSON.stringify(context));
+			} catch(e) {
+				console.error(e.message);
+			}
 
-			/*setTimeout(() => {
-				console.log('[login] Redirecting...');
-				router.replace('/(tabs)');
-			}, 1000)*/
-			
-			//setLoggedIn(true);
 			router.replace('/(tabs)');
 
 		} catch (error) {
@@ -164,17 +160,21 @@ export default function LoginScreen() {
 
 			const data = await response.json();
 
-			await AsyncStorage.setItem('authToken', data.token);
+			try {
 
-			const context = {
-				user: {
-					name: guestName,
-					isGuest: true,
-					isAuthenticated: false
-				}
-			};
+				await login(
+					{
+						id: data.id,
+						name: data.name,
+						isAuthenticated: false,
+						isGuest: true,
+					},
+					data.token
+				);
 
-			await AsyncStorage.setItem('context', JSON.stringify(context));
+			} catch(e) {
+				console.error(e.message);
+			}
 
 			router.replace('/(tabs)');
 

@@ -14,6 +14,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
 import { Hotspot, isActive } from '@/lib/hotspot';
+import { useAuth } from '@/hooks/useAuth';
 
 const isTokenValid = async (token: string): Promise<boolean> => {
 	try {
@@ -34,7 +35,8 @@ const HomeTab: React.FC = () => {
 	const [active, setActive] = useState<number | null>(0);
 	const [inactive, setInactive] = useState<number | null>(0);
 	const [subs, setSubs] = useState<number | null>(0);
-	const [context, setContext] = useState<any>(null);
+	//const [context, setContext] = useState<any>(null);
+	const { user, token } = useAuth();
 
 	useFocusEffect(
 
@@ -43,8 +45,6 @@ const HomeTab: React.FC = () => {
 
 				console.log('[index] Home page focused. Checking authorization and refreshing data...');
 
-				// Get token
-				const token = await AsyncStorage.getItem('authToken');
 				if (!token) {
 					router.replace('/login');
 					return;
@@ -57,12 +57,7 @@ const HomeTab: React.FC = () => {
 					return;
 				}
 
-				// Get context
-				const contextStr = await AsyncStorage.getItem('context');
-				const ctx = contextStr ? JSON.parse(contextStr) : {};
-				setContext(ctx);
-
-				if (ctx.user?.isAuthenticated) {
+				if (user?.isAuthenticated) {
 					getMyHotspots(token);
 					getMyHSubscriptions(token);
 				}
@@ -130,7 +125,7 @@ const HomeTab: React.FC = () => {
 
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
-			<Text style={styles.header}>Hello, {context?.user?.name || 'Utente'} 👋</Text>
+			<Text style={styles.header}>Hello, {user?.name || 'Utente'} 👋</Text>
 
 			<Text style={styles.subtitle}>Here’s your dashboard</Text>
 

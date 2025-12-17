@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, Alert, View, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +20,11 @@ export const HotspotLikeButton: React.FC<Props> = ({
 	const [likes, setLikes] = useState<number>(initialLikes);
 	const [likedByMe, setLikedByMe] = useState<boolean>(initialLikedByMe);
 	const [loading, setLoading] = useState(false);
+
+	useEffect(() => {
+		//console.log(`[HotspotLikeButton.useEffect] Updating likes =,`, likes);
+		//console.log(`[HotspotLikeButton.useEffect] Updating likedByMe = `, likedByMe);
+	}, [likes, likedByMe]);
 
 	const handleLike = async (like: boolean) => {
 		if (loading) return;

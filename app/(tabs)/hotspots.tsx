@@ -16,6 +16,7 @@ import { decode as atob } from 'base-64';
 import { Picker } from '@react-native-picker/picker';
 import DropdownHotspot from '@/components/DropdownHotspot'
 import { Hotspot, isActive } from '@/lib/hotspot'
+import { useAuth } from '@/hooks/useAuth';
 
 const isTokenValid = async (token: string): Promise<boolean> => {
 
@@ -36,10 +37,11 @@ const isTokenValid = async (token: string): Promise<boolean> => {
 
 const HomeTab: React.FC = () => {
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
-	const [context, setContext] = useState(null);
-	const [authToken, setAuthToken] = useState('');
+	//const [context, setContext] = useState(null);
+	//const [authToken, setAuthToken] = useState('');
 	const [refreshing, setRefreshing] = useState(false);
 	const [filterValue, setFilterValue] = useState('all');
+	const { user, token } = useAuth();
 
 	const { filter } = useLocalSearchParams();
 
@@ -53,10 +55,7 @@ const HomeTab: React.FC = () => {
 		useCallback(() => {
 			const checkToken = async () => {
 
-				const token = await AsyncStorage.getItem('authToken');
-
-				if (!token)
-					return;
+				if (!token)	return;
 
 				console.log('[hotspots] Checking token validity...')
 				const valid = await isTokenValid(token);
@@ -71,23 +70,8 @@ const HomeTab: React.FC = () => {
 
 	useEffect(() => {
 		const checkAuth = async () => {
-			const token = await AsyncStorage.getItem('authToken');
-			//console.log('[hotspots] Token found: ', !!token);
-
-			if (!token) {
-				console.log('[hotspots] Redirecting to login...');
-				router.replace('/login');
-			} else {
-
-				setAuthToken(token);
-
-				const contextStr = await AsyncStorage.getItem('context');
-				const ctx = contextStr ? JSON.parse(contextStr) : {};
-				setContext(ctx);
-
-				if (ctx.user.isAuthenticated)
-					getMyHotspots(token);
-			}
+			if (user?.isAuthenticated && token)
+				getMyHotspots(token);
 		};
 
 		checkAuth();
@@ -148,11 +132,12 @@ const HomeTab: React.FC = () => {
 	});
 
 	const onRefresh = useCallback(() => {
-		getMyHotspots(authToken);
-	}, [authToken]);
+		if (token)
+			getMyHotspots(token);
+	}, []);
 
 	const handleDelete = async (id: string) => {
-		const token = await AsyncStorage.getItem('authToken');
+		//const token = await AsyncStorage.getItem('authToken');
 
 		try {
 			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}`, {
@@ -175,7 +160,7 @@ const HomeTab: React.FC = () => {
 	};
 
 	const handleClone = async (id: string) => {
-		const token = await AsyncStorage.getItem('authToken');
+		//const token = await AsyncStorage.getItem('authToken');
 
 		try {
 			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}/clone`, {
@@ -226,21 +211,8 @@ const HomeTab: React.FC = () => {
 			}
 		});
 	}
-/*
-	function isActive(h: Hotspot): boolean {
-		if (!h.enabled || !h.startTime || !h.endTime) return false;
 
-		const now = new Date();
-		const start = new Date(h.startTime);
-		const end = new Date(h.endTime);
-
-		return now >= start && now <= end;
-	}
-*/
-	if (!context)
-		return null;
-
-	if (context.user.isGuest)
+	if (user?.isGuest)
 		return (
 			<View style={{
 				flex: 1,

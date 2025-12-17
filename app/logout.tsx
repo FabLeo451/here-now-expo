@@ -3,12 +3,14 @@ import React, { useEffect } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import { useAuth } from '@/hooks/useAuth'
 
 export default function Logout() {
+	const { logout } = useAuth();
 
 	useEffect(() => {
 
-		const logout = async () => {
+		const logoutUser = async () => {
 
 			const token = await AsyncStorage.getItem('authToken');
 
@@ -28,6 +30,8 @@ export default function Logout() {
 					throw new Error('Error calling /logout');
 				}
 
+				await logout();
+
 			} catch (error) {
 				const message = error instanceof Error ? error.message : 'Unknown error';
 				console.log('[profile]', message);
@@ -39,7 +43,7 @@ export default function Logout() {
 			router.replace('/login');
 		}
 
-		logout();
+		logoutUser();
 
 	}, []);
 

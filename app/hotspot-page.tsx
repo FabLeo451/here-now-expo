@@ -19,6 +19,7 @@ import { HotspotLikeButton } from '@/components/HotspotLikeButton';
 import { Comments } from '@/components/Comments';
 import { AppButton } from '@/components/AppButton';
 import { Share } from 'react-native';
+import { useAuth } from '@/hooks/useAuth';
 
 type Params = {
 	id: string;
@@ -30,10 +31,7 @@ const HotspotPage: React.FC = () => {
 
 	const insets = useSafeAreaInsets();
 
-	const [authToken, setAuthToken] = useState('');
-	const [context, setContext] = useState(null);
-	const [authenticated, setAuthenticated] = useState<boolean>(false);
-
+	const { user, token } = useAuth();
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
 	const [likes, setLikes] = useState<number>(0);
 	const [likedByMe, setLikedByMe] = useState<boolean>(false);
@@ -46,14 +44,6 @@ const HotspotPage: React.FC = () => {
 	useEffect(() => {
 
 		const init = async () => {
-			const token = await AsyncStorage.getItem('authToken');
-			setAuthToken(token ?? '');
-
-			const contextStr = await AsyncStorage.getItem('context');
-			const ctx = contextStr ? JSON.parse(contextStr) : {};
-			setContext(ctx);
-			setAuthenticated(ctx.user.isAuthenticated);
-
 			if (token)
 				getHotspot(token, id);
 		}
@@ -61,16 +51,6 @@ const HotspotPage: React.FC = () => {
 		init();
 
 	}, [id]);
-
-	useEffect(() => {
-
-		if (hotspots[0]) {
-			setLikes(hotspots[0].likes);
-			setLikedByMe(hotspots[0].likedByMe);
-			setSubscribed(hotspots[0].subscribed);
-		}
-
-	}, [hotspots]);
 
 	const getHotspot = async (token: string, id: string) => {
 
@@ -92,6 +72,11 @@ const HotspotPage: React.FC = () => {
 			if (response.ok) {
 				const data: Hotspot[] = await response.json();
 				setHotspots(data);
+
+				setLikes(data[0].likes);
+				setLikedByMe(data[0].likedByMe);
+				setSubscribed(data[0].subscribed);
+
 				setLoaded(true);
 			} else {
 				//console.log('[HotspotPage.getHotspot] ', response);
@@ -153,7 +138,7 @@ const HotspotPage: React.FC = () => {
 						title="Retry"
 						icon={<Ionicons name="refresh-outline" size={18} color="white" />}
 						onPress={() => {
-							getHotspot(authToken, id);
+							if (token) getHotspot(token, id);
 						}}
 					/>
 				</View>
@@ -204,7 +189,7 @@ const HotspotPage: React.FC = () => {
 						/>
 
 						{/* Likes */}
-						{authenticated &&
+						{user?.isAuthenticated &&
 							(
 								<HotspotLikeButton
 									hotspotId={hotspots[0].id}
@@ -222,7 +207,7 @@ const HotspotPage: React.FC = () => {
 
 
 						{/* Subscribe/unsubscribe */}
-						{(!hotspots[0].ownedByMe && authenticated) &&
+						{(!hotspots[0].ownedByMe && user?.isAuthenticated) &&
 							(
 								<HotspotSubscriptionButton
 									hotspotId={hotspots[0].id}
@@ -234,7 +219,7 @@ const HotspotPage: React.FC = () => {
 					</View>
 
 					{/* Comments */}
-					{authenticated &&
+					{user?.isAuthenticated &&
 						(
 							<Comments hotspotId={hotspots[0].id} />
 						)
