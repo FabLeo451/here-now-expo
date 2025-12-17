@@ -32,10 +32,6 @@ const HotspotPage: React.FC = () => {
 	const insets = useSafeAreaInsets();
 
 	const { user, token } = useAuth();
-	//const [authToken, setAuthToken] = useState('');
-	//const [context, setContext] = useState(null);
-	//const [authenticated, setAuthenticated] = useState<boolean>(false);
-
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
 	const [likes, setLikes] = useState<number>(0);
 	const [likedByMe, setLikedByMe] = useState<boolean>(false);
@@ -55,16 +51,6 @@ const HotspotPage: React.FC = () => {
 		init();
 
 	}, [id]);
-
-	useEffect(() => {
-
-		if (hotspots[0]) {
-			setLikes(hotspots[0].likes);
-			setLikedByMe(hotspots[0].likedByMe);
-			setSubscribed(hotspots[0].subscribed);
-		}
-
-	}, [hotspots]);
 
 	const getHotspot = async (token: string, id: string) => {
 
@@ -86,6 +72,11 @@ const HotspotPage: React.FC = () => {
 			if (response.ok) {
 				const data: Hotspot[] = await response.json();
 				setHotspots(data);
+
+				setLikes(data[0].likes);
+				setLikedByMe(data[0].likedByMe);
+				setSubscribed(data[0].subscribed);
+
 				setLoaded(true);
 			} else {
 				//console.log('[HotspotPage.getHotspot] ', response);
