@@ -41,7 +41,7 @@ const HomeTab: React.FC = () => {
 	//const [authToken, setAuthToken] = useState('');
 	const [refreshing, setRefreshing] = useState(false);
 	const [filterValue, setFilterValue] = useState('all');
-	const { user, token, isAuthenticated } = useAuth();
+	const { user, token } = useAuth();
 
 	const { filter } = useLocalSearchParams();
 
@@ -70,7 +70,7 @@ const HomeTab: React.FC = () => {
 
 	useEffect(() => {
 		const checkAuth = async () => {
-			if (isAuthenticated && token)
+			if (user?.isAuthenticated && token)
 				getMyHotspots(token);
 		};
 

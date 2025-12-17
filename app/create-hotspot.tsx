@@ -19,13 +19,15 @@ import { useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import ModalMapSelect from '@/components/ModalMapSelect'
 import { Hotspot, Category } from '@/lib/hotspot'
+import { useAuth } from '@/hooks/useAuth';
 
 const CreateHotspot: React.FC = () => {
 
 	const { action, hotspotEnc } = useLocalSearchParams();
 	const insets = useSafeAreaInsets();
 
-	const [authToken, setAuthToken] = useState('');
+	//const [authToken, setAuthToken] = useState('');
+	const { user, token } = useAuth();
 	const [id, setId] = useState('');
 	const [name, setName] = useState('');
 	const [description, setDescription] = useState('');
@@ -50,8 +52,8 @@ const CreateHotspot: React.FC = () => {
 	useEffect(() => {
 
 		const init = async () => {
-			const token = await AsyncStorage.getItem('authToken');
-			setAuthToken(token ?? '');
+			//const token = await AsyncStorage.getItem('authToken');
+			//setAuthToken(token ?? '');
 
 			const { status } = await Location.requestForegroundPermissionsAsync();
 			if (status !== 'granted') {
@@ -141,7 +143,7 @@ const CreateHotspot: React.FC = () => {
 		//const token = await AsyncStorage.getItem('authToken');
 		const title = 'Invalid data';
 
-		if (!authToken) {
+		if (!token) {
 			Alert.alert('Error', 'Not authenticated');
 			return false;
 		}
@@ -185,7 +187,7 @@ const CreateHotspot: React.FC = () => {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: authToken,
+					Authorization: token,
 				},
 				body: JSON.stringify(hotspot),
 			});
@@ -229,7 +231,7 @@ const CreateHotspot: React.FC = () => {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: authToken,
+					Authorization: token,
 				},
 				body: JSON.stringify(hotspot),
 			});
@@ -264,7 +266,7 @@ const CreateHotspot: React.FC = () => {
 			</View>
 			<View style={styles.container}>
 				<ModalMapSelect
-					token={authToken}
+					token={token}
 					visible={modalVisible}
 					latitude={location?.latitude ?? 0}
 					longitude={location?.longitude ?? 0}

@@ -52,7 +52,7 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { isAuthenticated, loading } = useAuth();
+  const { user, loading } = useAuth();
   const segments = useSegments();
 
   if (loading) return null;
@@ -60,12 +60,12 @@ function RootLayoutNav() {
   const inAuthGroup = segments[0] === 'login';
 
   // 🔐 Non loggato → solo login
-  if (!isAuthenticated && !inAuthGroup) {
+  if (!user && !inAuthGroup) {
     return <Redirect href="/login" />;
   }
 
   // 🔓 Loggato → fuori dal login
-  if (isAuthenticated && inAuthGroup) {
+  if (user && inAuthGroup) {
     return <Redirect href="/(tabs)" />;
   }
 

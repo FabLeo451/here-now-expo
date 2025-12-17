@@ -107,26 +107,14 @@ export default function LoginScreen() {
 			console.log('[login] Authenticated', data);
 
 			await AsyncStorage.setItem('authToken', data.token);
-/*
-			const context = {
-				user: {
-					id: data.id,
-					name: data.name,
-					isGuest: false,
-					isAuthenticated: true
-				}
-			};
 
-			console.log('context = ', context);
-
-			await AsyncStorage.setItem('context', JSON.stringify(context));
-*/
 			try {
 
 				await login(
 					{
 						id: data.id,
 						name: data.name,
+						isAuthenticated: true,
 						isGuest: false,
 					},
 					data.token
@@ -136,12 +124,6 @@ export default function LoginScreen() {
 				console.error(e.message);
 			}
 
-			/*setTimeout(() => {
-				console.log('[login] Redirecting...');
-				router.replace('/(tabs)');
-			}, 1000)*/
-			
-			//setLoggedIn(true);
 			router.replace('/(tabs)');
 
 		} catch (error) {
@@ -184,6 +166,7 @@ export default function LoginScreen() {
 					{
 						id: data.id,
 						name: data.name,
+						isAuthenticated: false,
 						isGuest: true,
 					},
 					data.token

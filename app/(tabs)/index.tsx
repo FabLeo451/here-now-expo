@@ -36,7 +36,7 @@ const HomeTab: React.FC = () => {
 	const [inactive, setInactive] = useState<number | null>(0);
 	const [subs, setSubs] = useState<number | null>(0);
 	//const [context, setContext] = useState<any>(null);
-	const { user, token, isAuthenticated } = useAuth();
+	const { user, token } = useAuth();
 
 	useFocusEffect(
 
@@ -57,7 +57,7 @@ const HomeTab: React.FC = () => {
 					return;
 				}
 
-				if (isAuthenticated) {
+				if (user?.isAuthenticated) {
 					getMyHotspots(token);
 					getMyHSubscriptions(token);
 				}

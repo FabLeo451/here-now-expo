@@ -41,7 +41,7 @@ export default function MapTab() {
 	const [targetCoords, setTargetCoords] = useState(null);
 	const [markerCoords, setMarkerCoords] = useState(null);
 	const [mapReady, setMapReady] = useState<boolean>(false);
-	const { user, token, isAuthenticated } = useAuth();
+	const { user, token } = useAuth();
 	
 	useFocusEffect(
 		useCallback(() => {

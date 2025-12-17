@@ -31,7 +31,7 @@ const HotspotPage: React.FC = () => {
 
 	const insets = useSafeAreaInsets();
 
-	const { user, token, isAuthenticated } = useAuth();
+	const { user, token } = useAuth();
 	//const [authToken, setAuthToken] = useState('');
 	//const [context, setContext] = useState(null);
 	//const [authenticated, setAuthenticated] = useState<boolean>(false);
@@ -198,7 +198,7 @@ const HotspotPage: React.FC = () => {
 						/>
 
 						{/* Likes */}
-						{!user?.isGuest &&
+						{user?.isAuthenticated &&
 							(
 								<HotspotLikeButton
 									hotspotId={hotspots[0].id}
@@ -216,7 +216,7 @@ const HotspotPage: React.FC = () => {
 
 
 						{/* Subscribe/unsubscribe */}
-						{(!hotspots[0].ownedByMe && !user?.isGuest) &&
+						{(!hotspots[0].ownedByMe && user?.isAuthenticated) &&
 							(
 								<HotspotSubscriptionButton
 									hotspotId={hotspots[0].id}
@@ -228,7 +228,7 @@ const HotspotPage: React.FC = () => {
 					</View>
 
 					{/* Comments */}
-					{!user?.isGuest &&
+					{user?.isAuthenticated &&
 						(
 							<Comments hotspotId={hotspots[0].id} />
 						)
