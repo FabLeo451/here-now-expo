@@ -120,14 +120,7 @@ const HotspotPage: React.FC = () => {
 	};
 
 	return (
-		<View style={{
-			paddingTop: insets.top,
-			paddingBottom: insets.bottom,
-			paddingLeft: insets.left,
-			paddingRight: insets.right,
-			flex: 1,
-			backgroundColor: '#f0f0f0',
-		}}>
+		<>
 
 			{loading && (<View><Text>Loading...</Text></View>)}
 
@@ -160,7 +153,7 @@ const HotspotPage: React.FC = () => {
 
 			{(loaded) && (
 				<>
-					<View style={{ height: 250 }}>
+					<View style={{ height: 230, borderBottomWidth: 1, borderBottomColor: 'lightgray' }}>
 						<Map
 							mapRef={mapRef}
 							//initialCoords={targetCoords ? targetCoords : markerCoords} 
@@ -247,7 +240,7 @@ const HotspotPage: React.FC = () => {
 					</View>
 				</>
 			)}
-		</View >
+		</>
 
 	);
 };
