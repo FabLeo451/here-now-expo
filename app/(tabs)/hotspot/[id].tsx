@@ -11,7 +11,6 @@ import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/comp
 import { styles } from "@/Style";
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
 import { Hotspot, Category } from '@/lib/hotspot'
 import { HotspotSubscriptionButton } from '@/components/HotspotSubscriptionButton';
@@ -121,12 +120,6 @@ const HotspotPage: React.FC = () => {
 			flex: 1,
 			backgroundColor: '#f0f0f0',
 		}}>
-			<View style={styles.rowLeft}>
-				<TouchableOpacity style={{ marginHorizontal: 10, marginVertical: 10 }} onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')}>
-					<Ionicons name="chevron-back" size={24} color="black" />
-				</TouchableOpacity>
-				<Text style={styles.sectionTitle}>Hotspot</Text>
-			</View>
 
 			{loading && (<View><Text>Loading...</Text></View>)}
 
@@ -146,7 +139,7 @@ const HotspotPage: React.FC = () => {
 
 			{notFound && (
 				<View style={{ marginTop: 50, justifyContent: 'center', alignItems: 'center', gap: 10 }}>
-					<Text style={{ fontSize: 25, fontWeight: "bold" }}>Not found</Text>
+					<Text style={{ fontSize: 25, fontWeight: "bold" }}>Hotspot not found</Text>
 					<AppButton
 						title="Home"
 						icon={<Ionicons name="home-outline" size={18} color="white" />}

@@ -297,7 +297,8 @@ const HomeTab: React.FC = () => {
 												break;
 
 											case 'view_hotspot_page':
-												router.push(`/hotspot-page?id=${h.id}`);
+												router.navigate(`/hotspot/${h.id}`);
+												break;
 
 											case 'view_on_map':
 												router.replace({
