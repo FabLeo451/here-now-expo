@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
 	Alert,
 	View,
@@ -19,6 +19,8 @@ import { Comments } from '@/components/Comments';
 import { AppButton } from '@/components/AppButton';
 import { Share } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
+import type MapView from 'react-native-maps';
+import Map from '@/components/Map';
 
 type Params = {
 	id: string;
@@ -39,6 +41,8 @@ const HotspotPage: React.FC = () => {
 	const [subscribed, setSubscribed] = useState<boolean>(false);
 	const [notFound, setNotFound] = useState<boolean>(false);
 	const [error, setError] = useState<boolean>(false);
+	const [targetCoords, setTargetCoords] = useState(null);
+	const mapRef = useRef<MapView>(null);
 
 	useEffect(() => {
 
@@ -75,6 +79,10 @@ const HotspotPage: React.FC = () => {
 				setLikes(data[0].likes);
 				setLikedByMe(data[0].likedByMe);
 				setSubscribed(data[0].subscribed);
+				setTargetCoords({
+					latitude: data[0].position.latitude,
+					longitude: data[0].position.longitude,
+				});
 
 				setLoaded(true);
 			} else {
@@ -124,7 +132,7 @@ const HotspotPage: React.FC = () => {
 			{loading && (<View><Text>Loading...</Text></View>)}
 
 			{error && (
-				<View style={{ marginTop: 50, justifyContent: 'center', alignItems: 'center', gap:20 }}>
+				<View style={{ marginTop: 50, justifyContent: 'center', alignItems: 'center', gap: 20 }}>
 					<Ionicons name="alert-circle-outline" size={30} color="red" />
 					<Text style={{ fontSize: 20, fontWeight: "bold" }}>Unable to retrieve hotspot</Text>
 					<AppButton
@@ -151,74 +159,93 @@ const HotspotPage: React.FC = () => {
 			)}
 
 			{(loaded) && (
-				<View style={styles.container}>
-
-					{/* Name */}
-					<Text style={styles.sectionTitle}>{hotspots[0].name}</Text>
-					<Text style={{ fontSize: 10, fontStyle: "italic", marginBottom: 8, color: "gray" }}>Created by {hotspots[0].owner}</Text>
-
-					{/* Description */}
-					<Text>{hotspots[0].description}</Text>
-
-					{/* Category */}
-					{/* <Text style={styles.label}>{hotspots[0].category}</Text>*/}
-
-					<View style={[styles.row, { marginVertical: 8 }]}>
-
-						<AppButton
-							title="View on map"
-							icon={<Ionicons name="map-outline" size={15} color="white" />}
-							onPress={() => {
-								const h = hotspots[0];
-								router.push({
-									pathname: '/map',
-									params: {
-										hotspotId: String(h.id),
-										targetLatitude: String(h.position.latitude),
-										targetLongitude: String(h.position.longitude),
-									},
-								});
+				<>
+					<View style={{ height: 250 }}>
+						<Map
+							mapRef={mapRef}
+							//initialCoords={targetCoords ? targetCoords : markerCoords} 
+							initialCoords={targetCoords}
+							markerCoords={targetCoords} 
+							hotspots={hotspots}
+							onMapReady={() => {
+								console.log('[map] Map ready');
+								//setMapReady(true);
+							}}
+							onRegionChangeCompleteBounds={(boundaries: Boundaries) => {
+								//console.log("Visible map:", boundaries);
+								//sendMapBoundaries(boundaries);
 							}}
 						/>
+					</View>
+					<View style={styles.container}>
 
-						{/* Likes */}
+						{/* Name */}
+						<Text style={{ fontSize: 20, fontWeight: "bold" }}>{hotspots[0].name}</Text>
+						<Text style={{ fontSize: 10, fontStyle: "italic", marginBottom: 14, color: "dimgray" }}>Created by {hotspots[0].owner}</Text>
+
+						{/* Description */}
+						<Text>{hotspots[0].description}</Text>
+
+						{/* Category */}
+						{/* <Text style={styles.label}>{hotspots[0].category}</Text>*/}
+
+						<View style={[styles.row, { marginVertical: 8 }]}>
+
+							<AppButton
+								title="View on map"
+								icon={<Ionicons name="map-outline" size={15} color="white" />}
+								onPress={() => {
+									const h = hotspots[0];
+									router.push({
+										pathname: '/map',
+										params: {
+											hotspotId: String(h.id),
+											targetLatitude: String(h.position.latitude),
+											targetLongitude: String(h.position.longitude),
+										},
+									});
+								}}
+							/>
+
+							{/* Likes */}
+							{user?.isAuthenticated &&
+								(
+									<HotspotLikeButton
+										hotspotId={hotspots[0].id}
+										initialLikedByMe={likedByMe}
+										initialLikes={likes}
+										onChange={(value) => console.log("Liked by me:", value)}
+									/>
+								)
+							}
+
+							{/* Share */}
+							<TouchableOpacity onPress={() => { shareHotspot(hotspots[0]) }} >
+								<Ionicons name="share-social-outline" size={25} color="green" />
+							</TouchableOpacity>
+
+
+							{/* Subscribe/unsubscribe */}
+							{(!hotspots[0].ownedByMe && user?.isAuthenticated) &&
+								(
+									<HotspotSubscriptionButton
+										hotspotId={hotspots[0].id}
+										initialSubscribed={subscribed}
+										onChange={(value) => console.log("New subscription state:", value)}
+									/>
+								)
+							}
+						</View>
+
+						{/* Comments */}
 						{user?.isAuthenticated &&
 							(
-								<HotspotLikeButton
-									hotspotId={hotspots[0].id}
-									initialLikedByMe={likedByMe}
-									initialLikes={likes}
-									onChange={(value) => console.log("Liked by me:", value)}
-								/>
+								<Comments hotspotId={hotspots[0].id} />
 							)
 						}
 
-						{/* Share */}
-						<TouchableOpacity onPress={() => { shareHotspot(hotspots[0]) }} >
-							<Ionicons name="share-social-outline" size={25} color="green" />
-						</TouchableOpacity>
-
-
-						{/* Subscribe/unsubscribe */}
-						{(!hotspots[0].ownedByMe && user?.isAuthenticated) &&
-							(
-								<HotspotSubscriptionButton
-									hotspotId={hotspots[0].id}
-									initialSubscribed={subscribed}
-									onChange={(value) => console.log("New subscription state:", value)}
-								/>
-							)
-						}
 					</View>
-
-					{/* Comments */}
-					{user?.isAuthenticated &&
-						(
-							<Comments hotspotId={hotspots[0].id} />
-						)
-					}
-
-				</View>
+				</>
 			)}
 		</View >
 
