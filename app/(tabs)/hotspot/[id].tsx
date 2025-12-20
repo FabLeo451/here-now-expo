@@ -169,23 +169,9 @@ const HotspotPage: React.FC = () => {
 								//sendMapBoundaries(boundaries);
 							}}
 						/>
-					</View>
-					<View style={styles.container}>
-
-						{/* Name */}
-						<Text style={{ fontSize: 20, fontWeight: "bold" }}>{hotspots[0].name}</Text>
-						<Text style={{ fontSize: 10, fontStyle: "italic", marginBottom: 14, color: "dimgray" }}>Created by {hotspots[0].owner}</Text>
-
-						{/* Description */}
-						<Text>{hotspots[0].description}</Text>
-
-						{/* Category */}
-						{/* <Text style={styles.label}>{hotspots[0].category}</Text>*/}
-
-						<View style={[styles.row, { marginVertical: 8 }]}>
-
+						<View style={{ position:'absolute', top:10, right:10 }}>
 							<AppButton
-								title="View on map"
+								title="Map"
 								icon={<Ionicons name="map-outline" size={15} color="white" />}
 								onPress={() => {
 									const h = hotspots[0];
@@ -199,6 +185,21 @@ const HotspotPage: React.FC = () => {
 									});
 								}}
 							/>
+						</View>
+					</View>
+					<View style={styles.container}>
+
+						{/* Name */}
+						<Text style={{ fontSize: 20, fontWeight: "bold" }}>{hotspots[0].name}</Text>
+
+						{/* Category */}
+						{/* <Text style={styles.label}>{hotspots[0].category}</Text>*/}
+
+						<View style={[styles.rowLeft, { marginVertical: 0 }]}>
+
+							<View>
+								<Text style={{ fontSize: 12, fontStyle: "italic", marginBottom: 0, color: "dimgray" }}>Created by {hotspots[0].owner}</Text>
+							</View>
 
 							{/* Likes */}
 							{user?.isAuthenticated &&
@@ -229,6 +230,9 @@ const HotspotPage: React.FC = () => {
 								)
 							}
 						</View>
+
+						{/* Description */}
+						<Text>{hotspots[0].description}</Text>
 
 						{/* Comments */}
 						{user?.isAuthenticated &&
