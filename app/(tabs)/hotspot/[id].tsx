@@ -232,7 +232,15 @@ const HotspotPage: React.FC = () => {
 						</View>
 
 						{/* Description */}
-						<Text>{hotspots[0].description}</Text>
+						<Text style={{ 
+							marginVertical:5, 
+							padding:5, 
+							backgroundColor:'gainsboro',
+							borderRadius:5,
+							fontSize:14
+							}}>
+								{hotspots[0].description}
+						</Text>
 
 						{/* Comments */}
 						{user?.isAuthenticated &&
