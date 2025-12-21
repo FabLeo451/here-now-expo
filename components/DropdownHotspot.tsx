@@ -6,25 +6,26 @@ import {
   StyleSheet,
   Modal,
   Pressable,
-  Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import Constants from 'expo-constants';
+
+type DropdownOption = {
+  label: string;
+  value: string;
+  icon?: keyof typeof Ionicons.glyphMap; // 👈 opzionale
+  color?: string; // opzionale (utile per Delete)
+};
 
 type DropdownMenuProps = {
+  options: DropdownOption[];
   onSelect: (value: string) => void;
 };
 
-export default function DropdownHotspot({ onSelect }: DropdownMenuProps): JSX.Element {
+export default function DropdownMenu({
+  options,
+  onSelect,
+}: DropdownMenuProps): JSX.Element {
   const [visible, setVisible] = useState(false);
-
-  const options = [
-    { label: 'Clone', value: 'clone' },
-    { label: 'View page', value: 'view_hotspot_page' },
-    { label: 'View on map', value: 'view_on_map' },
-    { label: 'Delete', value: 'delete' },
-  ];
 
   return (
     <View style={styles.wrapper}>
@@ -35,16 +36,32 @@ export default function DropdownHotspot({ onSelect }: DropdownMenuProps): JSX.El
       <Modal transparent visible={visible} animationType="fade">
         <Pressable style={styles.backdrop} onPress={() => setVisible(false)}>
           <View style={styles.menu}>
-            {options.map((option) => (
+            {options.map(option => (
               <TouchableOpacity
                 key={option.value}
+                style={styles.menuItem}
                 onPress={() => {
                   setVisible(false);
                   onSelect(option.value);
                 }}
-                style={styles.menuItem}
               >
-                <Text style={styles.menuText}>{option.label}</Text>
+                {option.icon && (
+                  <Ionicons
+                    name={option.icon}
+                    size={18}
+                    color={option.color ?? '#333'}
+                    style={styles.icon}
+                  />
+                )}
+
+                <Text
+                  style={[
+                    styles.menuText,
+                    option.color && { color: option.color },
+                  ]}
+                >
+                  {option.label}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -71,12 +88,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 6,
     elevation: 4,
-    width: 160,
+    width: 180,
     paddingVertical: 8,
   },
   menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
+  },
+  icon: {
+    marginRight: 12,
   },
   menuText: {
     fontSize: 16,
