@@ -1,45 +1,45 @@
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
-	container: {
+  container: {
     flex: 1,
     padding: 16,
     backgroundColor: 'white',
-	},
-	containerList: {
+  },
+  containerList: {
     flex: 1,
     backgroundColor: 'white',
-	},
-	mainTitle: {
-		marginTop: 60,
-		marginBottom: 100,
-		textAlign: 'center',
-		fontFamily: 'Dosis_600SemiBold',
+  },
+  mainTitle: {
+    marginTop: 60,
+    marginBottom: 100,
+    textAlign: 'center',
+    fontFamily: 'Dosis_600SemiBold',
     fontSize: 40
-	},
-	title: {
-		marginTop: 10,
-		marginBottom: 20,
-		textAlign: 'center',
-		fontFamily: 'Ubuntu_300Light'
-	},
-	input: {
+  },
+  title: {
+    marginTop: 10,
+    marginBottom: 20,
+    textAlign: 'center',
+    fontFamily: 'Ubuntu_300Light'
+  },
+  input: {
     backgroundColor: "white",
     minWidth: 300,
-	},
-	button: {
-		minWidth: 250,
-		alignSelf: 'center',
-		marginVertical: 10,
-	},
-	selectButton: {
+  },
+  button: {
+    minWidth: 250,
+    alignSelf: 'center',
+    marginVertical: 10,
+  },
+  selectButton: {
     width: 40,
     height: 40,
     backgroundColor: '#007AFF',
     borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',
-	},
+  },
   fab: {
     position: 'absolute',
     right: 20,
@@ -61,25 +61,25 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     zIndex: 5
   },
-	link: {
-		textAlign: 'center',
-		marginVertical: 15,
-		textDecorationLine: 'underline',
-		/*cursor: 'pointer', */// per web
-	},
-	divider: {
-		textAlign: 'center',
-		marginVertical: 10,
-	},
-	footer: {
-		position: 'absolute',
-		bottom: 20,
-		left: 0,
-		right: 0,
-		textAlign: 'center',
-		fontSize: 12,
-		color: 'dimgray',
-	},
+  link: {
+    textAlign: 'center',
+    marginVertical: 15,
+    textDecorationLine: 'underline',
+    /*cursor: 'pointer', */// per web
+  },
+  divider: {
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    fontSize: 12,
+    color: 'dimgray',
+  },
   hello: {
     fontWeight: 'bold',
     fontSize: 20,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',   // Tutti su una linea
     justifyContent: 'flex-start', // Allineati a sinistra
     alignItems: 'center',   // Centra verticalmente (opzionale)
-    gap: 10, 
+    gap: 10,
   },
   scrollContent: {
     paddingBottom: 20,
@@ -150,9 +150,10 @@ const styles = StyleSheet.create({
     height: 90,
     borderColor: 'lightgray',
     borderWidth: 1,
-    padding: 10,
+    padding: 5,
     textAlignVertical: 'top', // necessario per multiline su Android
     borderRadius: 8,
+    fontSize: 12
   },
 });
 

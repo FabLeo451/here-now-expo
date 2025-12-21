@@ -73,7 +73,7 @@ export const Comments: React.FC<Props> = ({
 
 				let minOffset = offset;
 
-				for (let i=0; i<data.length; i++) {
+				for (let i = 0; i < data.length; i++) {
 					if (data[i].id < minOffset || minOffset == -1)
 						minOffset = data[i].id
 				}
@@ -82,7 +82,7 @@ export const Comments: React.FC<Props> = ({
 				console.log('[Comments] minOffset =', minOffset);
 			} else
 				setReadMore(false);
-			
+
 		} catch (error: any) {
 			console.log('[getMyHotspots] ', error);
 			Alert.alert('Error getting my hotspots', error.message);
@@ -143,7 +143,7 @@ export const Comments: React.FC<Props> = ({
 			{!user?.isGuest && (
 				<View>
 					<TextInput
-						style={[styles.textArea, {height: 70,}]}
+						style={[styles.textArea, { height: 45, }]}
 						multiline={true}
 						numberOfLines={3}
 						value={message}

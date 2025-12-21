@@ -22,7 +22,7 @@ type Boundaries = {
 type MapProps = {
 	mapRef: React.RefObject<any>;
 	initialCoords: LatLng;
-	markerCoords: LatLng;
+	markerCoords: LatLng | null;
 	hotspots: Hotspot[];
 	onMapReady?: () => void;
 	onRegionChangeCompleteBounds?: (bounds: Boundaries) => void;
@@ -42,7 +42,7 @@ export default function Map({
 	const [userIconBase64, setUserIconBase64] = useState<string | null>(null);
 	const [hasCenteredOnce, setHasCenteredOnce] = useState(false);
 
-	const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string, hotspot: Hotspot | null}>({
+	const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string, hotspot: Hotspot | null }>({
 		visible: false,
 		id: '',
 		hotspot: null
@@ -59,6 +59,9 @@ export default function Map({
 			}
 
 			if (message.type === 'HOTSPOT_CLICKED') {
+				// If markerCoords we are in the hotspot page
+				if (!markerCoords) return;
+
 				console.log('[handleWebViewMessage]', message);
 				setModalVisible({ visible: true, id: message.id, hotspot: message.hotspot });
 			}
@@ -122,15 +125,13 @@ export default function Map({
 		if (!mapReady) return;
 		if (!webViewRef.current || !markerCoords) return;
 
-		console.log('[Map.native] markerCoords:', markerCoords);
-
-		// update only marker position
 		webViewRef.current.injectJavaScript(`
 			if (typeof updateUserPosition === 'function') {
 			updateUserPosition(${markerCoords.latitude}, ${markerCoords.longitude});
 			}
 		`);
 	}, [mapReady, markerCoords]);
+
 
 	useEffect(() => {
 		console.log("[map] first centering on marker");
@@ -154,11 +155,11 @@ export default function Map({
 		console.log('[Map.native] hotspots:', hotspots.length);
 	}, [mapReady, hotspots]);
 
-	if (!initialCoords)
+	if (!initialCoords && markerCoords)
 		initialCoords = {
 			latitude: markerCoords.latitude,
 			longitude: markerCoords.longitude
-	};
+		};
 
 	// Generate HTML after user icon is ready
 	const htmlContentRef = useRef<string | null>(null);
@@ -179,9 +180,11 @@ export default function Map({
 				onClose={() => setModalVisible({ visible: false, id: 'dummyId', hotspot: null })}
 			/>
 
-			<TouchableOpacity style={styles.fab} onPress={moveToMyPosition}>
-				<Ionicons name="person" size={25} color="#fff" />
-			</TouchableOpacity>
+			{markerCoords && (
+				<TouchableOpacity style={styles.fab} onPress={moveToMyPosition}>
+					<Ionicons name="person" size={25} color="#fff" />
+				</TouchableOpacity>
+			)}
 
 			<WebView
 				ref={webViewRef}
@@ -205,7 +208,7 @@ function generateLeafletHTML({
 	userIconBase64,
 }: {
 	initialCoords: LatLng;
-	markerCoords: LatLng;
+	markerCoords: LatLng | null;
 	hotspots: Hotspot[];
 	userIconBase64: string;
 }): string {
@@ -280,15 +283,24 @@ function generateLeafletHTML({
         iconAnchor: [20, 40],
       });
 
-      let userMarker = L.marker([${markerCoords.latitude}, ${markerCoords.longitude}], { icon: userIcon })
-        .addTo(map)
-        .bindPopup("Your position");
+	let userMarker = null;
+
+	${markerCoords ? `
+	userMarker = L.marker(
+		[${markerCoords.latitude}, ${markerCoords.longitude}],
+		{ icon: userIcon }
+	)
+		.addTo(map)
+		.bindPopup("Your position");
+	` : ''}
 
       function updateUserPosition(lat, lng) {
+	    if (!userMarker) return;
         userMarker.setLatLng([lat, lng]);
       }
 
       function moveToUser() {
+	    if (!userMarker) return;
         map.setView(userMarker.getLatLng(), map.getZoom());
       }
 

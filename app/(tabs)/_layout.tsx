@@ -68,6 +68,10 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => <TabBarIcon name="map" color={color} />,
           }}
         />
+        <Tabs.Screen
+          name="hotspot/[id]"
+          options={{ href: null }}
+        />
       </Tabs>
     </View>
   );

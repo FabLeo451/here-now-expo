@@ -55,7 +55,7 @@ const HomeTab: React.FC = () => {
 		useCallback(() => {
 			const checkToken = async () => {
 
-				if (!token)	return;
+				if (!token) return;
 
 				console.log('[hotspots] Checking token validity...')
 				const valid = await isTokenValid(token);
@@ -117,7 +117,7 @@ const HomeTab: React.FC = () => {
 	// Applica il filtro sulle sessioni
 
 	const filteredHotspots = hotspots?.filter((hotspot) => {
-		switch(filterValue) {
+		switch (filterValue) {
 			case 'active':
 				return isActive(hotspot);
 			case 'inactive':
@@ -231,7 +231,7 @@ const HomeTab: React.FC = () => {
 				<Ionicons name="add" size={25} color="#fff" />
 			</TouchableOpacity>
 
-			<View style={{ backgroundColor: 'ghostwhite', paddingVertical: 6, paddingHorizontal: 5, borderBottomColor: 'gainsboro', borderBottomWidth: 1}}>
+			<View style={{ backgroundColor: 'ghostwhite', paddingVertical: 6, paddingHorizontal: 5, borderBottomColor: 'gainsboro', borderBottomWidth: 1 }}>
 				<Picker
 					selectedValue={filterValue}
 					onValueChange={(value) => handleFilterChange(value)}
@@ -287,6 +287,12 @@ const HomeTab: React.FC = () => {
                 </TouchableOpacity>*/}
 
 								<DropdownHotspot
+									options={[
+										{ label: 'Clone', value: 'clone', icon: 'copy-outline' },
+										{ label: 'View page', value: 'view_hotspot_page', icon: 'document-text-outline' },
+										{ label: 'View on map', value: 'view_on_map', icon: 'map-outline' },
+										{ label: 'Delete', value: 'delete', icon: 'trash-outline', color: '#d32f2f' },
+									]}
 									onSelect={(value: string) => {
 
 										//console.log(`Selected from '${h.id}': ${value}`);
@@ -297,15 +303,16 @@ const HomeTab: React.FC = () => {
 												break;
 
 											case 'view_hotspot_page':
-												router.push(`/hotspot-page?id=${h.id}`);
+												router.navigate(`/hotspot/${h.id}`);
+												break;
 
 											case 'view_on_map':
 												router.replace({
 													pathname: '/map',
-													params: { 
-														hotspotId: h.id, 
-														targetLatitude: h.position.latitude, 
-														targetLongitude: h.position.longitude 
+													params: {
+														hotspotId: h.id,
+														targetLatitude: h.position.latitude,
+														targetLongitude: h.position.longitude
 													}
 												});
 												break;
