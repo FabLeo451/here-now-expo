@@ -28,52 +28,54 @@ export default function DropdownMenu({
   const [visible, setVisible] = useState(false);
 
   return (
-    <View style={styles.wrapper}>
-      <TouchableOpacity onPress={() => setVisible(true)}>
+    <TouchableOpacity onPress={() => setVisible(true)}>
+      <View style={styles.wrapper}>
         <Ionicons name="ellipsis-vertical" size={20} color="#000" />
-      </TouchableOpacity>
 
-      <Modal transparent visible={visible} animationType="fade">
-        <Pressable style={styles.backdrop} onPress={() => setVisible(false)}>
-          <View style={styles.menu}>
-            {options.map(option => (
-              <TouchableOpacity
-                key={option.value}
-                style={styles.menuItem}
-                onPress={() => {
-                  setVisible(false);
-                  onSelect(option.value);
-                }}
-              >
-                {option.icon && (
-                  <Ionicons
-                    name={option.icon}
-                    size={18}
-                    color={option.color ?? '#333'}
-                    style={styles.icon}
-                  />
-                )}
-
-                <Text
-                  style={[
-                    styles.menuText,
-                    option.color && { color: option.color },
-                  ]}
+        <Modal transparent visible={visible} animationType="fade">
+          <Pressable style={styles.backdrop} onPress={() => setVisible(false)}>
+            <View style={styles.menu}>
+              {options.map(option => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={styles.menuItem}
+                  onPress={() => {
+                    setVisible(false);
+                    onSelect(option.value);
+                  }}
                 >
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </Pressable>
-      </Modal>
-    </View>
+                  {option.icon && (
+                    <Ionicons
+                      name={option.icon}
+                      size={18}
+                      color={option.color ?? '#333'}
+                      style={styles.icon}
+                    />
+                  )}
+
+                  <Text
+                    style={[
+                      styles.menuText,
+                      option.color && { color: option.color },
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Pressable>
+        </Modal>
+      </View>
+    </TouchableOpacity>
+
   );
 }
 
 const styles = StyleSheet.create({
   wrapper: {
     padding: 10,
+    margin: 5,
     alignItems: 'flex-start',
   },
   backdrop: {
