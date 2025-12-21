@@ -158,7 +158,7 @@ const HotspotPage: React.FC = () => {
 							mapRef={mapRef}
 							//initialCoords={targetCoords ? targetCoords : markerCoords} 
 							initialCoords={targetCoords}
-							markerCoords={targetCoords} 
+							//markerCoords={targetCoords} 
 							hotspots={hotspots}
 							onMapReady={() => {
 								console.log('[map] Map ready');
@@ -169,7 +169,7 @@ const HotspotPage: React.FC = () => {
 								//sendMapBoundaries(boundaries);
 							}}
 						/>
-						<View style={{ position:'absolute', top:10, right:10 }}>
+						<View style={{ position: 'absolute', top: 10, right: 10 }}>
 							<AppButton
 								title="Map"
 								icon={<Ionicons name="map-outline" size={15} color="white" />}
@@ -232,14 +232,14 @@ const HotspotPage: React.FC = () => {
 						</View>
 
 						{/* Description */}
-						<Text style={{ 
-							marginVertical:5, 
-							padding:5, 
-							backgroundColor:'gainsboro',
-							borderRadius:5,
-							fontSize:14
-							}}>
-								{hotspots[0].description}
+						<Text style={{
+							marginVertical: 5,
+							padding: 5,
+							backgroundColor: 'gainsboro',
+							borderRadius: 5,
+							fontSize: 14
+						}}>
+							{hotspots[0].description}
 						</Text>
 
 						{/* Comments */}
