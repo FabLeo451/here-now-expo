@@ -143,7 +143,7 @@ export const Comments: React.FC<Props> = ({
 			{!user?.isGuest && (
 				<View>
 					<TextInput
-						style={[styles.textArea, { height: 70, }]}
+						style={[styles.textArea, { height: 45, }]}
 						multiline={true}
 						numberOfLines={3}
 						value={message}
