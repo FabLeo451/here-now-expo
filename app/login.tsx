@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, Platform, Linking } from 'react-native';
 import * as Device from 'expo-device';
 import { Alert, View } from 'react-native';
@@ -13,8 +13,10 @@ import { styles } from '@/Style';
 
 import { useAuth } from '@/hooks/useAuth'
 
-const getDeviceType = () => {
-	switch (Device.deviceType) {
+const getDeviceType = async (): Promise<string> => {
+	const type = await Device.getDeviceTypeAsync();
+
+	switch (type) {
 		case Device.DeviceType.PHONE:
 			return 'Phone';
 		case Device.DeviceType.TABLET:
@@ -34,7 +36,6 @@ const validateEmail = (email: string): boolean => {
 	return re.test(email);
 };
 
-
 export default function LoginScreen() {
 	const { login } = useAuth();
 	const [email, setEmail] = useState('');
@@ -44,6 +45,7 @@ export default function LoginScreen() {
 	const [emailError, setEmailError] = useState('');
 	const [passwordError, setPasswordError] = useState('');
 	const [guestNameError, setGuestNameError] = useState('');
+	const [deviceType, setDeviceType] = useState('');
 
 	const [loading, setLoading] = useState(false);
 	const insets = useSafeAreaInsets();
@@ -55,10 +57,14 @@ export default function LoginScreen() {
 		const platform = Platform.OS + ' ' + Platform.Version;
 		const model = Device.modelName || 'Undefined';
 		const deviceName = Device.deviceName || 'Undefined';
-		const deviceType = getDeviceType();
+		//const deviceType = getDeviceType();
 
-		return { agent, platform, model, deviceName, deviceType };
+		return { agent, platform, model, deviceName };
 	};
+
+	useEffect(() => {
+		getDeviceType().then(setDeviceType);
+	}, []);
 
 	const handleLogin = async () => {
 		let valid = true;
@@ -80,7 +86,7 @@ export default function LoginScreen() {
 		if (!valid) return;
 
 		setLoading(true);
-		const { agent, platform, model, deviceName, deviceType } = getDeviceInfo();
+		const { agent, platform, model, deviceName } = getDeviceInfo();
 
 		try {
 
@@ -120,7 +126,7 @@ export default function LoginScreen() {
 					data.token
 				);
 
-			} catch(e) {
+			} catch (e) {
 				console.error(e.message);
 			}
 
@@ -145,7 +151,7 @@ export default function LoginScreen() {
 		}
 
 		setLoading(true);
-		const { agent, platform, model, deviceName, deviceType } = getDeviceInfo();
+		const { agent, platform, model, deviceName } = getDeviceInfo();
 
 		try {
 			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/login?guest`, {
@@ -172,7 +178,7 @@ export default function LoginScreen() {
 					data.token
 				);
 
-			} catch(e) {
+			} catch (e) {
 				console.error(e.message);
 			}
 
@@ -188,84 +194,84 @@ export default function LoginScreen() {
 	};
 
 	return (
-	<View style={{
-		paddingTop: insets.top,
-		paddingBottom: insets.bottom,
-		paddingLeft: insets.left,
-		paddingRight: insets.right,
-		flex: 1,
-		backgroundColor: '#f0f0f0',
-	  }}
-	>
-		<Layout style={styles.container}>
-			<Text style={styles.mainTitle}>HereN<FontAwesome name="wifi" size={22} color="#000" />w</Text>
+		<View style={{
+			paddingTop: insets.top,
+			paddingBottom: insets.bottom,
+			paddingLeft: insets.left,
+			paddingRight: insets.right,
+			flex: 1,
+			backgroundColor: '#f0f0f0',
+		}}
+		>
+			<Layout style={styles.container}>
+				<Text style={styles.mainTitle}>HereN<FontAwesome name="wifi" size={22} color="#000" />w</Text>
 
-			<Input
-				placeholder="Email"
-				style={[styles.input, { marginBottom: 10 }]}
-				value={email}
-				onChangeText={setEmail}
-				autoCapitalize="none"
-				keyboardType="email-address"
-				textContentType="emailAddress"
-				status={emailError ? 'danger' : 'basic'}
-				caption={emailError}
-			/>
+				<Input
+					placeholder="Email"
+					style={[styles.input, { marginBottom: 10 }]}
+					value={email}
+					onChangeText={setEmail}
+					autoCapitalize="none"
+					keyboardType="email-address"
+					textContentType="emailAddress"
+					status={emailError ? 'danger' : 'basic'}
+					caption={emailError}
+				/>
 
-			<Input
-				placeholder="Password"
-				style={[styles.input, { marginBottom: 10 }]}
-				value={password}
-				onChangeText={setPassword}
-				secureTextEntry
-				textContentType="password"
-				status={passwordError ? 'danger' : 'basic'}
-				caption={passwordError}
-				autoCapitalize="none"
-			/>
+				<Input
+					placeholder="Password"
+					style={[styles.input, { marginBottom: 10 }]}
+					value={password}
+					onChangeText={setPassword}
+					secureTextEntry
+					textContentType="password"
+					status={passwordError ? 'danger' : 'basic'}
+					caption={passwordError}
+					autoCapitalize="none"
+				/>
 
-			<Button
-				style={styles.button}
-				onPress={handleLogin}
-				disabled={loading}
-				accessoryRight={loading ? () => <LoadingIndicator /> : undefined}
-			>
-				Log in
-			</Button>
+				<Button
+					style={styles.button}
+					onPress={handleLogin}
+					disabled={loading}
+					accessoryRight={loading ? () => <LoadingIndicator /> : undefined}
+				>
+					Log in
+				</Button>
 
-			<Text
-				style={styles.link}
-				status="primary"
-				onPress={() => Linking.openURL('https://www.ekhoes.com/sign-up')}
-			>
-				No account? Sign up
-			</Text>
+				<Text
+					style={styles.link}
+					status="primary"
+					onPress={() => Linking.openURL('https://www.ekhoes.com/sign-up')}
+				>
+					No account? Sign up
+				</Text>
 
-			<Text category="h6" style={styles.divider}>Or</Text>
+				<Text category="h6" style={styles.divider}>Or</Text>
 
-			<Input
-				placeholder="Name (Guest)"
-				style={[styles.input, { marginBottom: 10 }]}
-				value={guestName}
-				onChangeText={setGuestName}
-				status={guestNameError ? 'danger' : 'basic'}
-				caption={guestNameError}
-				autoCapitalize="words"
-			/>
+				<Input
+					placeholder="Name (Guest)"
+					style={[styles.input, { marginBottom: 10 }]}
+					value={guestName}
+					onChangeText={setGuestName}
+					status={guestNameError ? 'danger' : 'basic'}
+					caption={guestNameError}
+					autoCapitalize="words"
+				/>
 
-			<Button
-				style={styles.button}
-				onPress={handleGuestLogin}
-				disabled={loading}
-				accessoryRight={loading ? () => <LoadingIndicator /> : undefined}
-			>
-				Enter as guest
-			</Button>
+				<Button
+					style={styles.button}
+					onPress={handleGuestLogin}
+					disabled={loading}
+					accessoryRight={loading ? () => <LoadingIndicator /> : undefined}
+				>
+					Enter as guest
+				</Button>
 
-			<Text style={styles.footer} appearance="hint" category="c1">
-				An app by ekhoes.com
-			</Text>
-		</Layout>
+				<Text style={styles.footer} appearance="hint" category="c1">
+					An app by ekhoes.com
+				</Text>
+			</Layout>
 		</View>
 	);
 }
