@@ -10,6 +10,7 @@ import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useFonts, Dosis_600SemiBold } from '@expo-google-fonts/dosis';
 import { AuthProvider } from '@/context/AuthProvider';
+import { WebsocketProvider } from '@/context/WebsocketContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Redirect, useSegments } from 'expo-router';
 
@@ -45,7 +46,9 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <WebsocketProvider>
+        <RootLayoutNav />
+      </WebsocketProvider>
     </AuthProvider>
   );
 }
