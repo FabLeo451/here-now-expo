@@ -114,7 +114,7 @@ const HomeTab: React.FC = () => {
 
 			const payload = await response.json() as PayloadType;
 
-			console.log('[getMyHSubscriptions]', payload);
+			//console.log('[getMyHSubscriptions]', payload);
 
 			setSubs(payload.count);
 
@@ -156,7 +156,7 @@ const HomeTab: React.FC = () => {
 					color="orange"
 					label="Subscriptions"
 					value={subs}
-					onPress={() => console.log('Go to subscriptions') }
+					onPress={() => console.log('Go to subscriptions')}
 				/>
 			</View>
 

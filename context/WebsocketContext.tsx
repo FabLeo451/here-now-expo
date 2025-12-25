@@ -7,10 +7,12 @@ import React, {
 } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
+type MessageHandler = (message: any) => void;
+
 type WebsocketContextType = {
 	isConnected: boolean;
 	sendMessage: (message: string) => void;
-	lastMessage: string | null;
+	callback: (cb: MessageHandler) => () => void;
 };
 
 const WebsocketContext = createContext<WebsocketContextType | undefined>(
@@ -18,21 +20,26 @@ const WebsocketContext = createContext<WebsocketContextType | undefined>(
 );
 
 const MAX_RETRIES = 5;
-const BASE_DELAY = 1000; // 1s
+const BASE_DELAY = 1000;
 
-export const WebsocketProvider = ({ children }: { children: React.ReactNode }) => {
+export const WebsocketProvider = ({
+	children,
+}: {
+	children: React.ReactNode;
+}) => {
 	const socketRef = useRef<WebSocket | null>(null);
 	const retryCountRef = useRef(0);
-	const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const reconnectTimeoutRef =
+		useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const listenersRef = useRef<Set<MessageHandler>>(new Set());
 
 	const [isConnected, setIsConnected] = useState(false);
-	const [lastMessage, setLastMessage] = useState<string | null>(null);
-
 	const { token } = useAuth();
 
 	const connect = () => {
 		if (!token) return;
-		if (socketRef.current) return; // evita doppie connessioni
+		if (socketRef.current) return;
 
 		const wsUrl = `${process.env.EXPO_PUBLIC_WEBSOCKET_URL}?token=${token}`;
 		const ws = new WebSocket(wsUrl);
@@ -46,27 +53,25 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 		};
 
 		ws.onmessage = (event) => {
-			setLastMessage(event.data);
-		};
-
-		ws.onerror = () => {
-			// onclose gestirà il reconnect
+			try {
+				const message = JSON.parse(event.data);
+				//console.log('[WebsocketContext] received data', message);
+				listenersRef.current.forEach((cb) => cb(message));
+			} catch {
+				console.warn("Invalid websocket message", event.data);
+			}
 		};
 
 		ws.onclose = () => {
-			console.log("WebSocket chiuso");
+			console.log("WebSocket closed");
 			setIsConnected(false);
 			socketRef.current = null;
 
-			if (!token) return; // logout → stop reconnect
+			if (!token) return;
 
 			if (retryCountRef.current < MAX_RETRIES) {
-				const delay =
-					BASE_DELAY * Math.pow(2, retryCountRef.current);
+				const delay = BASE_DELAY * 2 ** retryCountRef.current;
 
-				console.log(`Reconnect tra ${delay}ms`);
-
-				const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 				reconnectTimeoutRef.current = setTimeout(() => {
 					retryCountRef.current += 1;
 					connect();
@@ -79,7 +84,6 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 
 	useEffect(() => {
 		if (!token) {
-			// logout → cleanup totale
 			socketRef.current?.close();
 			socketRef.current = null;
 			setIsConnected(false);
@@ -101,13 +105,28 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 
 	const sendMessage = (message: string) => {
 		if (socketRef.current?.readyState === WebSocket.OPEN) {
+			console.log('[WebsocketContext] sending data...');
 			socketRef.current.send(message);
 		}
 	};
 
+	const callback = (cb: MessageHandler) => {
+		console.log("[WebsocketContext] Listeners:", listenersRef.current.size);
+		listenersRef.current.add(cb);
+
+		return () => {
+			console.log("[WebsocketContext] Listeners:", listenersRef.current.size);
+			listenersRef.current.delete(cb);
+		};
+	};
+
 	return (
 		<WebsocketContext.Provider
-			value={{ isConnected, sendMessage, lastMessage }}
+			value={{
+				isConnected,
+				sendMessage,
+				callback,
+			}}
 		>
 			{children}
 		</WebsocketContext.Provider>

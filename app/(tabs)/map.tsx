@@ -9,7 +9,7 @@ import Map from '@/components/Map';
 import type { MapView } from 'react-native-maps';
 import { Hotspot } from '@/lib/hotspot'
 import { useAuth } from '@/hooks/useAuth';
-import { useWebSocket } from "@/hooks/useWebSocket";
+import { useWebsocket } from "@/hooks/useWebsocket";
 
 type LatLng = {
 	latitude: number;
@@ -43,6 +43,26 @@ export default function MapTab() {
 	const [markerCoords, setMarkerCoords] = useState(null);
 	const [mapReady, setMapReady] = useState<boolean>(false);
 	const { user, token } = useAuth();
+	const { isConnected, sendMessage, callback } = useWebsocket();
+
+	const onMessage = useCallback((message) => {
+		//console.log('[map]', message);
+		if (message.Type === "map") {
+			let parsed: Hotspot[] = JSON.parse(message.Text);
+
+			//console.log('[map] message.Text =', message.Text);
+
+			if (!parsed)
+				parsed = [];
+
+			console.log('[map] Updating hotspots...', parsed.length);
+			setHotspots(parsed);
+		}
+	}, []);
+
+	useEffect(() => {
+		return callback(onMessage);
+	}, [callback, onMessage]);
 
 	useFocusEffect(
 		useCallback(() => {
@@ -148,86 +168,30 @@ export default function MapTab() {
 					//sendUserPosition(loc.coords.latitude, loc.coords.longitude);
 				});
 			};
-			/*
-						const connectWebsocket = async () => {
-			
-							const wsUrl = `${process.env.EXPO_PUBLIC_WEBSOCKET_URL}?token=${token}`;
-							socket.current = new WebSocket(wsUrl);
-			
-							socket.current.onopen = () => {
-								console.log('WebSocket connected');
-			
-								//if (currentLocation)
-								//	sendUserPosition(currentLocation.coords.latitude, currentLocation.coords.longitude);
-			
-								startTracking();
-							};
-			
-							socket.current.onmessage = (event) => {
-								try {
-									const message = JSON.parse(event.data);
-									let parsed: Hotspot[] = JSON.parse(message.Text);
-			
-									//console.log('[map] message.Text =', message.Text);
-			
-									if (!parsed)
-										parsed = [];
-			
-									console.log('[map] Updating hotspots...', parsed.length);
-									setHotspots(parsed);
-								} catch (e) {
-									console.log('[map][onmessage]', e);
-								}
-							};
-			
-							socket.current.onerror = (event) => {
-								console.log("WebSocket error:", {
-									message: event?.message,
-									readyState: socket.current?.readyState,
-									url: socket.current?.url
-								});
-							};
-			
-							socket.current.onclose = (event) => {
-								console.warn("WebSocket closed:", event.code, event.reason);
-							};
-			
-						}
-			
-						connectWebsocket();
-			*/
+
+			startTracking();
+
 			return () => {
 				if (subscription) {
 					subscription.remove();
 					console.log('[MapTab] GPS tracking stopped (tab unfocused)');
 				}
-				/*
-								if (socket.current) {
-									socket.current.close();
-								}
-				*/
 			};
 		}, [token])
 	);
 
 	function sendMapBoundaries(boundaries: Boundaries) {
-		/*
-		if (socket.current && socket.current.readyState === WebSocket.OPEN) {
+		const payload = {
+			appId: process.env.EXPO_PUBLIC_APP_ID,
+			type: 'map',
+			subtype: 'getHotspotsByBoundaries',
+			text: JSON.stringify({
+				northEast: { latitude: boundaries.northEast.latitude, longitude: boundaries.northEast.longitude },
+				southWest: { latitude: boundaries.southWest.latitude, longitude: boundaries.southWest.longitude }
+			}),
+		};
 
-			console.log('[map] Querying for hotspots by boundaries...');
-
-			const payload = {
-				appId: process.env.EXPO_PUBLIC_APP_ID,
-				type: 'hotspots',
-				subtype: 'byBoundaries',
-				text: JSON.stringify({
-					northEast: { latitude: boundaries.northEast.latitude, longitude: boundaries.northEast.longitude },
-					southWest: { latitude: boundaries.southWest.latitude, longitude: boundaries.southWest.longitude }
-				}),
-			};
-			socket.current.send(JSON.stringify(payload));
-		}
-		*/
+		sendMessage(JSON.stringify(payload));
 	}
 
 	return (
