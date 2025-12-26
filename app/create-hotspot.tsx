@@ -64,25 +64,32 @@ const CreateHotspot: React.FC = () => {
 			let coords = { latitude: 0, longitude: 0 };
 
 			if (action == 'update' && typeof hotspotEnc === 'string') {
-				const hotspot = JSON.parse(hotspotEnc);
-				//Alert.alert('', hotspotEnc)
-				setId(hotspot.id);
-				setName(hotspot.name);
-				setDescription(hotspot.description);
-				setCategory(hotspot.category);
-				setPosition(hotspot.position.latitude.toFixed(6) + ', ' + hotspot.position.longitude.toFixed(6));
-				setEnabled(hotspot.enabled);
-				setPrivate(hotspot.private);
-				setStartDate(new Date(hotspot.startTime));
-				setEndDate(new Date(hotspot.endTime));
+				let hotspot;
+				try {
+					hotspot = JSON.parse(hotspotEnc);
 
-				coords.latitude = hotspot.position.latitude;
-				coords.longitude = hotspot.position.longitude;
+					//Alert.alert('', hotspotEnc)
+					setId(hotspot.id);
+					setName(hotspot.name);
+					setDescription(hotspot.description);
+					setCategory(hotspot.category);
+					setPosition(hotspot.position.latitude.toFixed(6) + ', ' + hotspot.position.longitude.toFixed(6));
+					setEnabled(hotspot.enabled);
+					setPrivate(hotspot.private);
+					setStartDate(new Date(hotspot.startTime));
+					setEndDate(new Date(hotspot.endTime));
+
+					coords.latitude = hotspot.position.latitude;
+					coords.longitude = hotspot.position.longitude;
+
+				} catch {
+					console.log("[edit-hotspot] Invalid hotspot data");
+				}
 
 			} else {
 
 				let loc = await Location.getCurrentPositionAsync({
-					accuracy: Location.Accuracy.BestForNavigation, // o .BestForNavigation
+					accuracy: Location.Accuracy.Balanced, // o .BestForNavigation
 					//maximumAge: 0,      // No cache
 				});
 
@@ -296,10 +303,8 @@ const CreateHotspot: React.FC = () => {
 
 				{/* Description */}
 				<Text style={styles.label}>Description</Text>
-				<TextInput
-					style={styles.textArea}
-					multiline={true}
-					numberOfLines={4}
+				<Input
+					multiline
 					value={description}
 					onChangeText={setDescription}
 				/>
@@ -334,7 +339,7 @@ const CreateHotspot: React.FC = () => {
 						value={category}
 					/>
 				</View>
-				
+
 				{/* Enabled */}
 				<View style={styles.row}>
 					<Text style={styles.label}>Enabled</Text>
@@ -435,27 +440,27 @@ const CreateHotspot: React.FC = () => {
 };
 
 const pickerSelectStyles = {
-  inputIOS: {
-    fontSize: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 4,
-    color: 'black',
-    paddingRight: 30,
-    backgroundColor: '#f0f0f0',
-  },
-  inputAndroid: {
-    fontSize: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 0,
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 4,
-    color: 'black',
-    backgroundColor: '#f0f0f0',
-  },
+	inputIOS: {
+		fontSize: 16,
+		paddingVertical: 12,
+		paddingHorizontal: 10,
+		borderWidth: 1,
+		borderColor: 'gray',
+		borderRadius: 4,
+		color: 'black',
+		paddingRight: 30,
+		backgroundColor: '#f0f0f0',
+	},
+	inputAndroid: {
+		fontSize: 16,
+		paddingHorizontal: 10,
+		paddingVertical: 0,
+		borderWidth: 1,
+		borderColor: 'gray',
+		borderRadius: 4,
+		color: 'black',
+		backgroundColor: '#f0f0f0',
+	},
 };
 
 export default CreateHotspot;
