@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
 	Alert,
 	View,
-	TextInput,
+	KeyboardAvoidingView, ScrollView,
 	TouchableOpacity,
 	Platform,
 	Switch
@@ -257,185 +257,203 @@ const CreateHotspot: React.FC = () => {
 	};
 
 	return (
-		<View style={{
-			paddingTop: insets.top,
-			paddingBottom: /*insets.bottom*/ 0,
-			paddingLeft: insets.left,
-			paddingRight: insets.right,
-			flex: 1,
-			backgroundColor: '#f0f0f0',
-		}}>
-			<View style={styles.rowLeft}>
-				<TouchableOpacity style={{ marginHorizontal: 10, marginVertical: 10 }} onPress={() => router.replace("/hotspots")}>
-					<Ionicons name="chevron-back" size={24} color="black" />
-				</TouchableOpacity>
-				<Text style={styles.sectionTitle}>{action == 'create' ? "Create" : "Update"} hotspot</Text>
-			</View>
-			<View style={styles.container}>
-				<ModalMapSelect
-					token={token}
-					visible={modalVisible}
-					latitude={location?.latitude ?? 0}
-					longitude={location?.longitude ?? 0}
-					onSelect={(coords: { latitude: number; longitude: number } | null) => {
-
-						//Alert.alert(JSON.stringify(coords))
-						setModalVisible(false);
-						if (coords) {
-							setLocation(coords);
-							setPosition(coords.latitude.toFixed(6) + ', ' + coords.longitude.toFixed(6));
-						}
-
-					}}
-				/>
-
-				{/*<Input value={id} style={{ display: 'none' }} />*/}
-
-				{/* Name */}
-				<Text style={styles.label}>Name</Text>
-				<Input
-					placeholder="Name"
-					style={styles.input}
-					value={name}
-					onChangeText={setName}
-					autoCapitalize="sentences"
-				/>
-
-				{/* Description */}
-				<Text style={styles.label}>Description</Text>
-				<Input
-					multiline
-					value={description}
-					onChangeText={setDescription}
-				/>
-
-				{/* Location */}
-				<Text style={styles.label}>Location</Text>
+		<KeyboardAvoidingView
+			style={{ flex: 1, backgroundColor: '#f0f0f0' }}
+			behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+			keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+		>
+			<ScrollView
+				contentContainerStyle={{
+					paddingTop: insets.top,
+					paddingBottom: insets.bottom,
+					paddingLeft: insets.left,
+					paddingRight: insets.right,
+					flexGrow: 1,
+				}}
+				keyboardShouldPersistTaps="handled"
+				keyboardDismissMode="interactive"
+			>
+				{/* Header */}
 				<View style={styles.rowLeft}>
-					{/*<Input
+					<TouchableOpacity
+						style={{ marginHorizontal: 10, marginVertical: 10 }}
+						onPress={() => router.replace("/hotspots")}
+					>
+						<Ionicons name="chevron-back" size={24} color="black" />
+					</TouchableOpacity>
+					<Text style={styles.sectionTitle}>
+						{action == 'create' ? "Create" : "Update"} hotspot
+					</Text>
+				</View>
+
+				{/* Container con tutti i campi */}
+				<View style={styles.container}>
+					<ModalMapSelect
+						token={token}
+						visible={modalVisible}
+						latitude={location?.latitude ?? 0}
+						longitude={location?.longitude ?? 0}
+						onSelect={(coords: { latitude: number; longitude: number } | null) => {
+
+							//Alert.alert(JSON.stringify(coords))
+							setModalVisible(false);
+							if (coords) {
+								setLocation(coords);
+								setPosition(coords.latitude.toFixed(6) + ', ' + coords.longitude.toFixed(6));
+							}
+
+						}}
+					/>
+
+					{/*<Input value={id} style={{ display: 'none' }} />*/}
+
+					{/* Name */}
+					<Text style={styles.label}>Name</Text>
+					<Input
+						placeholder="Name"
+						style={styles.input}
+						value={name}
+						onChangeText={setName}
+						autoCapitalize="sentences"
+					/>
+
+					{/* Description */}
+					<Text style={styles.label}>Description</Text>
+					<Input
+						multiline
+						value={description}
+						onChangeText={setDescription}
+					/>
+
+					{/* Location */}
+					<Text style={styles.label}>Location</Text>
+					<View style={styles.rowLeft}>
+						{/*<Input
 						style={styles.input}
 						value={position}
 						autoCapitalize="none"
 						disabled={true}
 					/>*/}
-					{position ? (
-						<View style={styles.rowLeft}><Text>Selected</Text><Ionicons name="checkmark-sharp" size={25} color="#0b0" /></View>
+						{position ? (
+							<View style={styles.rowLeft}><Text>Selected</Text><Ionicons name="checkmark-sharp" size={25} color="#0b0" /></View>
+						) : (
+							<View style={styles.rowLeft}><Text style={{ color: "darkgray" }}>Not selected</Text><Ionicons name="help-circle-outline" size={25} color="darkgray" /></View>
+						)}
+						<TouchableOpacity style={styles.selectButton} onPress={() => setModalVisible(true)}>
+							<Ionicons name="locate" size={25} color="#fff" />
+						</TouchableOpacity>
+					</View>
+
+					{/* Category */}
+					<View >
+						<Text style={styles.label}>Category</Text>
+						<RNPickerSelect
+							onValueChange={(value) => setCategory(value)}
+							items={confCategories}
+							placeholder={{ label: 'Select a category...', value: null }}
+							style={pickerSelectStyles}
+							value={category}
+						/>
+					</View>
+
+					{/* Enabled */}
+					<View style={styles.row}>
+						<Text style={styles.label}>Enabled</Text>
+						<Switch
+							value={enabled}
+							onValueChange={setEnabled}
+						/>
+					</View>
+
+					{/* Private */}
+					<View style={styles.row}>
+						<Text style={styles.label}>Private</Text>
+						<Switch
+							value={isPrivate}
+							onValueChange={setPrivate}
+						/>
+					</View>
+
+					{/* Start time */}
+					<Text style={styles.label}>Start time</Text>
+					<View style={styles.rowLeft}>
+						<Text>{startDate.toLocaleString()}</Text>
+						<TouchableOpacity style={styles.selectButton} onPress={() => setShowStartDatePicker(true)}>
+							<Ionicons name="calendar" size={25} color="#fff" />
+						</TouchableOpacity>
+						<TouchableOpacity style={styles.selectButton} onPress={() => setShowStartTimePicker(true)}>
+							<Ionicons name="time" size={25} color="#fff" />
+						</TouchableOpacity>
+					</View>
+
+					{
+						showStartDatePicker && (
+							<DateTimePicker
+								value={startDate}
+								mode="date"
+								display={Platform.OS === 'ios' ? 'inline' : 'default'}
+								onChange={onChangeStartDate}
+							/>
+						)
+					}
+					{
+						showStartTimePicker && (
+							<DateTimePicker
+								value={startDate}
+								mode="time"
+								display={Platform.OS === 'ios' ? 'inline' : 'default'}
+								onChange={onChangeStartDate}
+							/>
+						)
+					}
+
+					{/* End time */}
+					<Text style={styles.label}>End time</Text>
+					<View style={styles.rowLeft}>
+						<Text>{endDate.toLocaleString()}</Text>
+						<TouchableOpacity style={styles.selectButton} onPress={() => setShowEndDatePicker(true)}>
+							<Ionicons name="calendar" size={25} color="#fff" />
+						</TouchableOpacity>
+						<TouchableOpacity style={styles.selectButton} onPress={() => setShowEndTimePicker(true)}>
+							<Ionicons name="time" size={25} color="#fff" />
+						</TouchableOpacity>
+					</View>
+
+					{
+						showEndDatePicker && (
+							<DateTimePicker
+								value={endDate}
+								mode="date"
+								display={Platform.OS === 'ios' ? 'inline' : 'default'}
+								onChange={onChangeEndDate}
+							/>
+						)
+					}
+					{
+						showEndTimePicker && (
+							<DateTimePicker
+								value={endDate}
+								mode="time"
+								display={Platform.OS === 'ios' ? 'inline' : 'default'}
+								onChange={onChangeEndDate}
+							/>
+						)
+					}
+
+					{action == 'create' ? (
+						<Button style={{ marginTop: 30 }} onPress={createHotspot}>
+							Create
+						</Button>
 					) : (
-						<View style={styles.rowLeft}><Text style={{ color: "darkgray" }}>Not selected</Text><Ionicons name="help-circle-outline" size={25} color="darkgray" /></View>
+						<Button style={{ marginTop: 30 }} onPress={updateHotspot}>
+							Save
+						</Button>
 					)}
-					<TouchableOpacity style={styles.selectButton} onPress={() => setModalVisible(true)}>
-						<Ionicons name="locate" size={25} color="#fff" />
-					</TouchableOpacity>
+
 				</View>
+			</ScrollView>
+		</KeyboardAvoidingView>
 
-				{/* Category */}
-				<View >
-					<Text style={styles.label}>Category</Text>
-					<RNPickerSelect
-						onValueChange={(value) => setCategory(value)}
-						items={confCategories}
-						placeholder={{ label: 'Select a category...', value: null }}
-						style={pickerSelectStyles}
-						value={category}
-					/>
-				</View>
-
-				{/* Enabled */}
-				<View style={styles.row}>
-					<Text style={styles.label}>Enabled</Text>
-					<Switch
-						value={enabled}
-						onValueChange={setEnabled}
-					/>
-				</View>
-
-				{/* Private */}
-				<View style={styles.row}>
-					<Text style={styles.label}>Private</Text>
-					<Switch
-						value={isPrivate}
-						onValueChange={setPrivate}
-					/>
-				</View>
-
-				{/* Start time */}
-				<Text style={styles.label}>Start time</Text>
-				<View style={styles.rowLeft}>
-					<Text>{startDate.toLocaleString()}</Text>
-					<TouchableOpacity style={styles.selectButton} onPress={() => setShowStartDatePicker(true)}>
-						<Ionicons name="calendar" size={25} color="#fff" />
-					</TouchableOpacity>
-					<TouchableOpacity style={styles.selectButton} onPress={() => setShowStartTimePicker(true)}>
-						<Ionicons name="time" size={25} color="#fff" />
-					</TouchableOpacity>
-				</View>
-
-				{
-					showStartDatePicker && (
-						<DateTimePicker
-							value={startDate}
-							mode="date"
-							display={Platform.OS === 'ios' ? 'inline' : 'default'}
-							onChange={onChangeStartDate}
-						/>
-					)
-				}
-				{
-					showStartTimePicker && (
-						<DateTimePicker
-							value={startDate}
-							mode="time"
-							display={Platform.OS === 'ios' ? 'inline' : 'default'}
-							onChange={onChangeStartDate}
-						/>
-					)
-				}
-
-				{/* End time */}
-				<Text style={styles.label}>End time</Text>
-				<View style={styles.rowLeft}>
-					<Text>{endDate.toLocaleString()}</Text>
-					<TouchableOpacity style={styles.selectButton} onPress={() => setShowEndDatePicker(true)}>
-						<Ionicons name="calendar" size={25} color="#fff" />
-					</TouchableOpacity>
-					<TouchableOpacity style={styles.selectButton} onPress={() => setShowEndTimePicker(true)}>
-						<Ionicons name="time" size={25} color="#fff" />
-					</TouchableOpacity>
-				</View>
-
-				{
-					showEndDatePicker && (
-						<DateTimePicker
-							value={endDate}
-							mode="date"
-							display={Platform.OS === 'ios' ? 'inline' : 'default'}
-							onChange={onChangeEndDate}
-						/>
-					)
-				}
-				{
-					showEndTimePicker && (
-						<DateTimePicker
-							value={endDate}
-							mode="time"
-							display={Platform.OS === 'ios' ? 'inline' : 'default'}
-							onChange={onChangeEndDate}
-						/>
-					)
-				}
-
-				{action == 'create' ? (
-					<Button style={{ marginTop: 30 }} onPress={createHotspot}>
-						Create
-					</Button>
-				) : (
-					<Button style={{ marginTop: 30 }} onPress={updateHotspot}>
-						Save
-					</Button>
-				)}
-
-			</View>
-		</View >
 	);
 };
 
