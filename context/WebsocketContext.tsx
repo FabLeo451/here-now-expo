@@ -13,11 +13,13 @@ const WebsocketContext = createContext<WebsocketContextType | undefined>(undefin
 
 const MAX_RETRIES = 5;
 const BASE_DELAY = 1000;
+const HEARTBEAT_INTERVAL = 25_000;
 
 export const WebsocketProvider = ({ children }: { children: React.ReactNode }) => {
 	const socketRef = useRef<WebSocket | null>(null);
 	const retryCountRef = useRef(0);
 	const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	const listenersRef = useRef<Set<MessageHandler>>(new Set());
 	const { token } = useAuth();
@@ -25,10 +27,27 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 
 	const [isConnected, setIsConnected] = useState(false);
 
-	// Aggiorna tokenRef ogni volta che cambia token
 	useEffect(() => {
 		tokenRef.current = token;
 	}, [token]);
+
+	const startHeartbeat = () => {
+		stopHeartbeat();
+
+		heartbeatIntervalRef.current = setInterval(() => {
+			if (socketRef.current?.readyState === WebSocket.OPEN) {
+				socketRef.current.send(JSON.stringify({ type: "ping" }));
+				console.log("[WebsocketContext] Heartbeat sent");
+			}
+		}, HEARTBEAT_INTERVAL);
+	};
+
+	const stopHeartbeat = () => {
+		if (heartbeatIntervalRef.current) {
+			clearInterval(heartbeatIntervalRef.current);
+			heartbeatIntervalRef.current = null;
+		}
+	};
 
 	const connect = (currentToken: string) => {
 		if (!currentToken) return;
@@ -44,6 +63,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 			console.log("[WebsocketContext] WebSocket connected");
 			retryCountRef.current = 0;
 			setIsConnected(true);
+			startHeartbeat();
 		};
 
 		ws.onmessage = (event) => {
@@ -58,23 +78,28 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 			}
 		};
 
-		ws.onerror = (err) => {
-			console.warn("[WebsocketContext] WebSocket error", err);
+		ws.onerror = () => {
+			console.warn("[WebsocketContext] WebSocket error");
 		};
 
 		ws.onclose = () => {
 			console.log("[WebsocketContext] WebSocket closed");
 			setIsConnected(false);
 			socketRef.current = null;
+			stopHeartbeat();
 
 			const currentToken = tokenRef.current;
-			if (!currentToken) return; // stop reconnect if logged out
+			if (!currentToken) return;
 
 			if (retryCountRef.current < MAX_RETRIES) {
 				const delay = BASE_DELAY * 2 ** retryCountRef.current;
+
 				reconnectTimeoutRef.current = setTimeout(() => {
 					retryCountRef.current += 1;
-					console.log("[WebsocketContext] Reconnecting attempt", retryCountRef.current);
+					console.log(
+						"[WebsocketContext] Reconnecting attempt",
+						retryCountRef.current
+					);
 					connect(currentToken);
 				}, delay);
 			} else {
@@ -83,7 +108,6 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 		};
 	};
 
-	// Effetto principale per gestire token e connessione
 	useEffect(() => {
 		if (!token) {
 			console.log("[WebsocketContext] No token → closing socket");
@@ -91,6 +115,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 			socketRef.current = null;
 			setIsConnected(false);
 			retryCountRef.current = 0;
+			stopHeartbeat();
 
 			if (reconnectTimeoutRef.current) {
 				clearTimeout(reconnectTimeoutRef.current);
@@ -104,6 +129,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 		return () => {
 			socketRef.current?.close();
 			socketRef.current = null;
+			stopHeartbeat();
 
 			if (reconnectTimeoutRef.current) {
 				clearTimeout(reconnectTimeoutRef.current);
@@ -112,21 +138,15 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 		};
 	}, [token]);
 
-	// Invia messaggi
 	const sendMessage = (message: string) => {
 		if (socketRef.current?.readyState === WebSocket.OPEN) {
-			console.log("[WebsocketContext] Sending message");
 			socketRef.current.send(message);
 		}
 	};
 
-	// Gestione callback
 	const callback = (cb: MessageHandler) => {
 		listenersRef.current.add(cb);
-
-		return () => {
-			listenersRef.current.delete(cb);
-		};
+		return () => listenersRef.current.delete(cb);
 	};
 
 	return (

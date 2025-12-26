@@ -24,21 +24,23 @@ export default function Logout() {
 					body: JSON.stringify({ token }),
 				});
 
-				console.log('[profile] logging out...');
+				console.log('[Logout] logging out...');
 
+				/* Logout anyway
 				if (!response.ok) {
 					throw new Error('Error calling /logout');
 				}
+				*/
 
 				await logout();
 
 			} catch (error) {
 				const message = error instanceof Error ? error.message : 'Unknown error';
-				console.log('[profile]', message);
+				console.log('[Logout]', message);
 				Alert.alert('Error:', message);
 			}
 
-			await AsyncStorage.removeItem('authToken');
+			//await AsyncStorage.removeItem('authToken');
 
 			router.replace('/login');
 		}
