@@ -16,7 +16,7 @@ import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
-//import ModalMapSelect from '@/components/ModalMapSelect';
+import ModalMapSelect from '@/components/ModalMapSelect';
 import { Hotspot, Category } from '@/lib/hotspot';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsFocused } from '@react-navigation/native';
@@ -60,6 +60,7 @@ const initialState: FormState = {
 };
 
 function formReducer(state: FormState, action: FormAction): FormState {
+	console.log(`[${action.type}]`, action);
 	switch (action.type) {
 		case 'SET_FIELD':
 			return { ...state, [action.field]: action.value };
@@ -121,6 +122,13 @@ const EditHotspotTab: React.FC = () => {
 
 			if (mountedRef.current) {
 				setConfCategories(data);
+
+				if (action == 'update') {
+					const hotspot: Hotspot = JSON.parse(hotspotEnc);
+					const category = data.find(c => c.value === hotspot.category) || null;
+					dispatch({ type: 'SET_CATEGORY', value: category });
+				}
+
 				console.log(`[${COMPONENT}] Categories updated`);
 			}
 		} catch (err: any) {
@@ -243,7 +251,6 @@ const EditHotspotTab: React.FC = () => {
 				</View>
 
 				<View style={styles.container}>
-					{/*
 					<ModalMapSelect
 						token={token}
 						visible={modalVisible}
@@ -257,7 +264,6 @@ const EditHotspotTab: React.FC = () => {
 							}
 						}}
 					/>
-					*/}
 
 					{/* Name */}
 					<Text style={styles.label}>Name</Text>
