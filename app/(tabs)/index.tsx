@@ -54,9 +54,9 @@ const HomeTab: React.FC = () => {
 					try {
 						console.log(`[${COMPONENT}] Refreshing...`);
 						const hotspots = await getMyHotspots(token);
+						const subsCount = await getMyHSubscriptionsCount(token);
 
 						setTotal(null);
-						const subsCount = await getMyHSubscriptionsCount(token);
 
 						if (hasFocus) {
 							let total = hotspots ? hotspots.length : 0,

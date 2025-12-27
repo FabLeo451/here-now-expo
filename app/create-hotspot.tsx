@@ -1,258 +1,220 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import {
 	Alert,
 	View,
-	KeyboardAvoidingView, ScrollView,
+	KeyboardAvoidingView,
+	ScrollView,
 	TouchableOpacity,
 	Platform,
 	Switch
 } from 'react-native';
 import { router } from 'expo-router';
-import { Layout, Text, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
+import { Text, Input, Button } from '@ui-kitten/components';
 import { styles } from "@/Style";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import RNPickerSelect from 'react-native-picker-select';
+import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
-import * as Location from 'expo-location';
-import ModalMapSelect from '@/components/ModalMapSelect'
-import { Hotspot, Category } from '@/lib/hotspot'
+//import ModalMapSelect from '@/components/ModalMapSelect';
+import { Hotspot, Category } from '@/lib/hotspot';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsFocused } from '@react-navigation/native';
 
-const CreateHotspot: React.FC = () => {
+const COMPONENT = 'EditHotspotTab';
 
+type FormState = {
+	id: string;
+	name: string;
+	description: string;
+	category: Category | null;
+	categoryId: string | null;
+	enabled: boolean;
+	isPrivate: boolean;
+	startDate: Date;
+	endDate: Date;
+	location: { latitude: number; longitude: number } | null;
+	position: string;
+};
+
+type FormAction =
+	| { type: 'SET_FIELD'; field: keyof FormState; value: any }
+	| { type: 'SET_LOCATION'; location: { latitude: number; longitude: number } }
+	| { type: 'SET_POSITION'; position: string }
+	| { type: 'SET_CATEGORY'; value: Category | null }
+	| { type: 'RESET'; payload: Partial<FormState> };
+
+
+const initialState: FormState = {
+	id: '',
+	name: '',
+	description: '',
+	category: null,
+	categoryId: null,
+	enabled: true,
+	isPrivate: false,
+	startDate: new Date(),
+	endDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+	location: { latitude: 41.9028, longitude: 12.4964 },
+	position: '',
+};
+
+function formReducer(state: FormState, action: FormAction): FormState {
+	switch (action.type) {
+		case 'SET_FIELD':
+			return { ...state, [action.field]: action.value };
+		case 'SET_LOCATION':
+			return { ...state, location: action.location };
+		case 'SET_POSITION':
+			return { ...state, position: action.position };
+		case 'RESET':
+			return { ...state, ...action.payload };
+		case 'SET_CATEGORY':
+			return {
+				...state,
+				category: action.value,
+				categoryId: action.value?.value || null,
+			};
+
+		default:
+			return state;
+	}
+}
+
+const EditHotspotTab: React.FC = () => {
 	const { action, hotspotEnc } = useLocalSearchParams();
 	const insets = useSafeAreaInsets();
+	const { token } = useAuth();
+	const isFocused = useIsFocused();
 
-	//const [authToken, setAuthToken] = useState('');
-	const { user, token } = useAuth();
-	const [id, setId] = useState('');
-	const [name, setName] = useState('');
-	const [description, setDescription] = useState('');
-	const [category, setCategory] = useState(null);
-	const [enabled, setEnabled] = useState(true);
-	const [isPrivate, setPrivate] = useState(false);
-	const [startDate, setStartDate] = useState(new Date());
+	const [form, dispatch] = useReducer(formReducer, initialState);
+	const [confCategories, setConfCategories] = useState<Category[]>([]);
+	const [refreshing, setRefreshing] = useState(false);
+
+	const [modalVisible, setModalVisible] = useState(false);
 	const [showStartDatePicker, setShowStartDatePicker] = useState(false);
 	const [showStartTimePicker, setShowStartTimePicker] = useState(false);
-	const [endDate, setEndDate] = useState(new Date(new Date().getTime() + 24 * 60 * 60 * 1000));
 	const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 	const [showEndTimePicker, setShowEndTimePicker] = useState(false);
-	const [modalVisible, setModalVisible] = useState(false);
-	const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>({
-		latitude: 41.9028,
-		longitude: 12.4964,
-	});
-	const [position, setPosition] = useState(''); // On screen
 
-	const [confCategories, setConfCategories] = useState<Category[]>([]);
+	// Mounted flag per evitare warning su async
+	const mountedRef = React.useRef(true);
 
 	useEffect(() => {
-
-		const init = async () => {
-			//const token = await AsyncStorage.getItem('authToken');
-			//setAuthToken(token ?? '');
-
-			const { status } = await Location.requestForegroundPermissionsAsync();
-			if (status !== 'granted') {
-				Alert.alert('GPS not permitted');
-				return;
-			}
-
-			let coords = { latitude: 0, longitude: 0 };
-
-			if (action == 'update' && typeof hotspotEnc === 'string') {
-				let hotspot;
-				try {
-					hotspot = JSON.parse(hotspotEnc);
-
-					//Alert.alert('', hotspotEnc)
-					setId(hotspot.id);
-					setName(hotspot.name);
-					setDescription(hotspot.description);
-					setCategory(hotspot.category);
-					setPosition(hotspot.position.latitude.toFixed(6) + ', ' + hotspot.position.longitude.toFixed(6));
-					setEnabled(hotspot.enabled);
-					setPrivate(hotspot.private);
-					setStartDate(new Date(hotspot.startTime));
-					setEndDate(new Date(hotspot.endTime));
-
-					coords.latitude = hotspot.position.latitude;
-					coords.longitude = hotspot.position.longitude;
-
-				} catch {
-					console.log("[edit-hotspot] Invalid hotspot data");
-				}
-
-			} else {
-
-				let loc = await Location.getCurrentPositionAsync({
-					accuracy: Location.Accuracy.Balanced, // o .BestForNavigation
-					//maximumAge: 0,      // No cache
-				});
-
-				coords.latitude = loc.coords.latitude;
-				coords.longitude = loc.coords.longitude;
-
-			}
-
-			setLocation(coords);
-
-			//console.log('[init] Initial coords: ', coords);
-		}
-
-		init();
-		getCategories();
-
-	}, [hotspotEnc, action]);
+		mountedRef.current = true;
+		console.log(`[${COMPONENT}] Mounted`);
+		return () => { mountedRef.current = false; console.log(`[${COMPONENT}] Unmounted`); };
+	}, []);
 
 	const getCategories = async () => {
+		if (!isFocused || refreshing) return;
+		setRefreshing(true);
+		console.log(`[${COMPONENT}] Getting categories...`);
 
 		try {
-			setConfCategories([]);
+			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/categories`);
+			if (!mountedRef.current) return;
 
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/categories`, {
-				method: 'GET',
-			});
-
-			if (!response.ok) {
-				console.log(response)
-				throw new Error('Failed to fetch: ' + response.status + ' ' + response.statusText);
-			}
+			if (!response.ok) throw new Error('Failed to fetch categories');
 
 			const data: Category[] = await response.json();
-			setConfCategories(data);
-			//console.log('[create-hotspot]', JSON.stringify(data))
-		} catch (error: any) {
-			console.log('[getCategories] ', error);
-			Alert.alert('Error getting categories', error.message);
-		} finally {
 
+			if (mountedRef.current) {
+				setConfCategories(data);
+				console.log(`[${COMPONENT}] Categories updated`);
+			}
+		} catch (err: any) {
+			console.log(`[${COMPONENT}] getCategories`, err);
+		} finally {
+			if (mountedRef.current) setRefreshing(false);
 		}
 	};
 
+	useEffect(() => { getCategories(); }, [isFocused]);
+
+	// Load hotspot if action = update
+	useEffect(() => {
+		if (!isFocused || action !== 'update' || !hotspotEnc) return;
+
+		try {
+			const hotspot: Hotspot = JSON.parse(hotspotEnc);
+			if (!mountedRef.current) return;
+
+			dispatch({
+				type: 'RESET',
+				payload: {
+					id: hotspot.id,
+					name: hotspot.name,
+					description: hotspot.description,
+					category: confCategories.find(c => c.value === hotspot.category) || null,
+					categoryId: hotspot.category,
+					enabled: hotspot.enabled,
+					isPrivate: hotspot.private,
+					startDate: new Date(hotspot.startTime),
+					endDate: new Date(hotspot.endTime),
+					location: hotspot.position,
+					position: `${hotspot.position.latitude.toFixed(6)}, ${hotspot.position.longitude.toFixed(6)}`
+				}
+			});
+		} catch {
+			console.log(`[${COMPONENT}] Invalid hotspotEnc`);
+		}
+	}, [hotspotEnc, isFocused]);
+
+	// Handlers picker
 	const onChangeStartDate = (event: any, selectedDate?: Date) => {
-		if (selectedDate && selectedDate < endDate) setStartDate(selectedDate);
+		if (selectedDate) {
+			dispatch({ type: 'SET_FIELD', field: 'startDate', value: selectedDate });
+		}
 		setShowStartDatePicker(false);
 		setShowStartTimePicker(false);
 	};
 
 	const onChangeEndDate = (event: any, selectedDate?: Date) => {
-		if (selectedDate && selectedDate > startDate) setEndDate(selectedDate);
+		if (selectedDate) {
+			dispatch({ type: 'SET_FIELD', field: 'endDate', value: selectedDate });
+		}
 		setShowEndDatePicker(false);
 		setShowEndTimePicker(false);
 	};
 
-	function validate() {
-
-		//const token = await AsyncStorage.getItem('authToken');
-		const title = 'Invalid data';
-
-		if (!token) {
-			Alert.alert('Error', 'Not authenticated');
-			return false;
-		}
-
-		if (!name || name.length < 3) {
-			Alert.alert(title, 'Name too short.');
-			return false;
-		}
-
-		if (!position) {
-			Alert.alert(title, 'Location not set.');
-			return false;
-		}
-
+	const validate = (): boolean => {
+		if (!token) { Alert.alert('Error', 'Not authenticated'); return false; }
+		if (!form.name || form.name.length < 3) { Alert.alert('Invalid data', 'Name too short.'); return false; }
+		if (!form.position) { Alert.alert('Invalid data', 'Location not set.'); return false; }
 		return true;
-	}
+	};
 
-	const updateHotspot = async () => {
+	const getHotspotPayload = (): Omit<Hotspot, 'id'> => ({
+		name: form.name,
+		description: form.description,
+		enabled: form.enabled,
+		private: form.isPrivate,
+		position: form.location || { latitude: 0, longitude: 0 },
+		startTime: form.startDate.toISOString(),
+		endTime: form.endDate.toISOString(),
+		category: form.category?.value,
+	});
 
-		if (!validate())
-			return;
+	const submitHotspot = async () => {
+		if (!validate()) return;
 
-		const hotspot: Omit<Hotspot, 'id'> = {
-			name,
-			description,
-			enabled,
-			private: isPrivate,
-			position: {
-				latitude: location?.latitude || 0,
-				longitude: location?.longitude || 0,
-			},
-			startTime: startDate.toISOString(),
-			endTime: endDate.toISOString(),
-			category
-		};
-
-		console.log('[edit-hotspot] Updating', hotspot);
-
-		try {
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${id}`, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: token,
-				},
-				body: JSON.stringify(hotspot),
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to update hotspot');
-			}
-
-			//const newHotspot: Hotspot = await response.json();
-
-			router.replace("/hotspots");
-
-		} catch (error: any) {
-			Alert.alert('Error updating:', error.message);
-		}
-	}
-
-	const createHotspot = async () => {
-
-		if (!validate())
-			return;
-
-		const hotspot: Omit<Hotspot, 'id'> = {
-			name,
-			description,
-			enabled,
-			private: isPrivate,
-			position: {
-				latitude: location?.latitude || 0,
-				longitude: location?.longitude || 0,
-			},
-			startTime: startDate.toISOString(),
-			endTime: endDate.toISOString(),
-			category
-		};
-
-		console.log('[edit-hotspot] Creating', hotspot);
+		const payload = getHotspotPayload();
+		const url = action === 'create'
+			? `${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`
+			: `${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot/${form.id}`;
+		const method = action === 'create' ? 'POST' : 'PUT';
 
 		try {
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: token,
-				},
-				body: JSON.stringify(hotspot),
+			const response = await fetch(url, {
+				method,
+				headers: { 'Content-Type': 'application/json', Authorization: token! },
+				body: JSON.stringify(payload),
 			});
-
-			if (!response.ok) {
-				throw new Error('Failed to create hotspot');
-			}
-
-			const newHotspot: Hotspot = await response.json();
-
+			if (!response.ok) throw new Error(`${action === 'create' ? 'Create' : 'Update'} failed`);
 			router.replace("/hotspots");
-
-		} catch (error: any) {
-			Alert.alert('Error', error.message);
+		} catch (err: any) {
+			Alert.alert('Error', err.message);
 		}
 	};
 
@@ -260,7 +222,7 @@ const CreateHotspot: React.FC = () => {
 		<KeyboardAvoidingView
 			style={{ flex: 1, backgroundColor: '#f0f0f0' }}
 			behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-			keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+			keyboardVerticalOffset={0}
 		>
 			<ScrollView
 				contentContainerStyle={{
@@ -273,47 +235,37 @@ const CreateHotspot: React.FC = () => {
 				keyboardShouldPersistTaps="handled"
 				keyboardDismissMode="interactive"
 			>
-				{/* Header */}
 				<View style={styles.rowLeft}>
-					<TouchableOpacity
-						style={{ marginHorizontal: 10, marginVertical: 10 }}
-						onPress={() => router.replace("/hotspots")}
-					>
+					<TouchableOpacity style={{ margin: 10 }} onPress={() => router.back()}>
 						<Ionicons name="chevron-back" size={24} color="black" />
 					</TouchableOpacity>
-					<Text style={styles.sectionTitle}>
-						{action == 'create' ? "Create" : "Update"} hotspot
-					</Text>
+					<Text style={styles.sectionTitle}>{action === 'create' ? "Create" : "Update"} hotspot</Text>
 				</View>
 
-				{/* Container con tutti i campi */}
 				<View style={styles.container}>
+					{/*
 					<ModalMapSelect
 						token={token}
 						visible={modalVisible}
-						latitude={location?.latitude ?? 0}
-						longitude={location?.longitude ?? 0}
-						onSelect={(coords: { latitude: number; longitude: number } | null) => {
-
-							//Alert.alert(JSON.stringify(coords))
+						latitude={form.location?.latitude ?? 0}
+						longitude={form.location?.longitude ?? 0}
+						onSelect={(coords) => {
 							setModalVisible(false);
 							if (coords) {
-								setLocation(coords);
-								setPosition(coords.latitude.toFixed(6) + ', ' + coords.longitude.toFixed(6));
+								dispatch({ type: 'SET_LOCATION', location: coords });
+								dispatch({ type: 'SET_POSITION', position: `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}` });
 							}
-
 						}}
 					/>
-
-					{/*<Input value={id} style={{ display: 'none' }} />*/}
+					*/}
 
 					{/* Name */}
 					<Text style={styles.label}>Name</Text>
 					<Input
 						placeholder="Name"
 						style={styles.input}
-						value={name}
-						onChangeText={setName}
+						value={form.name}
+						onChangeText={(text) => dispatch({ type: 'SET_FIELD', field: 'name', value: text })}
 						autoCapitalize="sentences"
 					/>
 
@@ -321,20 +273,14 @@ const CreateHotspot: React.FC = () => {
 					<Text style={styles.label}>Description</Text>
 					<Input
 						multiline
-						value={description}
-						onChangeText={setDescription}
+						value={form.description}
+						onChangeText={(text) => dispatch({ type: 'SET_FIELD', field: 'description', value: text })}
 					/>
 
 					{/* Location */}
 					<Text style={styles.label}>Location</Text>
 					<View style={styles.rowLeft}>
-						{/*<Input
-						style={styles.input}
-						value={position}
-						autoCapitalize="none"
-						disabled={true}
-					/>*/}
-						{position ? (
+						{form.position ? (
 							<View style={styles.rowLeft}><Text>Selected</Text><Ionicons name="checkmark-sharp" size={25} color="#0b0" /></View>
 						) : (
 							<View style={styles.rowLeft}><Text style={{ color: "darkgray" }}>Not selected</Text><Ionicons name="help-circle-outline" size={25} color="darkgray" /></View>
@@ -345,39 +291,37 @@ const CreateHotspot: React.FC = () => {
 					</View>
 
 					{/* Category */}
-					<View >
-						<Text style={styles.label}>Category</Text>
-						<RNPickerSelect
-							onValueChange={(value) => setCategory(value)}
-							items={confCategories}
-							placeholder={{ label: 'Select a category...', value: null }}
-							style={pickerSelectStyles}
-							value={category}
-						/>
+					<Text style={styles.label}>Category</Text>
+					<View style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 6 }}>
+						<Picker
+							selectedValue={form.category?.value ?? null}
+							onValueChange={(value) => {
+								const category = confCategories.find(c => c.value === value) || null;
+								dispatch({ type: 'SET_CATEGORY', value: category });
+							}}
+						>
+							<Picker.Item label="Select a category..." value={null} />
+							{confCategories.map(c => (
+								<Picker.Item key={c.value} label={c.label} value={c.value} />
+							))}
+						</Picker>
 					</View>
 
-					{/* Enabled */}
+					{/* Enabled / Private */}
 					<View style={styles.row}>
 						<Text style={styles.label}>Enabled</Text>
-						<Switch
-							value={enabled}
-							onValueChange={setEnabled}
-						/>
+						<Switch value={form.enabled} onValueChange={(val) => dispatch({ type: 'SET_FIELD', field: 'enabled', value: val })} />
 					</View>
 
-					{/* Private */}
 					<View style={styles.row}>
 						<Text style={styles.label}>Private</Text>
-						<Switch
-							value={isPrivate}
-							onValueChange={setPrivate}
-						/>
+						<Switch value={form.isPrivate} onValueChange={(val) => dispatch({ type: 'SET_FIELD', field: 'isPrivate', value: val })} />
 					</View>
 
-					{/* Start time */}
+					{/* Start / End Time */}
 					<Text style={styles.label}>Start time</Text>
 					<View style={styles.rowLeft}>
-						<Text>{startDate.toLocaleString()}</Text>
+						<Text>{form.startDate.toLocaleString()}</Text>
 						<TouchableOpacity style={styles.selectButton} onPress={() => setShowStartDatePicker(true)}>
 							<Ionicons name="calendar" size={25} color="#fff" />
 						</TouchableOpacity>
@@ -385,32 +329,12 @@ const CreateHotspot: React.FC = () => {
 							<Ionicons name="time" size={25} color="#fff" />
 						</TouchableOpacity>
 					</View>
+					{showStartDatePicker && <DateTimePicker value={form.startDate} mode="date" display={Platform.OS === 'ios' ? 'inline' : 'default'} onChange={onChangeStartDate} />}
+					{showStartTimePicker && <DateTimePicker value={form.startDate} mode="time" display={Platform.OS === 'ios' ? 'inline' : 'default'} onChange={onChangeStartDate} />}
 
-					{
-						showStartDatePicker && (
-							<DateTimePicker
-								value={startDate}
-								mode="date"
-								display={Platform.OS === 'ios' ? 'inline' : 'default'}
-								onChange={onChangeStartDate}
-							/>
-						)
-					}
-					{
-						showStartTimePicker && (
-							<DateTimePicker
-								value={startDate}
-								mode="time"
-								display={Platform.OS === 'ios' ? 'inline' : 'default'}
-								onChange={onChangeStartDate}
-							/>
-						)
-					}
-
-					{/* End time */}
 					<Text style={styles.label}>End time</Text>
 					<View style={styles.rowLeft}>
-						<Text>{endDate.toLocaleString()}</Text>
+						<Text>{form.endDate.toLocaleString()}</Text>
 						<TouchableOpacity style={styles.selectButton} onPress={() => setShowEndDatePicker(true)}>
 							<Ionicons name="calendar" size={25} color="#fff" />
 						</TouchableOpacity>
@@ -418,42 +342,15 @@ const CreateHotspot: React.FC = () => {
 							<Ionicons name="time" size={25} color="#fff" />
 						</TouchableOpacity>
 					</View>
+					{showEndDatePicker && <DateTimePicker value={form.endDate} mode="date" display={Platform.OS === 'ios' ? 'inline' : 'default'} onChange={onChangeEndDate} />}
+					{showEndTimePicker && <DateTimePicker value={form.endDate} mode="time" display={Platform.OS === 'ios' ? 'inline' : 'default'} onChange={onChangeEndDate} />}
 
-					{
-						showEndDatePicker && (
-							<DateTimePicker
-								value={endDate}
-								mode="date"
-								display={Platform.OS === 'ios' ? 'inline' : 'default'}
-								onChange={onChangeEndDate}
-							/>
-						)
-					}
-					{
-						showEndTimePicker && (
-							<DateTimePicker
-								value={endDate}
-								mode="time"
-								display={Platform.OS === 'ios' ? 'inline' : 'default'}
-								onChange={onChangeEndDate}
-							/>
-						)
-					}
-
-					{action == 'create' ? (
-						<Button style={{ marginTop: 30 }} onPress={createHotspot}>
-							Create
-						</Button>
-					) : (
-						<Button style={{ marginTop: 30 }} onPress={updateHotspot}>
-							Save
-						</Button>
-					)}
-
+					<Button style={{ marginTop: 30 }} onPress={submitHotspot}>
+						{action === 'create' ? 'Create' : 'Save'}
+					</Button>
 				</View>
 			</ScrollView>
 		</KeyboardAvoidingView>
-
 	);
 };
 
@@ -481,4 +378,4 @@ const pickerSelectStyles = {
 	},
 };
 
-export default CreateHotspot;
+export default EditHotspotTab;
