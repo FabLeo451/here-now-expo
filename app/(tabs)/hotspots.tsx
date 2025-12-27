@@ -17,33 +17,17 @@ import { Picker } from '@react-native-picker/picker';
 import DropdownHotspot from '@/components/DropdownHotspot'
 import { Hotspot, isActive, getMyHotspots } from '@/lib/hotspot'
 import { useAuth } from '@/hooks/useAuth';
+import { useIsFocused } from '@react-navigation/native';
 
-/*
-const isTokenValid = async (token: string): Promise<boolean> => {
+const COMPONENT = 'HotspotsTab';
 
-	try {
-		const payloadBase64 = token.split('.')[1];
-		const payloadJson = atob(payloadBase64);
-		const payload = JSON.parse(payloadJson);
-
-		if (!payload.exp) return true;
-
-		const now = Math.floor(Date.now() / 1000); // current time in seconds
-		return payload.exp > now;
-	} catch (err) {
-		console.error('Error decoding token JWT:', err);
-		return false;
-	}
-};
-*/
-
-const HomeTab: React.FC = () => {
+const HotspotsTab: React.FC = () => {
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
-	//const [context, setContext] = useState(null);
-	//const [authToken, setAuthToken] = useState('');
 	const [refreshing, setRefreshing] = useState(false);
 	const [filterValue, setFilterValue] = useState('all');
 	const { user, token } = useAuth();
+	const isFocused = useIsFocused();
+	const isLoadingRef = React.useRef(false);
 
 	const { filter } = useLocalSearchParams();
 
@@ -53,42 +37,45 @@ const HomeTab: React.FC = () => {
 		}
 	}, [filter]);
 
+	const loadHotspots = useCallback(async () => {
+		if (!token || !isFocused || isLoadingRef.current) return;
+
+		console.log(`[${COMPONENT}] Refreshing...`);
+
+		isLoadingRef.current = true;
+		setRefreshing(true);
+
+		try {
+			const data = await getMyHotspots(token);
+			if (isFocused) {
+				setHotspots(data);
+			}
+		} catch (error) {
+			console.error(`[${COMPONENT}]`, error);
+		} finally {
+			isLoadingRef.current = false;
+			if (isFocused) {
+				setRefreshing(false);
+				console.log(`[${COMPONENT}] Refreshing done`);
+			}
+		}
+	}, [token, isFocused]);
+
 	useFocusEffect(
-
 		React.useCallback(() => {
-			console.log('[hotspots] Focus');
+			console.log(`[${COMPONENT}] Focus`);
 
-			let hasFocus = true;
-
-			const refreshHotspots = async () => {
-				if (user?.isAuthenticated && token) {
-					const hotspots = await getMyHotspots(token);
-
-					if (hasFocus) setHotspots(hotspots);
-
-					setRefreshing(false);
-				}
-			};
-
-			refreshHotspots();
+			loadHotspots();
 
 			return () => {
-				hasFocus = false;
-				console.log('[hotspots] Lost focus');
+				console.log(`[${COMPONENT}] Lost focus`);
 			};
-		}, [])
+		}, [loadHotspots])
 	);
 
-	const onRefresh = useCallback(async () => {
-		if (token) {
-			setRefreshing(true);
-
-			const hotspots = await getMyHotspots(token);
-			setHotspots(hotspots);
-
-			setRefreshing(false);
-		}
-	}, [token]);
+	const onRefresh = useCallback(() => {
+		loadHotspots();
+	}, [loadHotspots]);
 
 	const handleFilterChange = (value: string) => {
 		console.log('Filter:', value);
@@ -198,10 +185,10 @@ const HomeTab: React.FC = () => {
 				alignItems: 'center',
 			}}><Text>Only registered users can add hotspots</Text></View>
 		)
-
-	if (refreshing)
-		return (<View style={{ margin: 10 }}><Text>Loading...</Text></View>)
-
+	/*
+		if (refreshing)
+			return (<View style={{ margin: 10 }}><Text>Loading...</Text></View>)
+	*/
 	return (
 		<View style={styles.containerList}>
 
@@ -315,4 +302,4 @@ const HomeTab: React.FC = () => {
 	);
 };
 
-export default HomeTab;
+export default HotspotsTab;

@@ -14,21 +14,10 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
 import { Hotspot, isActive, getMyHotspots, getMyHSubscriptionsCount } from '@/lib/hotspot'
+import { isTokenValid } from '@/lib/auth'
 import { useAuth } from '@/hooks/useAuth';
 
-const isTokenValid = async (token: string): Promise<boolean> => {
-	try {
-		const payloadBase64 = token.split('.')[1];
-		const payloadJson = atob(payloadBase64);
-		const payload = JSON.parse(payloadJson);
-		if (!payload.exp) return true;
-		const now = Math.floor(Date.now() / 1000);
-		return payload.exp > now;
-	} catch (err) {
-		console.error('Error decoding token JWT:', err);
-		return false;
-	}
-};
+const COMPONENT = 'HomeTab';
 
 const HomeTab: React.FC = () => {
 	const [total, setTotal] = useState<number | null>(0);
@@ -45,15 +34,17 @@ const HomeTab: React.FC = () => {
 
 			const checkAuth = async () => {
 
-				console.log('[index] Home page focused. Checking authorization and refreshing data...');
+				console.log(`[${COMPONENT}] Focus`);
 
 				if (!token) {
+					console.log(`[${COMPONENT}] Invalid token. Logging out...`);
 					router.replace('/login');
 					return;
 				}
 
 				// Check token validity
-				const valid = await isTokenValid(token);
+				console.log(`[${COMPONENT}] Checking token...`);
+				const valid = isTokenValid(token);
 				if (!valid) {
 					router.replace('/logout');
 					return;
@@ -61,6 +52,7 @@ const HomeTab: React.FC = () => {
 
 				if (user?.isAuthenticated) {
 					try {
+						console.log(`[${COMPONENT}] Refreshing...`);
 						const hotspots = await getMyHotspots(token);
 
 						setTotal(null);
@@ -79,9 +71,10 @@ const HomeTab: React.FC = () => {
 							setInactive(nInactive);
 
 							setSubs(subsCount);
+							console.log(`[${COMPONENT}] Refreshing done...`);
 						}
 					} catch (error) {
-						console.error('[HomeTab]', error);
+						console.error(`[${COMPONENT}]`, error);
 					}
 				}
 			};
@@ -89,6 +82,7 @@ const HomeTab: React.FC = () => {
 			checkAuth();
 			return () => {
 				hasFocus = false;
+				console.log(`[${COMPONENT}] Lost focus`);
 			};
 
 		}, [token, user])
