@@ -13,7 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
-import { Hotspot, isActive, getMyHotspots } from '@/lib/hotspot'
+import { Hotspot, isActive, getMyHotspots, getMyHSubscriptionsCount } from '@/lib/hotspot'
 import { useAuth } from '@/hooks/useAuth';
 
 const isTokenValid = async (token: string): Promise<boolean> => {
@@ -60,8 +60,10 @@ const HomeTab: React.FC = () => {
 				}
 
 				if (user?.isAuthenticated) {
-					getMyHSubscriptions(token);
 					const hotspots = await getMyHotspots(token);
+
+					setTotal(null);
+					const subsCount = await getMyHSubscriptionsCount(token);
 
 					if (hasFocus) {
 						let total = hotspots ? hotspots.length : 0,
@@ -74,6 +76,8 @@ const HomeTab: React.FC = () => {
 						setTotal(total);
 						setActive(nActive);
 						setInactive(nInactive);
+
+						setSubs(subsCount);
 					}
 				}
 			};
@@ -85,34 +89,34 @@ const HomeTab: React.FC = () => {
 
 		}, [])
 	);
-
-	const getMyHSubscriptions = async (token: string) => {
-		try {
-			setTotal(null);
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/mysubscriptions?count`, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: token,
-				},
-			});
-			if (!response.ok) throw new Error('Failed to fetch');
-
-			type PayloadType = {
-				count: number;
-			};
-
-			const payload = await response.json() as PayloadType;
-
-			//console.log('[getMyHSubscriptions]', payload);
-
-			setSubs(payload.count);
-
-		} catch (error: any) {
-			console.log('[getMyHSubscriptions]', error);
-		}
-	};
-
+	/*
+		const getMyHSubscriptions = async (token: string) => {
+			try {
+				setTotal(null);
+				const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/mysubscriptions?count`, {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: token,
+					},
+				});
+				if (!response.ok) throw new Error('Failed to fetch');
+	
+				type PayloadType = {
+					count: number;
+				};
+	
+				const payload = await response.json() as PayloadType;
+	
+				//console.log('[getMyHSubscriptions]', payload);
+	
+				setSubs(payload.count);
+	
+			} catch (error: any) {
+				console.log('[getMyHSubscriptions]', error);
+			}
+		};
+	*/
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
 			<Text style={styles.header}>Hello, {user?.name || 'Utente'} 👋</Text>

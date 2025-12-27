@@ -60,4 +60,29 @@ const getMyHotspots = async (token: string): Promise<Hotspot[]> => {
 	}
 };
 
-export { Hotspot, Category, isActive, getMyHotspots }
+const getMyHSubscriptionsCount = async (token: string): Promise<number> => {
+	try {
+		const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/mysubscriptions?count`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: token,
+			},
+		});
+		if (!response.ok) throw new Error('Failed to fetch');
+
+		type PayloadType = {
+			count: number;
+		};
+
+		const payload = await response.json() as PayloadType;
+
+		return payload.count;
+
+	} catch (error: any) {
+		console.log('[getMyHSubscriptionsCount]', error);
+		return 0;
+	}
+};
+
+export { Hotspot, Category, isActive, getMyHotspots, getMyHSubscriptionsCount }
