@@ -13,7 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
-import { Hotspot, isActive } from '@/lib/hotspot';
+import { Hotspot, isActive, getMyHotspots } from '@/lib/hotspot'
 import { useAuth } from '@/hooks/useAuth';
 
 const isTokenValid = async (token: string): Promise<boolean> => {
@@ -41,6 +41,8 @@ const HomeTab: React.FC = () => {
 	useFocusEffect(
 
 		useCallback(() => {
+			let hasFocus = true;
+
 			const checkAuth = async () => {
 
 				console.log('[index] Home page focused. Checking authorization and refreshing data...');
@@ -58,43 +60,31 @@ const HomeTab: React.FC = () => {
 				}
 
 				if (user?.isAuthenticated) {
-					getMyHotspots(token);
 					getMyHSubscriptions(token);
+					const hotspots = await getMyHotspots(token);
+
+					if (hasFocus) {
+						let total = hotspots ? hotspots.length : 0,
+							nActive = 0,
+							nInactive = 0;
+
+						if (total > 0)
+							hotspots.forEach(h => (isActive(h) ? nActive++ : nInactive++));
+
+						setTotal(total);
+						setActive(nActive);
+						setInactive(nInactive);
+					}
 				}
 			};
 
 			checkAuth();
+			return () => {
+				hasFocus = false;
+			};
 
 		}, [])
 	);
-
-	const getMyHotspots = async (token: string) => {
-		try {
-			setTotal(null);
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: token,
-				},
-			});
-			if (!response.ok) throw new Error('Failed to fetch');
-			const hotspots: Hotspot[] = await response.json();
-
-			let total = hotspots ? hotspots.length : 0,
-				nActive = 0,
-				nInactive = 0;
-
-			if (total > 0)
-				hotspots.forEach(h => (isActive(h) ? nActive++ : nInactive++));
-
-			setTotal(total);
-			setActive(nActive);
-			setInactive(nInactive);
-		} catch (error: any) {
-			console.log('[getMyHotspots]', error);
-		}
-	};
 
 	const getMyHSubscriptions = async (token: string) => {
 		try {

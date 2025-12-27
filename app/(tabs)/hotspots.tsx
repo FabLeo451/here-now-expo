@@ -15,9 +15,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
 import { Picker } from '@react-native-picker/picker';
 import DropdownHotspot from '@/components/DropdownHotspot'
-import { Hotspot, isActive } from '@/lib/hotspot'
+import { Hotspot, isActive, getMyHotspots } from '@/lib/hotspot'
 import { useAuth } from '@/hooks/useAuth';
 
+/*
 const isTokenValid = async (token: string): Promise<boolean> => {
 
 	try {
@@ -34,6 +35,7 @@ const isTokenValid = async (token: string): Promise<boolean> => {
 		return false;
 	}
 };
+*/
 
 const HomeTab: React.FC = () => {
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
@@ -50,24 +52,25 @@ const HomeTab: React.FC = () => {
 			setFilterValue(filter.toString());
 		}
 	}, [filter]);
-
-	useFocusEffect(
-		useCallback(() => {
-			const checkToken = async () => {
-
-				if (!token) return;
-
-				console.log('[hotspots] Checking token validity...')
-				const valid = await isTokenValid(token);
-				if (!valid) {
-					console.log('[hotspots] Invalid token')
-					router.replace('/logout');
-				}
-			};
-			checkToken();
-		}, [])
-	);
-
+	/*
+		useFocusEffect(
+			useCallback(() => {
+				const checkToken = async () => {
+	
+					if (!token) return;
+	
+					console.log('[hotspots] Checking token validity...')
+					const valid = await isTokenValid(token);
+					if (!valid) {
+						console.log('[hotspots] Invalid token')
+						router.replace('/logout');
+					}
+				};
+				checkToken();
+			}, [])
+		);
+	*/
+	/*
 	useEffect(() => {
 		const checkAuth = async () => {
 			if (user?.isAuthenticated && token)
@@ -75,39 +78,79 @@ const HomeTab: React.FC = () => {
 		};
 
 		checkAuth();
-	}, []);
+	});
+	*/
 
-	const getMyHotspots = async (token: string) => {
+	useFocusEffect(
 
-		try {
-			setRefreshing(true);
-			setHotspots([]);
+		React.useCallback(() => {
+			console.log('[hotspots] Focus');
 
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: token,
-				},
-			});
+			let hasFocus = true;
 
-			if (!response.ok) {
-				console.log(response)
-				throw new Error('Failed to fetch: ' + response.status + ' ' + response.statusText);
+			const refreshHotspots = async () => {
+				if (user?.isAuthenticated && token) {
+					const hotspots = await getMyHotspots(token);
+
+					if (hasFocus) setHotspots(hotspots);
+
+					setRefreshing(false);
+				}
+			};
+
+			refreshHotspots();
+
+			return () => {
+				hasFocus = false;
+				console.log('[hotspots] Lost focus');
+			};
+		}, [])
+	);
+	/*
+		const getMyHotspots = async (token: string): Promise<Hotspot[]> => {
+	
+			try {
+				setRefreshing(true);
+				setHotspots([]);
+	
+				const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: token,
+					},
+				});
+	
+				if (!response.ok) {
+					console.log(response)
+					throw new Error('Failed to fetch: ' + response.status + ' ' + response.statusText);
+				}
+	
+				const data: Hotspot[] = await response.json();
+				//setHotspots(data);
+				//console.log('[hotspots]', JSON.stringify(data))
+				return data;
+			} catch (error: any) {
+				console.log('[hotspots.getMyHotspots] ', error);
+				//Alert.alert('Error getting my hotspots', error.message);
+				return ([])
+			} finally {
+				//setRefreshing(false);
 			}
+		};
+	*/
+	const onRefresh = useCallback(async () => {
+		if (token) {
+			setRefreshing(true);
 
-			const data: Hotspot[] = await response.json();
-			setHotspots(data);
-			//console.log('[hotspots]', JSON.stringify(data))
-		} catch (error: any) {
-			console.log('[getMyHotspots] ', error);
-			Alert.alert('Error getting my hotspots', error.message);
-		} finally {
+			const hotspots = await getMyHotspots(token);
+			setHotspots(hotspots);
+
 			setRefreshing(false);
 		}
-	};
+	}, [token]);
 
-	const handleFilterChange = (value) => {
+	const handleFilterChange = (value: string) => {
 		console.log('Filter:', value);
 		setFilterValue(value);
 		/*setSelectedSessions(new Set()); // reset selezione al cambio filtro
@@ -130,11 +173,6 @@ const HomeTab: React.FC = () => {
 				return true;
 		}
 	});
-
-	const onRefresh = useCallback(() => {
-		if (token)
-			getMyHotspots(token);
-	}, []);
 
 	const handleDelete = async (id: string) => {
 		//const token = await AsyncStorage.getItem('authToken');

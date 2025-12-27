@@ -1,38 +1,63 @@
 interface Category {
-    value: string;
-    label: string;
+	value: string;
+	label: string;
 }
 
 interface Hotspot {
-  id: string;
-  name: string;
-  description: string;
-  owner: string;
-  ownedByMe: boolean;
-  enabled: boolean;
-  private: boolean;
-  position: {
-    latitude: number;
-    longitude: number;
-  };
-  startTime?: string;
-  endTime?: string;
-  likes: number;
-  likedByMe: boolean;
-  subscriptions: number;
-  subscribed: boolean;
-  category: string|null;
+	id: string;
+	name: string;
+	description: string;
+	owner: string;
+	ownedByMe: boolean;
+	enabled: boolean;
+	private: boolean;
+	position: {
+		latitude: number;
+		longitude: number;
+	};
+	startTime?: string;
+	endTime?: string;
+	likes: number;
+	likedByMe: boolean;
+	subscriptions: number;
+	subscribed: boolean;
+	category: string | null;
 }
 
 function isActive(h: Hotspot): boolean {
-    if (!h.enabled || !h.startTime || !h.endTime) return false;
+	if (!h.enabled || !h.startTime || !h.endTime) return false;
 
-    const now = new Date();
-    const start = new Date(h.startTime);
-    const end = new Date(h.endTime);
+	const now = new Date();
+	const start = new Date(h.startTime);
+	const end = new Date(h.endTime);
 
-    return now >= start && now <= end;
+	return now >= start && now <= end;
 }
 
+const getMyHotspots = async (token: string): Promise<Hotspot[]> => {
 
-export { Hotspot, Category, isActive }
+	try {
+		const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: token,
+			},
+		});
+
+		if (!response.ok) {
+			console.log(response)
+			throw new Error('Failed to fetch: ' + response.status + ' ' + response.statusText);
+		}
+
+		const data: Hotspot[] = await response.json();
+		return data;
+	} catch (error: any) {
+		console.log('[getMyHotspots] ', error);
+		return ([])
+	} finally {
+
+	}
+};
+
+export { Hotspot, Category, isActive, getMyHotspots }
