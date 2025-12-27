@@ -60,24 +60,28 @@ const HomeTab: React.FC = () => {
 				}
 
 				if (user?.isAuthenticated) {
-					const hotspots = await getMyHotspots(token);
+					try {
+						const hotspots = await getMyHotspots(token);
 
-					setTotal(null);
-					const subsCount = await getMyHSubscriptionsCount(token);
+						setTotal(null);
+						const subsCount = await getMyHSubscriptionsCount(token);
 
-					if (hasFocus) {
-						let total = hotspots ? hotspots.length : 0,
-							nActive = 0,
-							nInactive = 0;
+						if (hasFocus) {
+							let total = hotspots ? hotspots.length : 0,
+								nActive = 0,
+								nInactive = 0;
 
-						if (total > 0)
-							hotspots.forEach(h => (isActive(h) ? nActive++ : nInactive++));
+							if (total > 0)
+								hotspots.forEach(h => (isActive(h) ? nActive++ : nInactive++));
 
-						setTotal(total);
-						setActive(nActive);
-						setInactive(nInactive);
+							setTotal(total);
+							setActive(nActive);
+							setInactive(nInactive);
 
-						setSubs(subsCount);
+							setSubs(subsCount);
+						}
+					} catch (error) {
+						console.error('[HomeTab]', error);
 					}
 				}
 			};
@@ -87,36 +91,9 @@ const HomeTab: React.FC = () => {
 				hasFocus = false;
 			};
 
-		}, [])
+		}, [token, user])
 	);
-	/*
-		const getMyHSubscriptions = async (token: string) => {
-			try {
-				setTotal(null);
-				const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/mysubscriptions?count`, {
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: token,
-					},
-				});
-				if (!response.ok) throw new Error('Failed to fetch');
-	
-				type PayloadType = {
-					count: number;
-				};
-	
-				const payload = await response.json() as PayloadType;
-	
-				//console.log('[getMyHSubscriptions]', payload);
-	
-				setSubs(payload.count);
-	
-			} catch (error: any) {
-				console.log('[getMyHSubscriptions]', error);
-			}
-		};
-	*/
+
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
 			<Text style={styles.header}>Hello, {user?.name || 'Utente'} 👋</Text>

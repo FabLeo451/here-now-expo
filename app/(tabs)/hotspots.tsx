@@ -52,34 +52,6 @@ const HomeTab: React.FC = () => {
 			setFilterValue(filter.toString());
 		}
 	}, [filter]);
-	/*
-		useFocusEffect(
-			useCallback(() => {
-				const checkToken = async () => {
-	
-					if (!token) return;
-	
-					console.log('[hotspots] Checking token validity...')
-					const valid = await isTokenValid(token);
-					if (!valid) {
-						console.log('[hotspots] Invalid token')
-						router.replace('/logout');
-					}
-				};
-				checkToken();
-			}, [])
-		);
-	*/
-	/*
-	useEffect(() => {
-		const checkAuth = async () => {
-			if (user?.isAuthenticated && token)
-				getMyHotspots(token);
-		};
-
-		checkAuth();
-	});
-	*/
 
 	useFocusEffect(
 
@@ -106,39 +78,7 @@ const HomeTab: React.FC = () => {
 			};
 		}, [])
 	);
-	/*
-		const getMyHotspots = async (token: string): Promise<Hotspot[]> => {
-	
-			try {
-				setRefreshing(true);
-				setHotspots([]);
-	
-				const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: token,
-					},
-				});
-	
-				if (!response.ok) {
-					console.log(response)
-					throw new Error('Failed to fetch: ' + response.status + ' ' + response.statusText);
-				}
-	
-				const data: Hotspot[] = await response.json();
-				//setHotspots(data);
-				//console.log('[hotspots]', JSON.stringify(data))
-				return data;
-			} catch (error: any) {
-				console.log('[hotspots.getMyHotspots] ', error);
-				//Alert.alert('Error getting my hotspots', error.message);
-				return ([])
-			} finally {
-				//setRefreshing(false);
-			}
-		};
-	*/
+
 	const onRefresh = useCallback(async () => {
 		if (token) {
 			setRefreshing(true);
