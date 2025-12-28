@@ -13,22 +13,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
-import { Hotspot, isActive } from '@/lib/hotspot';
+import { Hotspot, isActive, getMyHotspots, getMyHSubscriptionsCount } from '@/lib/hotspot'
+import { isTokenValid } from '@/lib/auth'
 import { useAuth } from '@/hooks/useAuth';
 
-const isTokenValid = async (token: string): Promise<boolean> => {
-	try {
-		const payloadBase64 = token.split('.')[1];
-		const payloadJson = atob(payloadBase64);
-		const payload = JSON.parse(payloadJson);
-		if (!payload.exp) return true;
-		const now = Math.floor(Date.now() / 1000);
-		return payload.exp > now;
-	} catch (err) {
-		console.error('Error decoding token JWT:', err);
-		return false;
-	}
-};
+const COMPONENT = 'HomeTab';
 
 const HomeTab: React.FC = () => {
 	const [total, setTotal] = useState<number | null>(0);
@@ -41,87 +30,63 @@ const HomeTab: React.FC = () => {
 	useFocusEffect(
 
 		useCallback(() => {
+			let hasFocus = true;
+
 			const checkAuth = async () => {
 
-				console.log('[index] Home page focused. Checking authorization and refreshing data...');
+				console.log(`[${COMPONENT}] Focus`);
 
 				if (!token) {
+					console.log(`[${COMPONENT}] Invalid token. Logging out...`);
 					router.replace('/login');
 					return;
 				}
 
 				// Check token validity
-				const valid = await isTokenValid(token);
+				console.log(`[${COMPONENT}] Checking token...`);
+				const valid = isTokenValid(token);
 				if (!valid) {
 					router.replace('/logout');
 					return;
 				}
 
 				if (user?.isAuthenticated) {
-					getMyHotspots(token);
-					getMyHSubscriptions(token);
+					try {
+						console.log(`[${COMPONENT}] Refreshing...`);
+						const hotspots = await getMyHotspots(token);
+						const subsCount = await getMyHSubscriptionsCount(token);
+
+						setTotal(null);
+
+						if (hasFocus) {
+							let total = hotspots ? hotspots.length : 0,
+								nActive = 0,
+								nInactive = 0;
+
+							if (total > 0)
+								hotspots.forEach(h => (isActive(h) ? nActive++ : nInactive++));
+
+							setTotal(total);
+							setActive(nActive);
+							setInactive(nInactive);
+
+							setSubs(subsCount);
+							console.log(`[${COMPONENT}] Refreshing done...`);
+						}
+					} catch (error) {
+						console.error(`[${COMPONENT}]`, error);
+					}
 				}
 			};
 
 			checkAuth();
-
-		}, [])
-	);
-
-	const getMyHotspots = async (token: string) => {
-		try {
-			setTotal(null);
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: token,
-				},
-			});
-			if (!response.ok) throw new Error('Failed to fetch');
-			const hotspots: Hotspot[] = await response.json();
-
-			let total = hotspots ? hotspots.length : 0,
-				nActive = 0,
-				nInactive = 0;
-
-			if (total > 0)
-				hotspots.forEach(h => (isActive(h) ? nActive++ : nInactive++));
-
-			setTotal(total);
-			setActive(nActive);
-			setInactive(nInactive);
-		} catch (error: any) {
-			console.log('[getMyHotspots]', error);
-		}
-	};
-
-	const getMyHSubscriptions = async (token: string) => {
-		try {
-			setTotal(null);
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/mysubscriptions?count`, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: token,
-				},
-			});
-			if (!response.ok) throw new Error('Failed to fetch');
-
-			type PayloadType = {
-				count: number;
+			return () => {
+				hasFocus = false;
+				console.log(`[${COMPONENT}] Lost focus`);
 			};
 
-			const payload = await response.json() as PayloadType;
-
-			console.log('[getMyHSubscriptions]', payload);
-
-			setSubs(payload.count);
-
-		} catch (error: any) {
-			console.log('[getMyHSubscriptions]', error);
-		}
-	};
+		}, [token, user])
+	);
 
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
@@ -156,7 +121,7 @@ const HomeTab: React.FC = () => {
 					color="orange"
 					label="Subscriptions"
 					value={subs}
-					onPress={() => console.log('Go to subscriptions') }
+					onPress={() => console.log('Go to subscriptions')}
 				/>
 			</View>
 

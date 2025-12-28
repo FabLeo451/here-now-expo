@@ -15,33 +15,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { decode as atob } from 'base-64';
 import { Picker } from '@react-native-picker/picker';
 import DropdownHotspot from '@/components/DropdownHotspot'
-import { Hotspot, isActive } from '@/lib/hotspot'
+import { Hotspot, isActive, getMyHotspots } from '@/lib/hotspot'
 import { useAuth } from '@/hooks/useAuth';
+import { useIsFocused } from '@react-navigation/native';
 
-const isTokenValid = async (token: string): Promise<boolean> => {
+const COMPONENT = 'HotspotsTab';
 
-	try {
-		const payloadBase64 = token.split('.')[1];
-		const payloadJson = atob(payloadBase64);
-		const payload = JSON.parse(payloadJson);
-
-		if (!payload.exp) return true;
-
-		const now = Math.floor(Date.now() / 1000); // current time in seconds
-		return payload.exp > now;
-	} catch (err) {
-		console.error('Error decoding token JWT:', err);
-		return false;
-	}
-};
-
-const HomeTab: React.FC = () => {
+const HotspotsTab: React.FC = () => {
 	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
-	//const [context, setContext] = useState(null);
-	//const [authToken, setAuthToken] = useState('');
 	const [refreshing, setRefreshing] = useState(false);
 	const [filterValue, setFilterValue] = useState('all');
 	const { user, token } = useAuth();
+	const isFocused = useIsFocused();
+	const isLoadingRef = React.useRef(false);
 
 	const { filter } = useLocalSearchParams();
 
@@ -51,63 +37,47 @@ const HomeTab: React.FC = () => {
 		}
 	}, [filter]);
 
-	useFocusEffect(
-		useCallback(() => {
-			const checkToken = async () => {
+	const loadHotspots = useCallback(async () => {
+		if (!token || !isFocused || isLoadingRef.current) return;
 
-				if (!token) return;
+		console.log(`[${COMPONENT}] Refreshing...`);
 
-				console.log('[hotspots] Checking token validity...')
-				const valid = await isTokenValid(token);
-				if (!valid) {
-					console.log('[hotspots] Invalid token')
-					router.replace('/logout');
-				}
-			};
-			checkToken();
-		}, [])
-	);
-
-	useEffect(() => {
-		const checkAuth = async () => {
-			if (user?.isAuthenticated && token)
-				getMyHotspots(token);
-		};
-
-		checkAuth();
-	}, []);
-
-	const getMyHotspots = async (token: string) => {
+		isLoadingRef.current = true;
+		setRefreshing(true);
 
 		try {
-			setRefreshing(true);
-			setHotspots([]);
-
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: token,
-				},
-			});
-
-			if (!response.ok) {
-				console.log(response)
-				throw new Error('Failed to fetch: ' + response.status + ' ' + response.statusText);
+			const data = await getMyHotspots(token);
+			if (isFocused) {
+				setHotspots(data);
 			}
-
-			const data: Hotspot[] = await response.json();
-			setHotspots(data);
-			//console.log('[hotspots]', JSON.stringify(data))
-		} catch (error: any) {
-			console.log('[getMyHotspots] ', error);
-			Alert.alert('Error getting my hotspots', error.message);
+		} catch (error) {
+			console.error(`[${COMPONENT}]`, error);
 		} finally {
-			setRefreshing(false);
+			isLoadingRef.current = false;
+			if (isFocused) {
+				setRefreshing(false);
+				console.log(`[${COMPONENT}] Refreshing done`);
+			}
 		}
-	};
+	}, [token, isFocused]);
 
-	const handleFilterChange = (value) => {
+	useFocusEffect(
+		React.useCallback(() => {
+			console.log(`[${COMPONENT}] Focus`);
+
+			loadHotspots();
+
+			return () => {
+				console.log(`[${COMPONENT}] Lost focus`);
+			};
+		}, [loadHotspots])
+	);
+
+	const onRefresh = useCallback(() => {
+		loadHotspots();
+	}, [loadHotspots]);
+
+	const handleFilterChange = (value: string) => {
 		console.log('Filter:', value);
 		setFilterValue(value);
 		/*setSelectedSessions(new Set()); // reset selezione al cambio filtro
@@ -130,11 +100,6 @@ const HomeTab: React.FC = () => {
 				return true;
 		}
 	});
-
-	const onRefresh = useCallback(() => {
-		if (token)
-			getMyHotspots(token);
-	}, []);
 
 	const handleDelete = async (id: string) => {
 		//const token = await AsyncStorage.getItem('authToken');
@@ -220,10 +185,10 @@ const HomeTab: React.FC = () => {
 				alignItems: 'center',
 			}}><Text>Only registered users can add hotspots</Text></View>
 		)
-
-	if (refreshing)
-		return (<View style={{ margin: 10 }}><Text>Loading...</Text></View>)
-
+	/*
+		if (refreshing)
+			return (<View style={{ margin: 10 }}><Text>Loading...</Text></View>)
+	*/
 	return (
 		<View style={styles.containerList}>
 
@@ -337,4 +302,4 @@ const HomeTab: React.FC = () => {
 	);
 };
 
-export default HomeTab;
+export default HotspotsTab;

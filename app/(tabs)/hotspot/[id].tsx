@@ -108,7 +108,7 @@ const HotspotPage: React.FC = () => {
 			const message = `📍 Take a look at this hotspot!
 				${hotspot.name}
 
-				https://ekhoes.com/herenow/hotspot/${hotspot.id}
+				https://www.ekhoes.com/herenow/hotspot/${hotspot.id}
 				`;
 
 			await Share.share({
