@@ -21,6 +21,7 @@ import ModalMapSelect from '@/components/ModalMapSelect';
 import { Hotspot, Category } from '@/lib/hotspot';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsFocused } from '@react-navigation/native';
+import * as Location from 'expo-location';
 
 const COMPONENT = 'EditHotspotTab';
 
@@ -124,6 +125,39 @@ const EditHotspotTab: React.FC = () => {
 
 		setCategoryValue(String(form.category.value));
 	}, [form.category]);
+
+	// Get user location on create
+	useEffect(() => {
+
+		const getCurrentPosition = async () => {
+			if (!isFocused || action != 'create') return
+
+			const { status } = await Location.requestForegroundPermissionsAsync();
+			if (status !== 'granted') {
+				Alert.alert('GPS not permitted');
+				return;
+			}
+
+			let loc = await Location.getCurrentPositionAsync({
+				accuracy: Location.Accuracy.BestForNavigation, // o .BestForNavigation
+				//maximumAge: 0,      // No cache
+			});
+
+			const coords = {
+				latitude: loc.coords.latitude,
+				longitude: loc.coords.longitude,
+			};
+
+			dispatch({ type: 'SET_LOCATION', location: coords });
+			dispatch({
+				type: 'SET_POSITION',
+				position: `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`
+			});
+		}
+
+		getCurrentPosition();
+
+	}, [action]);
 
 	const getCategories = async () => {
 		if (!isFocused || refreshing) return;
@@ -415,30 +449,6 @@ const EditHotspotTab: React.FC = () => {
 			</ScrollView>
 		</KeyboardAvoidingView>
 	);
-};
-
-const pickerSelectStyles = {
-	inputIOS: {
-		fontSize: 16,
-		paddingVertical: 12,
-		paddingHorizontal: 10,
-		borderWidth: 1,
-		borderColor: 'gray',
-		borderRadius: 4,
-		color: 'black',
-		paddingRight: 30,
-		backgroundColor: '#f0f0f0',
-	},
-	inputAndroid: {
-		fontSize: 16,
-		paddingHorizontal: 10,
-		paddingVertical: 0,
-		borderWidth: 1,
-		borderColor: 'gray',
-		borderRadius: 4,
-		color: 'black',
-		backgroundColor: '#f0f0f0',
-	},
 };
 
 export default EditHotspotTab;
