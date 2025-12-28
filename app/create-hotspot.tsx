@@ -149,10 +149,6 @@ const EditHotspotTab: React.FC = () => {
 			};
 
 			dispatch({ type: 'SET_LOCATION', location: coords });
-			dispatch({
-				type: 'SET_POSITION',
-				position: `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`
-			});
 		}
 
 		getCurrentPosition();
