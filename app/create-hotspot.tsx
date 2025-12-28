@@ -8,11 +8,12 @@ import {
 	Platform,
 	Switch
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { Text, Input, Button } from '@ui-kitten/components';
 import { styles } from "@/Style";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
@@ -98,14 +99,31 @@ const EditHotspotTab: React.FC = () => {
 	const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 	const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
-	// Mounted flag per evitare warning su async
-	//const mountedRef = React.useRef(true);
+	const [categoryOpen, setCategoryOpen] = useState(false);
+	const [categoryValue, setCategoryValue] = useState<string | null>(null);
+	const [categoryItems, setCategoryItems] = useState<
+		{ label: string; value: string }[]
+	>([]);
 
 	useEffect(() => {
-		//mountedRef.current = true;
-		console.log(`[${COMPONENT}] Mounted`);
-		return () => { /*mountedRef.current = false;*/ console.log(`[${COMPONENT}] Unmounted`); };
-	}, []);
+		if (confCategories.length === 0) return;
+
+		setCategoryItems(
+			confCategories.map(c => ({
+				label: c.label,
+				value: String(c.value),
+			}))
+		);
+	}, [confCategories]);
+
+	useEffect(() => {
+		if (!form.category?.value) {
+			setCategoryValue(null);
+			return;
+		}
+
+		setCategoryValue(String(form.category.value));
+	}, [form.category]);
 
 	const getCategories = async () => {
 		if (!isFocused || refreshing) return;
@@ -131,7 +149,6 @@ const EditHotspotTab: React.FC = () => {
 
 					const hotspot: Hotspot = JSON.parse(hotspotEnc);
 					const category = data.find(c => c.value === hotspot.category) || null;
-					dispatch({ type: 'SET_CATEGORY', value: category });
 				}
 
 				console.log(`[${COMPONENT}] Categories updated`);
@@ -319,31 +336,39 @@ const EditHotspotTab: React.FC = () => {
 
 					{/* Category */}
 					<Text style={styles.label}>Category</Text>
-					<View style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 6 }}>
-						<Picker
-							enabled={confCategories.length > 0}
-							selectedValue={safeCategoryValue}
-							onValueChange={(value) => {
+					<DropDownPicker
+						open={categoryOpen}
+						value={categoryValue}
+						items={categoryItems}
+						setOpen={setCategoryOpen}
+						setValue={(cb) => {
+							setCategoryValue(prev => {
+								const value = cb(prev);
+
 								if (!value) {
 									dispatch({ type: 'SET_CATEGORY', value: null });
-									return;
+									return null;
 								}
 
-								const category = confCategories.find(c => c.value === value);
-								dispatch({ type: 'SET_CATEGORY', value: category || null });
-							}}
-						>
-							<Picker.Item label="Select a category..." value="" />
-							{confCategories.map(c => (
-								<Picker.Item
-									key={String(c.value)}
-									label={c.label}
-									value={c.value}
-								/>
-							))}
-						</Picker>
-					</View>
+								const category = confCategories.find(
+									c => String(c.value) === String(value)
+								);
 
+								dispatch({ type: 'SET_CATEGORY', value: category || null });
+								return value;
+							});
+						}}
+						setItems={setCategoryItems}
+						placeholder="Select a category..."
+						listMode="MODAL"          // 🔥 evita problemi di layout nello ScrollView
+						modalTitle="Category"
+						zIndex={3000}
+						zIndexInverse={1000}
+						style={{
+							borderColor: '#ccc',
+							marginBottom: categoryOpen ? 200 : 20,
+						}}
+					/>
 
 					{/* Enabled / Private */}
 					<View style={styles.row}>
