@@ -99,12 +99,12 @@ const EditHotspotTab: React.FC = () => {
 	const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
 	// Mounted flag per evitare warning su async
-	const mountedRef = React.useRef(true);
+	//const mountedRef = React.useRef(true);
 
 	useEffect(() => {
-		mountedRef.current = true;
+		//mountedRef.current = true;
 		console.log(`[${COMPONENT}] Mounted`);
-		return () => { mountedRef.current = false; console.log(`[${COMPONENT}] Unmounted`); };
+		return () => { /*mountedRef.current = false;*/ console.log(`[${COMPONENT}] Unmounted`); };
 	}, []);
 
 	const getCategories = async () => {
@@ -114,16 +114,21 @@ const EditHotspotTab: React.FC = () => {
 
 		try {
 			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/categories`);
-			if (!mountedRef.current) return;
+			if (!isFocused) return;
 
 			if (!response.ok) throw new Error('Failed to fetch categories');
 
 			const data: Category[] = await response.json();
 
-			if (mountedRef.current) {
+			if (isFocused) {
 				setConfCategories(data);
 
 				if (action == 'update') {
+					if (typeof hotspotEnc !== 'string') {
+						console.log(`[${COMPONENT}] hotspotEnc invalid`, hotspotEnc);
+						return;
+					}
+
 					const hotspot: Hotspot = JSON.parse(hotspotEnc);
 					const category = data.find(c => c.value === hotspot.category) || null;
 					dispatch({ type: 'SET_CATEGORY', value: category });
@@ -134,7 +139,7 @@ const EditHotspotTab: React.FC = () => {
 		} catch (err: any) {
 			console.log(`[${COMPONENT}] getCategories`, err);
 		} finally {
-			if (mountedRef.current) setRefreshing(false);
+			if (isFocused) setRefreshing(false);
 		}
 	};
 
@@ -143,10 +148,17 @@ const EditHotspotTab: React.FC = () => {
 	// Load hotspot if action = update
 	useEffect(() => {
 		if (!isFocused || action !== 'update' || !hotspotEnc) return;
+		if (confCategories.length === 0) return;
 
 		try {
+			if (typeof hotspotEnc !== 'string') {
+				console.log(`[${COMPONENT}] hotspotEnc invalid`, hotspotEnc);
+				return;
+			}
+
 			const hotspot: Hotspot = JSON.parse(hotspotEnc);
-			if (!mountedRef.current) return;
+
+			if (!isFocused) return;
 
 			dispatch({
 				type: 'RESET',
@@ -167,10 +179,10 @@ const EditHotspotTab: React.FC = () => {
 		} catch {
 			console.log(`[${COMPONENT}] Invalid hotspotEnc`);
 		}
-	}, [hotspotEnc, isFocused]);
+	}, [hotspotEnc, isFocused, confCategories]);
 
 	// Handlers picker
-	const onChangeStartDate = (event: any, selectedDate?: Date) => {
+	const onChangeStartDate = (_: any, selectedDate?: Date) => {
 		if (selectedDate) {
 			dispatch({ type: 'SET_FIELD', field: 'startDate', value: selectedDate });
 		}
@@ -178,7 +190,8 @@ const EditHotspotTab: React.FC = () => {
 		setShowStartTimePicker(false);
 	};
 
-	const onChangeEndDate = (event: any, selectedDate?: Date) => {
+
+	const onChangeEndDate = (_: any, selectedDate?: Date) => {
 		if (selectedDate) {
 			dispatch({ type: 'SET_FIELD', field: 'endDate', value: selectedDate });
 		}
@@ -205,6 +218,7 @@ const EditHotspotTab: React.FC = () => {
 	});
 
 	const submitHotspot = async () => {
+		if (!token) return;
 		if (!validate()) return;
 
 		const payload = getHotspotPayload();
@@ -225,6 +239,13 @@ const EditHotspotTab: React.FC = () => {
 			Alert.alert('Error', err.message);
 		}
 	};
+
+	const safeCategoryValue = React.useMemo(() => {
+		if (!form.category?.value) return "";
+		return confCategories.some(c => c.value === form.category!.value)
+			? form.category!.value
+			: "";
+	}, [form.category, confCategories]);
 
 	return (
 		<KeyboardAvoidingView
@@ -300,18 +321,29 @@ const EditHotspotTab: React.FC = () => {
 					<Text style={styles.label}>Category</Text>
 					<View style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 6 }}>
 						<Picker
-							selectedValue={form.category?.value ?? null}
+							enabled={confCategories.length > 0}
+							selectedValue={safeCategoryValue}
 							onValueChange={(value) => {
-								const category = confCategories.find(c => c.value === value) || null;
-								dispatch({ type: 'SET_CATEGORY', value: category });
+								if (!value) {
+									dispatch({ type: 'SET_CATEGORY', value: null });
+									return;
+								}
+
+								const category = confCategories.find(c => c.value === value);
+								dispatch({ type: 'SET_CATEGORY', value: category || null });
 							}}
 						>
-							<Picker.Item label="Select a category..." value={null} />
+							<Picker.Item label="Select a category..." value="" />
 							{confCategories.map(c => (
-								<Picker.Item key={c.value} label={c.label} value={c.value} />
+								<Picker.Item
+									key={String(c.value)}
+									label={c.label}
+									value={c.value}
+								/>
 							))}
 						</Picker>
 					</View>
+
 
 					{/* Enabled / Private */}
 					<View style={styles.row}>
