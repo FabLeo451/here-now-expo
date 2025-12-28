@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Layout, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import { ImageBackground } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { styles } from '@/Style';
 
@@ -70,14 +70,14 @@ export default function LoginScreen() {
 		let valid = true;
 
 		if (!validateEmail(email)) {
-			setEmailError('Email non valida');
+			setEmailError('Invalid email');
 			valid = false;
 		} else {
 			setEmailError('');
 		}
 
 		if (password.trim() === '') {
-			setPasswordError('Password non può essere vuota');
+			setPasswordError('Password cannot be empty');
 			valid = false;
 		} else {
 			setPasswordError('');
@@ -99,7 +99,7 @@ export default function LoginScreen() {
 			});
 
 			if (!response.ok) {
-				throw new Error('Email o password errati');
+				throw new Error('Wrong email or password');
 			}
 
 			type LoginResponse = {
@@ -144,7 +144,7 @@ export default function LoginScreen() {
 
 	const handleGuestLogin = async () => {
 		if (!guestName.trim()) {
-			setGuestNameError('Inserisci un nome per accedere come ospite.');
+			setGuestNameError('Insert a name to enter as a guest.');
 			return;
 		} else {
 			setGuestNameError('');
@@ -161,7 +161,7 @@ export default function LoginScreen() {
 			});
 
 			if (!response.ok) {
-				throw new Error('Errore nel login ospite');
+				throw new Error('Error logging in as guest');
 			}
 
 			const data = await response.json();
@@ -200,78 +200,83 @@ export default function LoginScreen() {
 			paddingLeft: insets.left,
 			paddingRight: insets.right,
 			flex: 1,
-			backgroundColor: '#f0f0f0',
 		}}
 		>
-			<Layout style={styles.container}>
-				<Text style={styles.mainTitle}>HereN<FontAwesome name="wifi" size={22} color="#000" />w</Text>
+			<ImageBackground
+				source={require('@/assets/images/cover.jpeg')}
+				resizeMode="cover"
+				style={{ flex: 1 }}
+			>
+				<Layout style={{ backgroundColor: 'rgba(240, 240, 240, 0.75)', flex: 1, padding: 16 }}>
+					<Text style={styles.mainTitle}>HereN<FontAwesome name="wifi" size={22} color="#000" />w</Text>
 
-				<Input
-					placeholder="Email"
-					style={[styles.input, { marginBottom: 10 }]}
-					value={email}
-					onChangeText={setEmail}
-					autoCapitalize="none"
-					keyboardType="email-address"
-					textContentType="emailAddress"
-					status={emailError ? 'danger' : 'basic'}
-					caption={emailError}
-				/>
+					<Input
+						placeholder="Email"
+						style={[styles.input, { marginBottom: 10 }]}
+						value={email}
+						onChangeText={setEmail}
+						autoCapitalize="none"
+						keyboardType="email-address"
+						textContentType="emailAddress"
+						status={emailError ? 'danger' : 'basic'}
+						caption={emailError}
+					/>
 
-				<Input
-					placeholder="Password"
-					style={[styles.input, { marginBottom: 10 }]}
-					value={password}
-					onChangeText={setPassword}
-					secureTextEntry
-					textContentType="password"
-					status={passwordError ? 'danger' : 'basic'}
-					caption={passwordError}
-					autoCapitalize="none"
-				/>
+					<Input
+						placeholder="Password"
+						style={[styles.input, { marginBottom: 10 }]}
+						value={password}
+						onChangeText={setPassword}
+						secureTextEntry
+						textContentType="password"
+						status={passwordError ? 'danger' : 'basic'}
+						caption={passwordError}
+						autoCapitalize="none"
+					/>
 
-				<Button
-					style={styles.button}
-					onPress={handleLogin}
-					disabled={loading}
-					accessoryRight={loading ? () => <LoadingIndicator /> : undefined}
-				>
-					Log in
-				</Button>
+					<Button
+						style={styles.button}
+						onPress={handleLogin}
+						disabled={loading}
+						accessoryRight={loading ? () => <LoadingIndicator /> : undefined}
+					>
+						Log in
+					</Button>
 
-				<Text
-					style={styles.link}
-					status="primary"
-					onPress={() => Linking.openURL('https://www.ekhoes.com/sign-up')}
-				>
-					No account? Sign up
-				</Text>
+					<Text
+						style={styles.link}
+						status="primary"
+						onPress={() => Linking.openURL('https://www.ekhoes.com/sign-up')}
+					>
+						No account? Sign up
+					</Text>
 
-				<Text category="h6" style={styles.divider}>Or</Text>
+					<Text category="h6" style={styles.divider}>Or</Text>
 
-				<Input
-					placeholder="Name (Guest)"
-					style={[styles.input, { marginBottom: 10 }]}
-					value={guestName}
-					onChangeText={setGuestName}
-					status={guestNameError ? 'danger' : 'basic'}
-					caption={guestNameError}
-					autoCapitalize="words"
-				/>
+					<Input
+						placeholder="Name (Guest)"
+						style={[styles.input, { marginBottom: 10 }]}
+						value={guestName}
+						onChangeText={setGuestName}
+						status={guestNameError ? 'danger' : 'basic'}
+						caption={guestNameError}
+						autoCapitalize="words"
+					/>
 
-				<Button
-					style={styles.button}
-					onPress={handleGuestLogin}
-					disabled={loading}
-					accessoryRight={loading ? () => <LoadingIndicator /> : undefined}
-				>
-					Enter as guest
-				</Button>
+					<Button
+						style={styles.button}
+						onPress={handleGuestLogin}
+						disabled={loading}
+						accessoryRight={loading ? () => <LoadingIndicator /> : undefined}
+					>
+						Enter as guest
+					</Button>
 
-				<Text style={styles.footer} appearance="hint" category="c1">
-					An app by ekhoes.com
-				</Text>
-			</Layout>
+					<Text style={styles.footer} appearance="hint" category="c1">
+						An app by Ekhoes
+					</Text>
+				</Layout>
+			</ImageBackground>
 		</View>
 	);
 }
