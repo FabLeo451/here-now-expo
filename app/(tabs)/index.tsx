@@ -119,7 +119,7 @@ const HomeTab: React.FC = () => {
 				<StatCard
 					icon="notifications"
 					color="orange"
-					label="Subscriptions"
+					label="Followed hotspots"
 					value={subs}
 					onPress={() => console.log('Go to subscriptions')}
 				/>

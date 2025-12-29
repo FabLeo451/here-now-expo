@@ -182,7 +182,7 @@ export default function LoginScreen() {
 				console.error(e.message);
 			}
 
-			router.replace('/(tabs)');
+			router.replace('/');
 
 		} catch (error) {
 			//console.log('[login]', error)
