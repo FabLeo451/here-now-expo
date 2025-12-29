@@ -10,6 +10,7 @@ import type { MapView } from 'react-native-maps';
 import { Hotspot } from '@/lib/hotspot'
 import { useAuth } from '@/hooks/useAuth';
 import { useWebsocket } from "@/hooks/useWebsocket";
+import { decodeBase64 } from "@/lib/utils";
 
 type LatLng = {
 	latitude: number;
@@ -48,9 +49,10 @@ export default function MapTab() {
 	const onMessage = useCallback((message) => {
 		//console.log('[map]', message);
 		if (message.Type === "map") {
-			let parsed: Hotspot[] = JSON.parse(message.Text);
+			let str = decodeBase64(message.Payload);
+			let parsed: Hotspot[] = JSON.parse(str);
 
-			//console.log('[map] message.Text =', message.Text);
+			//console.log('[map] decoded payload =', str);
 
 			if (!parsed)
 				parsed = [];
@@ -181,17 +183,17 @@ export default function MapTab() {
 	);
 
 	function sendMapBoundaries(boundaries: Boundaries) {
-		const payload = {
+		const message = {
 			appId: process.env.EXPO_PUBLIC_APP_ID,
 			type: 'map',
 			subtype: 'getHotspotsByBoundaries',
-			text: JSON.stringify({
+			payload: JSON.stringify({
 				northEast: { latitude: boundaries.northEast.latitude, longitude: boundaries.northEast.longitude },
 				southWest: { latitude: boundaries.southWest.latitude, longitude: boundaries.southWest.longitude }
 			}),
 		};
 
-		sendMessage(JSON.stringify(payload));
+		sendMessage(message);
 	}
 
 	return (

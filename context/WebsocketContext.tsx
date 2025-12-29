@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { encodeBase64 } from "@/lib/utils";
 
 type MessageHandler = (message: any) => void;
 
@@ -138,9 +139,14 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 		};
 	}, [token]);
 
-	const sendMessage = (message: string) => {
+	const sendMessage = <T extends Record<string, any>>(message: T) => {
 		if (socketRef.current?.readyState === WebSocket.OPEN) {
-			socketRef.current.send(message);
+			if (message.payload) {
+				message.payload = encodeBase64(message.payload);
+			}
+			//console.log(message);
+			const str = JSON.stringify(message);
+			socketRef.current.send(str);
 		}
 	};
 
