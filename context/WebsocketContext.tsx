@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import { router } from 'expo-router';
 import { useAuth } from "@/hooks/useAuth";
 import { encodeBase64 } from "@/lib/utils";
 
@@ -8,6 +9,7 @@ type WebsocketContextType = {
 	isConnected: boolean;
 	sendMessage: (message: string) => void;
 	callback: (cb: MessageHandler) => () => void;
+	connect: (token: string) => void;
 };
 
 const WebsocketContext = createContext<WebsocketContextType | undefined>(undefined);
@@ -58,7 +60,6 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 		) {
 			return;
 		}
-
 
 		console.log("[WebsocketContext] Connecting with token:", currentToken);
 
@@ -111,6 +112,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 				}, delay);
 			} else {
 				console.log("[WebsocketContext] Max retry reached");
+				router.replace("/disconnected");
 			}
 		};
 	};
@@ -163,7 +165,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 	};
 
 	return (
-		<WebsocketContext.Provider value={{ isConnected, sendMessage, callback }}>
+		<WebsocketContext.Provider value={{ isConnected, sendMessage, callback, connect }}>
 			{children}
 		</WebsocketContext.Provider>
 	);
