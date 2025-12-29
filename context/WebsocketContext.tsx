@@ -52,7 +52,13 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 
 	const connect = (currentToken: string) => {
 		if (!currentToken) return;
-		if (socketRef.current) return;
+		if (
+			socketRef.current &&
+			socketRef.current.readyState === WebSocket.OPEN
+		) {
+			return;
+		}
+
 
 		console.log("[WebsocketContext] Connecting with token:", currentToken);
 
@@ -112,30 +118,31 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 	useEffect(() => {
 		if (!token) {
 			console.log("[WebsocketContext] No token → closing socket");
-			socketRef.current?.close();
-			socketRef.current = null;
+
+			stopHeartbeat(); // ⬅️ SUBITO
+
+			if (socketRef.current) {
+				socketRef.current.close();
+				socketRef.current = null;
+			}
+
 			setIsConnected(false);
 			retryCountRef.current = 0;
-			stopHeartbeat();
 
 			if (reconnectTimeoutRef.current) {
 				clearTimeout(reconnectTimeoutRef.current);
 				reconnectTimeoutRef.current = null;
 			}
+
 			return;
 		}
 
 		connect(token);
 
 		return () => {
+			stopHeartbeat();
 			socketRef.current?.close();
 			socketRef.current = null;
-			stopHeartbeat();
-
-			if (reconnectTimeoutRef.current) {
-				clearTimeout(reconnectTimeoutRef.current);
-				reconnectTimeoutRef.current = null;
-			}
 		};
 	}, [token]);
 
