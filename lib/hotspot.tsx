@@ -34,7 +34,9 @@ function isActive(h: Hotspot): boolean {
 	return now >= start && now <= end;
 }
 
-const getMyHotspots = async (token: string): Promise<Hotspot[]> => {
+const getMyHotspots = async (token: string, timeoutMs = 5000): Promise<Hotspot[]> => {
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
 	try {
 		const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
@@ -43,6 +45,7 @@ const getMyHotspots = async (token: string): Promise<Hotspot[]> => {
 				'Content-Type': 'application/json',
 				Authorization: token,
 			},
+			signal: controller.signal,
 		});
 
 		if (!response.ok) {
@@ -56,32 +59,45 @@ const getMyHotspots = async (token: string): Promise<Hotspot[]> => {
 		console.log('[getMyHotspots] ', error);
 		return ([])
 	} finally {
-
+		clearTimeout(timeoutId);
 	}
 };
 
-const getMyHSubscriptionsCount = async (token: string): Promise<number> => {
+const getMyHSubscriptionsCount = async (
+	token: string,
+	timeoutMs = 5000
+): Promise<number> => {
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
 	try {
-		const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/mysubscriptions?count`, {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: token,
-			},
-		});
-		if (!response.ok) throw new Error('Failed to fetch');
+		const response = await fetch(
+			`${process.env.EXPO_PUBLIC_API_BASE_URL}/mysubscriptions?count`,
+			{
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: token,
+				},
+				signal: controller.signal,
+			}
+		);
 
-		type PayloadType = {
-			count: number;
-		};
+		if (!response.ok) {
+			throw new Error(`HTTP error ${response.status}`);
+		}
 
-		const payload = await response.json() as PayloadType;
-
+		const payload = (await response.json()) as { count: number };
 		return payload.count;
-
 	} catch (error: any) {
-		console.log('[getMyHSubscriptionsCount]', error);
+		if (error.name === 'AbortError') {
+			console.warn('[getMyHSubscriptionsCount] Timeout');
+		} else {
+			console.log('[getMyHSubscriptionsCount]', error);
+		}
 		return 0;
+	} finally {
+		clearTimeout(timeoutId);
 	}
 };
 
