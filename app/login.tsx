@@ -130,7 +130,7 @@ export default function LoginScreen() {
 				console.error(e.message);
 			}
 
-			router.replace('/(tabs)');
+			router.replace('/');
 
 		} catch (error) {
 			//console.log('[login]', error)
@@ -271,6 +271,9 @@ export default function LoginScreen() {
 					>
 						Enter as guest
 					</Button>
+
+					<Text>{process.env.EXPO_PUBLIC_API_BASE_URL}</Text>
+					<Text>{process.env.EXPO_PUBLIC_WEBSOCKET_URL}</Text>
 
 					<Text style={styles.footer} appearance="hint" category="c1">
 						An app by Ekhoes
