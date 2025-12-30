@@ -25,7 +25,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 	const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	const listenersRef = useRef<Set<MessageHandler>>(new Set());
-	const { token } = useAuth();
+	const { token, logout } = useAuth();
 	const tokenRef = useRef<string | null>(token);
 
 	const [isConnected, setIsConnected] = useState(false);
@@ -90,11 +90,18 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 			console.warn("[WebsocketContext] WebSocket error");
 		};
 
-		ws.onclose = () => {
-			console.log("[WebsocketContext] WebSocket closed");
+		ws.onclose = (event) => {
+			console.log("[WebsocketContext] WebSocket closed", event.code);
 			setIsConnected(false);
 			socketRef.current = null;
 			stopHeartbeat();
+			
+			if (event.code == 1008) { // Auth / policy violation
+				console.log("[WebsocketContext] Auth error", event.code);
+				tokenRef.current = null;
+				logout();
+				return;
+			}
 
 			const currentToken = tokenRef.current;
 			if (!currentToken) return;

@@ -3,7 +3,6 @@ import { Text, Platform, Linking } from 'react-native';
 import * as Device from 'expo-device';
 import { Alert, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Layout, TextProps, Input, Button, Spinner } from '@ui-kitten/components';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -112,7 +111,7 @@ export default function LoginScreen() {
 
 			console.log('[login] Authenticated', data);
 
-			await AsyncStorage.setItem('authToken', data.token);
+			//await AsyncStorage.setItem('authToken', data.token);
 
 			try {
 
