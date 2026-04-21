@@ -101,6 +101,13 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="dashboard"
+          options={{
+            title: 'Dashboard',
+            tabBarIcon: ({ color }) => <TabBarIcon name="dashboard" color={color} />,
+          }}
+        />
+        <Tabs.Screen
           name="hotspots"
           options={{
             title: 'Hotspots',
@@ -108,7 +115,7 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="map"
+          name="map_old"
           options={{
             title: 'Map',
             tabBarIcon: ({ color }) => <TabBarIcon name="map" color={color} />,
