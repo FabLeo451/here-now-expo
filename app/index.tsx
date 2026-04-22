@@ -1,21 +1,14 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import {
-    Text,
-    View
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text } from 'react-native';
 import * as Location from 'expo-location';
 import LeafMap from '@/components/LeafMap.web';
 
 const MapTab: React.FC = () => {
     const [gpsPermission, setGPSPermission] = useState<boolean>(false);
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
-    const [markerCoords, setMarkerCoords] = useState(null);
 
-    // Start once on mount: auth + WebSocket
     useEffect(() => {
         const init = async () => {
-
-            // Request GPS permissions
             const { status } = await Location.requestForegroundPermissionsAsync();
             const granted = status === 'granted';
             setGPSPermission(granted);
@@ -25,28 +18,28 @@ const MapTab: React.FC = () => {
                 return;
             }
 
-            // Get current position
             const currentLocation = await Location.getCurrentPositionAsync({});
             setLocation(currentLocation);
-            setMarkerCoords({
-                latitude: currentLocation.coords.latitude,
-                longitude: currentLocation.coords.longitude,
-            });
         };
 
         init();
-
-        return () => {
-        };
     }, []);
 
+    if (!gpsPermission) {
+        return <Text>Permesso GPS necessario</Text>;
+    }
+
+    if (!location) {
+        return <Text>Loading position...</Text>;
+    }
+
     return (
-        <View>
+        <View style={{ flex: 1 }}>
             <LeafMap
-                latitude={41.867356}
-                longitude={12.468980}
+                latitude={location.coords.latitude}
+                longitude={location.coords.longitude}
                 onSelect={(coords) => {
-                    console.log('onSelect');
+                    console.log('Selected:', coords);
                 }}
             />
         </View>
