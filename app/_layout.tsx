@@ -60,7 +60,10 @@ function RootLayoutNav() {
 
   if (loading) return null;
 
-  const inAuthGroup = segments[0] === 'login';
+/*
+  console.log('segments[0] =', segments[0]);
+
+  const inAuthGroup = segments[0] === 'login' || segments[0] === '(tabs)';
 
   // 🔐 Non loggato → solo login
   if (!user && !inAuthGroup) {
@@ -71,6 +74,7 @@ function RootLayoutNav() {
   if (user && inAuthGroup) {
     return <Redirect href="/(tabs)" />;
   }
+*/
 
   return (
     <>

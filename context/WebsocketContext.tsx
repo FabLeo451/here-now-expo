@@ -54,7 +54,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 	};
 
 	const connect = (currentToken: string) => {
-		if (!currentToken) return;
+		//if (!currentToken) return;
 		if (
 			socketRef.current &&
 			socketRef.current.readyState === WebSocket.OPEN
@@ -64,7 +64,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 
 		console.log("[WebsocketContext] Connecting with token:", currentToken);
 
-		const wsUrl = `${process.env.EXPO_PUBLIC_WEBSOCKET_URL}?token=${currentToken}`;
+		const wsUrl = `${process.env.EXPO_PUBLIC_WEBSOCKET_URL}` + (currentToken ? `token=${currentToken}` : '');
 		const ws = new WebSocket(wsUrl);
 		socketRef.current = ws;
 
@@ -126,6 +126,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 	};
 
 	useEffect(() => {
+		/*
 		if (!token) {
 			console.log("[WebsocketContext] No token → closing socket");
 
@@ -146,6 +147,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 
 			return;
 		}
+		*/
 
 		connect(token);
 
