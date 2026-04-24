@@ -1,112 +1,97 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import ModalHotspot from '@/components/ModalHotspot'
-import { Hotspot } from '@/lib/hotspot'
+import React, { useState } from 'react';
 
-type LatLng = {
-	latitude: number;
-	longitude: number;
-};
+let LeafletMap: React.FC<any> = () => null;
 
-type MapProps = {
-	markerCoords: LatLng;
-	_hotspots: Hotspot[];
-	onRegionChangeCompleteBounds?: (bounds: {
-		northEast: LatLng;
-		southWest: LatLng;
-	}) => void;
-};
+const isClient = typeof window !== 'undefined';
 
-export default function Map({ markerCoords, _hotspots, onRegionChangeCompleteBounds }: MapProps) {
-	const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string }>({
-		visible: false,
-		id: '',
+if (isClient) {
+	const L = require('leaflet');
+	require('leaflet/dist/leaflet.css');
+
+	delete L.Icon.Default.prototype._getIconUrl;
+	L.Icon.Default.mergeOptions({
+		iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+		shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 	});
 
-	const [hotspots, setHotspots] = useState<Hotspot[]>([]);
-	const [context, setContext] = useState(null);
-	const [authToken, setAuthToken] = useState('');
-	const [refreshing, setRefreshing] = useState(false);
+	const {
+		MapContainer,
+		TileLayer,
+		Marker,
+		useMapEvents,
+	} = require('react-leaflet');
 
-	useEffect(() => {
-		const checkAuth = async () => {
-			const token = await AsyncStorage.getItem('authToken');
-			//console.log('[index] Token found: ', !!token);
+	function LocationSelector({ onSelect }: any) {
+		useMapEvents({
+			click(e: any) {
+				onSelect({
+					latitude: e.latlng.lat,
+					longitude: e.latlng.lng,
+				});
+			},
+		});
+		return null;
+	}
 
-			if (!token) {
-				console.log('[index] Redirecting to login...');
-				router.replace('/login');
-			} else {
+	LeafletMap = function ({
+		latitude,
+		longitude,
+		onSelect,
+		selectedCoords,
+	}: any) {
+		return (
+			<div style={{ height: '100vh', width: '100%' }}>
+				<MapContainer
+					center={[latitude, longitude]}
+					zoom={15}
+					style={{ height: '100%', width: '100%' }}
+				>
+					<TileLayer
+						url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+						attribution="&copy; OpenStreetMap contributors"
+					/>
 
-				setAuthToken(token);
+					<LocationSelector onSelect={onSelect} />
 
-				const contextStr = await AsyncStorage.getItem('context');
-				const ctx = contextStr ? JSON.parse(contextStr) : {};
-				setContext(ctx);
-
-				if (ctx.user.isAuthenticated)
-					getMyHotspots(token);
-			}
-		};
-
-		checkAuth();
-	}, []);
-
-	const getMyHotspots = async (token: string) => {
-
-		try {
-			setRefreshing(true);
-			setHotspots([]);
-
-			const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/hotspot`, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: token,
-				},
-			});
-
-			if (!response.ok) {
-				console.log(response)
-				throw new Error('Failed to fetch: ' + response.status + ' ' + response.statusText);
-			}
-
-			const data: Hotspot[] = await response.json();
-			setHotspots(data);
-			//Alert.alert('', JSON.stringify(data))
-		} catch (error: any) {
-			console.log('[getMyHotspots] ', error);
-			//Alert.alert('Error getting my hotspots', error.message);
-		} finally {
-			setRefreshing(false);
-		}
+					<Marker
+						position={[
+							selectedCoords?.latitude ?? latitude,
+							selectedCoords?.longitude ?? longitude,
+						]}
+					/>
+				</MapContainer>
+			</div>
+		);
 	};
+}
+
+type Props = {
+	latitude: number;
+	longitude: number;
+	onSelect: (coords: { latitude: number; longitude: number } | null) => void;
+};
+
+export default function Map({
+	latitude,
+	longitude,
+	onSelect,
+}: Props) {
+	const [selectedCoords, setSelectedCoords] = useState<{
+		latitude: number;
+		longitude: number;
+	} | null>(null);
+
+	if (!isClient) return null;
+
 	return (
-		<View>
-
-			<ModalHotspot
-				visible={modalVisible.visible}
-				id={modalVisible.id}
-				onClose={() => {
-					setModalVisible({ visible: false, id: 'dummyId' });
-				}}
-			/>
-						
-			<Text>Hotspots</Text>
-			{hotspots && (
-				hotspots.map((h) => {
-					return (
-						<TouchableOpacity key={h.id} onPress={() => setModalVisible({ visible: true, id: h.id })}>
-							<View>
-								<Text>{h.name}</Text>
-							</View>
-						</TouchableOpacity>
-					);
-				})
-
-			)}
-		</View>
+		<LeafletMap
+			latitude={latitude}
+			longitude={longitude}
+			onSelect={(coords: any) => {
+				setSelectedCoords(coords);
+				onSelect(coords);
+			}}
+			selectedCoords={selectedCoords}
+		/>
 	);
 }
