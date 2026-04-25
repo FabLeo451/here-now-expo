@@ -15,10 +15,6 @@ type Props = {
 export default function Map({ userCoords, onSelect }: Props) {
   const [selectedCoords, setSelectedCoords] = useState<Coords | null>(null);
 
-  useEffect(() => {
-    console.log('Map.native.tsx');
-  });
-
   const handlePress = (e: MapPressEvent) => {
     const coords = e.nativeEvent.coordinate;
 
@@ -38,12 +34,48 @@ export default function Map({ userCoords, onSelect }: Props) {
         }}
         onPress={handlePress}
       >
+
+      <Marker coordinate={userCoords || { latitude: 0, longitude: 0 }}>
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {/* alone */}
+          <View
+            style={{
+              position: 'absolute',
+              width: 30,
+              height: 30,
+              borderRadius: 20,
+              backgroundColor: 'rgba(0,122,255,0.2)',
+            }}
+          />
+
+          {/* punto centrale */}
+          <View
+            style={{
+              width: 16,
+              height: 16,
+              borderRadius: 8,
+              backgroundColor: '#007AFF',
+              borderWidth: 3,
+              borderColor: 'white',
+            }}
+          />
+        </View>
+      </Marker>
+
+        {selectedCoords && (
         <Marker
           coordinate={{
-            latitude: selectedCoords?.latitude ?? (userCoords?.latitude || 0),
-            longitude: selectedCoords?.longitude ?? (userCoords?.longitude || 0),
+            latitude: selectedCoords?.latitude,
+            longitude: selectedCoords?.longitude,
           }}
-        />
+        />)}
       </MapView>
     </View>
   );

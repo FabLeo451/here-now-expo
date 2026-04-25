@@ -38,7 +38,7 @@ const MapTab: React.FC = () => {
             <Map
                 userCoords={location.coords}
                 onSelect={(coords: any) => {
-                    console.log('Selected:', coords);
+                    console.log('[MapTab] Selected:', coords);
                 }}
             />
         </View>
