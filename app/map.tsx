@@ -3,6 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import Map from '@/components/Map';
 
 const MapTab: React.FC = () => {
@@ -25,40 +26,45 @@ const MapTab: React.FC = () => {
         init();
     }, []);
 
-	// Start/stop location tracking only when tab is focused
-	useFocusEffect(
-		useCallback(() => {
+    // Start/stop location tracking only when tab is focused
+    useFocusEffect(
+        useCallback(() => {
 
-			let subscription: Location.LocationSubscription;
+            let subscription: Location.LocationSubscription | null = null;
 
-			const startTracking = async () => {
-				subscription = await Location.watchPositionAsync({
-					accuracy: Location.Accuracy.Highest,
-					distanceInterval: 1,
-				}, (loc) => {
-                    //console.log('[MapTab]', loc);
-					setLocation(loc);
-				});
-			};
+            const startTracking = async () => {
+                subscription = await Location.watchPositionAsync({
+                    accuracy: Location.Accuracy.Highest,
+                    distanceInterval: 1,
+                }, (loc) => {
+                    console.log('[MapTab]', loc);
+                    setLocation(loc);
+                });
+            };
 
-			startTracking();
+            startTracking();
 
-			return () => {
-				if (subscription) {
-					subscription.remove();
-					console.log('[MapTab] GPS tracking stopped (tab unfocused)');
-				}
-			};
-		}, [])
+            return () => {
+                if (subscription) {
+                    try {
+                        subscription.remove?.();
+                    } catch (e) {
+                        console.log('Subscription cleanup failed (ignored)');
+                    }
+
+                    subscription = null;
+                }
+            };
+        }, [])
 	);
 
 	const handleCreate = async () => {
-		//router.replace('/create-hotspot');
-		/*router.push({
-			pathname: '/create-hotspot',
-			params: { action: 'create' }
-		});*/
         console.log('[MapTab] Add hotspot');
+		//router.replace('/create-hotspot');
+		router.push({
+			pathname: '/edit-hotspot',
+			params: { action: 'create' }
+		});
 	}
 
     if (!gpsPermission) {
@@ -102,8 +108,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
-    width: 56,
-    height: 56,
+    width: 50,
+    height: 50,
     borderRadius: 28,
     backgroundColor: '#007AFF',
     justifyContent: 'center',
