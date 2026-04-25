@@ -35,7 +35,7 @@ type FormState = {
 	isPrivate: boolean;
 	startDate: Date;
 	endDate: Date;
-	location: { latitude: number; longitude: number } | null;
+	location: { latitude: number; longitude: number } | null; // Will be the hotspot location
 	position: string;
 };
 
@@ -85,7 +85,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
 }
 
 const EditHotspotTab: React.FC = () => {
-	const { action, hotspotEnc } = useLocalSearchParams();
+	const { action, latIn, longIn, hotspotEnc } = useLocalSearchParams();
 	const insets = useSafeAreaInsets();
 	const { token } = useAuth();
 	const isFocused = useIsFocused();
@@ -128,7 +128,7 @@ const EditHotspotTab: React.FC = () => {
 
 	// Get user location on create
 	useEffect(() => {
-
+/*
 		const getCurrentPosition = async () => {
 			if (!isFocused || action != 'create') return
 
@@ -152,7 +152,18 @@ const EditHotspotTab: React.FC = () => {
 		}
 
 		getCurrentPosition();
+*/
+		if (action == 'create' && latIn && longIn) {
+			console.log(`[${COMPONENT}] latIn=`, latIn);
+			console.log(`[${COMPONENT}] longIn=`, longIn);
+			const lat = typeof latIn === 'string' ? parseFloat(latIn) : null;
+			const long = typeof longIn === 'string' ? parseFloat(longIn) : null;
 
+			if (lat && long) {
+				dispatch({ type: 'SET_LOCATION', location: { latitude: lat, longitude: long} });
+				dispatch({ type: 'SET_POSITION', position: `${lat.toFixed(6)}, ${long.toFixed(6)}` });
+			}
+		}
 	}, [action]);
 
 	const getCategories = async () => {
@@ -187,7 +198,7 @@ const EditHotspotTab: React.FC = () => {
 			console.log(`[${COMPONENT}] getCategories`, err);
 		} finally {
 			if (isFocused) setRefreshing(false);
-		}
+		}location
 	};
 
 	useEffect(() => { getCategories(); }, [isFocused]);

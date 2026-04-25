@@ -9,6 +9,10 @@ import Map from '@/components/Map';
 const MapTab: React.FC = () => {
     const [gpsPermission, setGPSPermission] = useState<boolean>(false);
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
+    const [selectedCoords, setSelectedCoords] = useState<{
+        latitude: number;
+        longitude: number;
+    } | null>(null);
 
     // Init
     useEffect(() => {
@@ -61,9 +65,27 @@ const MapTab: React.FC = () => {
 	const handleCreate = async () => {
         console.log('[MapTab] Add hotspot');
 		//router.replace('/create-hotspot');
+
+        type Params = {
+            action: string;
+            latIn: number | null;
+            longIn: number | null;
+        };
+        
+        const params: Params = {
+            action: 'create',
+            latIn: null,
+            longIn: null
+        };
+
+        if (selectedCoords) {
+            params.latIn = selectedCoords.latitude
+            params.longIn = selectedCoords.longitude
+        }
+
 		router.push({
 			pathname: '/edit-hotspot',
-			params: { action: 'create' }
+			params: params
 		});
 	}
 
@@ -84,6 +106,7 @@ const MapTab: React.FC = () => {
                     userCoords={location ? location.coords : null}
                     onSelect={(coords: any) => {
                         console.log('[MapTab] Selected:', coords);
+                        setSelectedCoords(coords);
                     }}
                 />
             </View>
