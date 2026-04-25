@@ -39,7 +39,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 
 		heartbeatIntervalRef.current = setInterval(() => {
 			if (socketRef.current?.readyState === WebSocket.OPEN) {
-				var msg = { appId: process.env.EXPO_PUBLIC_APP_ID, messageId: "ping" }
+				var msg = { appId: process.env.EXPO_PUBLIC_APP_ID, type: "ping", payload: { foo: 5, bar: "Ping" } }
 				socketRef.current.send(JSON.stringify(msg));
 				console.log("[WebsocketContext] Heartbeat sent");
 			}
