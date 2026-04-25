@@ -59,7 +59,7 @@ if (isClient) {
 		return (
 			<div style={{ height: '100vh', width: '100%' }}>
 				<MapContainer
-					center={[userCoords.latitude, userCoords.longitude]}
+					center={userCoords ? [userCoords.latitude, userCoords.longitude] : [0,0]}
 					zoom={15}
 					style={{ height: '100%', width: '100%' }}
 				>
@@ -70,10 +70,12 @@ if (isClient) {
 
 					<LocationSelector onSelect={onSelect} />
 
-					<Marker
-						position={[userCoords.latitude, userCoords.longitude]}
-						icon={userIcon}
-					/>
+					{userCoords && (
+						<Marker
+							position={[userCoords.latitude, userCoords.longitude]}
+							icon={userIcon}
+						/>
+					)}
 
 					{selectedCoords && (<Marker
 						position={[
