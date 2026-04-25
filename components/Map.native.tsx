@@ -35,7 +35,7 @@ export default function Map({ userCoords, onSelect }: Props) {
         onPress={handlePress}
       >
 
-      <Marker coordinate={userCoords || { latitude: 0, longitude: 0 }}>
+      <Marker coordinate={userCoords || { latitude: 0, longitude: 0 }} tracksViewChanges={false}>
         <View
           style={{
             width: 40,
