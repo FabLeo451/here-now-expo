@@ -71,7 +71,7 @@ const MapTab: React.FC = () => {
             latIn: number | null;
             longIn: number | null;
         };
-        
+
         const params: Params = {
             action: 'create',
             latIn: null,
@@ -112,16 +112,17 @@ const MapTab: React.FC = () => {
             </View>
 
             {/* FAB ADD */}
-            <Pressable
-                onPress={handleCreate}
-                style={({ pressed }) => [
-                    styles.fab,
-                    pressed && Platform.OS !== 'web' && { opacity: 0.7 },
-                ]}
-            >
-                <Ionicons name="add" size={25} color="#fff" />
-            </Pressable>
-
+            {selectedCoords && (
+                <Pressable
+                    onPress={handleCreate}
+                    style={({ pressed }) => [
+                        styles.fab,
+                        pressed && Platform.OS !== 'web' && { opacity: 0.7 },
+                    ]}
+                >
+                    <Ionicons name="add" size={25} color="#fff" />
+                </Pressable>
+            )}
         </View>
     );
 };

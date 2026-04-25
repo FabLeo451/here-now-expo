@@ -17,7 +17,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
-import ModalMapSelect from '@/components/ModalMapSelect';
+//import ModalMapSelect from '@/components/ModalMapSelect';
 import { Hotspot, Category } from '@/lib/hotspot';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsFocused } from '@react-navigation/native';
@@ -36,7 +36,7 @@ type FormState = {
 	startDate: Date;
 	endDate: Date;
 	location: { latitude: number; longitude: number } | null; // Will be the hotspot location
-	position: string;
+	//position: string;
 };
 
 type FormAction =
@@ -58,7 +58,7 @@ const initialState: FormState = {
 	startDate: new Date(),
 	endDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
 	location: { latitude: 41.9028, longitude: 12.4964 },
-	position: '',
+	//position: '',
 };
 
 function formReducer(state: FormState, action: FormAction): FormState {
@@ -68,8 +68,8 @@ function formReducer(state: FormState, action: FormAction): FormState {
 			return { ...state, [action.field]: action.value };
 		case 'SET_LOCATION':
 			return { ...state, location: action.location };
-		case 'SET_POSITION':
-			return { ...state, position: action.position };
+		//case 'SET_POSITION':
+		//	return { ...state, position: action.position };
 		case 'RESET':
 			return { ...state, ...action.payload };
 		case 'SET_CATEGORY':
@@ -161,7 +161,7 @@ const EditHotspotTab: React.FC = () => {
 
 			if (lat && long) {
 				dispatch({ type: 'SET_LOCATION', location: { latitude: lat, longitude: long} });
-				dispatch({ type: 'SET_POSITION', position: `${lat.toFixed(6)}, ${long.toFixed(6)}` });
+				//dispatch({ type: 'SET_POSITION', position: `${lat.toFixed(6)}, ${long.toFixed(6)}` });
 			}
 		}
 	}, [action]);
@@ -231,7 +231,7 @@ const EditHotspotTab: React.FC = () => {
 					startDate: new Date(hotspot.startTime),
 					endDate: new Date(hotspot.endTime),
 					location: hotspot.position,
-					position: `${hotspot.position.latitude.toFixed(6)}, ${hotspot.position.longitude.toFixed(6)}`
+					//position: `${hotspot.position.latitude.toFixed(6)}, ${hotspot.position.longitude.toFixed(6)}`
 				}
 			});
 		} catch {
@@ -260,7 +260,7 @@ const EditHotspotTab: React.FC = () => {
 	const validate = (): boolean => {
 		if (!token) { Alert.alert('Error', 'Not authenticated'); return false; }
 		if (!form.name || form.name.length < 3) { Alert.alert('Invalid data', 'Name too short.'); return false; }
-		if (!form.position) { Alert.alert('Invalid data', 'Location not set.'); return false; }
+		//if (!form.position) { Alert.alert('Invalid data', 'Location not set.'); return false; }
 		return true;
 	};
 
@@ -330,6 +330,7 @@ const EditHotspotTab: React.FC = () => {
 				</View>
 
 				<View style={styles.container}>
+					{/*
 					<ModalMapSelect
 						token={token}
 						visible={modalVisible}
@@ -339,10 +340,11 @@ const EditHotspotTab: React.FC = () => {
 							setModalVisible(false);
 							if (coords) {
 								dispatch({ type: 'SET_LOCATION', location: coords });
-								dispatch({ type: 'SET_POSITION', position: `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}` });
+								//dispatch({ type: 'SET_POSITION', position: `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}` });
 							}
 						}}
 					/>
+					*/}
 
 					{/* Name */}
 					<Text style={styles.label}>Name</Text>
@@ -362,7 +364,7 @@ const EditHotspotTab: React.FC = () => {
 						onChangeText={(text) => dispatch({ type: 'SET_FIELD', field: 'description', value: text })}
 					/>
 
-					{/* Location */}
+					{/* Location 
 					<Text style={styles.label}>Location</Text>
 					<View style={styles.rowLeft}>
 						{form.position ? (
@@ -374,6 +376,7 @@ const EditHotspotTab: React.FC = () => {
 							<Ionicons name="locate" size={25} color="#fff" />
 						</TouchableOpacity>
 					</View>
+*/}
 
 					{/* Category */}
 					<Text style={styles.label}>Category</Text>
