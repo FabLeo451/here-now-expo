@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text } from 'react-native';
 import * as Location from 'expo-location';
 import Map from '@/components/Map';
@@ -7,6 +8,7 @@ const MapTab: React.FC = () => {
     const [gpsPermission, setGPSPermission] = useState<boolean>(false);
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
 
+    // Init
     useEffect(() => {
         const init = async () => {
             const { status } = await Location.requestForegroundPermissionsAsync();
@@ -24,6 +26,33 @@ const MapTab: React.FC = () => {
 
         init();
     }, []);
+
+	// Start/stop location tracking only when tab is focused
+	useFocusEffect(
+		useCallback(() => {
+
+			let subscription: Location.LocationSubscription;
+
+			const startTracking = async () => {
+				subscription = await Location.watchPositionAsync({
+					accuracy: Location.Accuracy.Highest,
+					distanceInterval: 1,
+				}, (loc) => {
+                    //console.log('[MapTab]', loc);
+					setLocation(loc);
+				});
+			};
+
+			startTracking();
+
+			return () => {
+				if (subscription) {
+					subscription.remove();
+					console.log('[MapTab] GPS tracking stopped (tab unfocused)');
+				}
+			};
+		}, [])
+	);
 
     if (!gpsPermission) {
         return <Text>Permesso GPS necessario</Text>;
