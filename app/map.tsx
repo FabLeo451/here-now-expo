@@ -36,9 +36,8 @@ const MapTab: React.FC = () => {
     return (
         <View style={{ flex: 1 }}>
             <Map
-                latitude={location.coords.latitude}
-                longitude={location.coords.longitude}
-                onSelect={(coords) => {
+                markerCoords={location.coords}
+                onSelect={(coords: any) => {
                     console.log('Selected:', coords);
                 }}
             />

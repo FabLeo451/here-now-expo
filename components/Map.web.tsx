@@ -34,15 +34,14 @@ if (isClient) {
 	}
 
 	LeafletMap = function ({
-		latitude,
-		longitude,
+		markerCoords,
 		onSelect,
 		selectedCoords,
 	}: any) {
 		return (
 			<div style={{ height: '100vh', width: '100%' }}>
 				<MapContainer
-					center={[latitude, longitude]}
+					center={[markerCoords.latitude, markerCoords.longitude]}
 					zoom={15}
 					style={{ height: '100%', width: '100%' }}
 				>
@@ -55,8 +54,8 @@ if (isClient) {
 
 					<Marker
 						position={[
-							selectedCoords?.latitude ?? latitude,
-							selectedCoords?.longitude ?? longitude,
+							selectedCoords?.latitude ?? markerCoords.latitude,
+							selectedCoords?.longitude ?? markerCoords.longitude,
 						]}
 					/>
 				</MapContainer>
@@ -66,14 +65,12 @@ if (isClient) {
 }
 
 type Props = {
-	latitude: number;
-	longitude: number;
+	markerCoords: { latitude: number; longitude: number } | null;
 	onSelect: (coords: { latitude: number; longitude: number } | null) => void;
 };
 
 export default function Map({
-	latitude,
-	longitude,
+	markerCoords,
 	onSelect,
 }: Props) {
 	const [selectedCoords, setSelectedCoords] = useState<{
@@ -85,8 +82,7 @@ export default function Map({
 
 	return (
 		<LeafletMap
-			latitude={latitude}
-			longitude={longitude}
+			markerCoords={markerCoords}
 			onSelect={(coords: any) => {
 				setSelectedCoords(coords);
 				onSelect(coords);

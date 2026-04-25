@@ -8,12 +8,11 @@ type Coords = {
 };
 
 type Props = {
-  latitude: number;
-  longitude: number;
+  markerCoords: { latitude: number; longitude: number } | null;
   onSelect: (coords: Coords | null) => void;
 };
 
-export default function Map({ latitude, longitude, onSelect }: Props) {
+export default function Map({ markerCoords, onSelect }: Props) {
   const [selectedCoords, setSelectedCoords] = useState<Coords | null>(null);
 
   useEffect(() => {
@@ -32,8 +31,8 @@ export default function Map({ latitude, longitude, onSelect }: Props) {
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude,
-          longitude,
+          latitude: markerCoords?.latitude || 0,
+          longitude: markerCoords?.longitude || 0,
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         }}
@@ -41,8 +40,8 @@ export default function Map({ latitude, longitude, onSelect }: Props) {
       >
         <Marker
           coordinate={{
-            latitude: selectedCoords?.latitude ?? latitude,
-            longitude: selectedCoords?.longitude ?? longitude,
+            latitude: selectedCoords?.latitude ?? (markerCoords?.latitude || 0),
+            longitude: selectedCoords?.longitude ?? (markerCoords?.longitude || 0),
           }}
         />
       </MapView>
