@@ -33,15 +33,33 @@ if (isClient) {
 		return null;
 	}
 
+	const userIcon = L.divIcon({
+		className: '',
+		html: `
+			<div style="position: relative;">
+			<div style="
+				width: 16px;
+				height: 16px;
+				background: #007aff;
+				border-radius: 50%;
+				border: 3px solid white;
+			"></div>
+
+			</div>
+		`,
+		iconSize: [16, 16],
+		iconAnchor: [8, 8],
+	});
+
 	LeafletMap = function ({
-		markerCoords,
+		userCoords,
 		onSelect,
 		selectedCoords,
 	}: any) {
 		return (
 			<div style={{ height: '100vh', width: '100%' }}>
 				<MapContainer
-					center={[markerCoords.latitude, markerCoords.longitude]}
+					center={[userCoords.latitude, userCoords.longitude]}
 					zoom={15}
 					style={{ height: '100%', width: '100%' }}
 				>
@@ -53,11 +71,16 @@ if (isClient) {
 					<LocationSelector onSelect={onSelect} />
 
 					<Marker
-						position={[
-							selectedCoords?.latitude ?? markerCoords.latitude,
-							selectedCoords?.longitude ?? markerCoords.longitude,
-						]}
+						position={[userCoords.latitude, userCoords.longitude]}
+						icon={userIcon}
 					/>
+
+					{selectedCoords && (<Marker
+						position={[
+							selectedCoords?.latitude,
+							selectedCoords?.longitude,
+						]}
+					/>)}
 				</MapContainer>
 			</div>
 		);
@@ -65,12 +88,12 @@ if (isClient) {
 }
 
 type Props = {
-	markerCoords: { latitude: number; longitude: number } | null;
+	userCoords: { latitude: number; longitude: number } | null;
 	onSelect: (coords: { latitude: number; longitude: number } | null) => void;
 };
 
 export default function Map({
-	markerCoords,
+	userCoords,
 	onSelect,
 }: Props) {
 	const [selectedCoords, setSelectedCoords] = useState<{
@@ -82,7 +105,7 @@ export default function Map({
 
 	return (
 		<LeafletMap
-			markerCoords={markerCoords}
+			userCoords={userCoords}
 			onSelect={(coords: any) => {
 				setSelectedCoords(coords);
 				onSelect(coords);
