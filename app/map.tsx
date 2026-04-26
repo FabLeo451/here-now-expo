@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Map from '@/components/Map';
+import { useWebsocket } from "@/hooks/useWebsocket";
 
 const MapTab: React.FC = () => {
     const [gpsPermission, setGPSPermission] = useState<boolean>(false);
@@ -13,6 +14,7 @@ const MapTab: React.FC = () => {
         latitude: number;
         longitude: number;
     } | null>(null);
+    const { isConnected, sendMessage, callback } = useWebsocket();
 
     // Init
     useEffect(() => {
@@ -41,7 +43,7 @@ const MapTab: React.FC = () => {
                     accuracy: Location.Accuracy.Highest,
                     distanceInterval: 1,
                 }, (loc) => {
-                    console.log('[MapTab]', loc);
+                    console.log('[map]', loc);
                     setLocation(loc);
                 });
             };
@@ -61,9 +63,27 @@ const MapTab: React.FC = () => {
             };
         }, [])
 	);
+	
+	const onMessage = useCallback((message) => {
+		console.log('[map] onMessage', message);
+		/*
+		if (message.Type === "map") {
+			let str = decodeBase64(message.Payload);
+			let parsed: Hotspot[] = JSON.parse(str);
 
+			//console.log('[map] decoded payload =', str);
+
+			if (!parsed)
+				parsed = [];
+
+			console.log('[map] Updating hotspots...', parsed.length);
+			setHotspots(parsed);
+		}
+		*/
+	}, []);
+	
 	const handleCreate = async () => {
-        console.log('[MapTab] Add hotspot');
+        console.log('[map] Add hotspot');
 		//router.replace('/create-hotspot');
 
         type Params = {
@@ -105,7 +125,7 @@ const MapTab: React.FC = () => {
                 <Map
                     userCoords={location ? location.coords : null}
                     onSelect={(coords: any) => {
-                        console.log('[MapTab] Selected:', coords);
+                        console.log('[map] Selected:', coords);
                         setSelectedCoords(coords);
                     }}
                 />
