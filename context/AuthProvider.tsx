@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				//console.log('[AuthProvider] storedUser = ',storedUser);
 				//console.log('[AuthProvider] storedToken = ',storedToken);
 
-				if (storedUser && storedToken) {
+				if (storedToken) {
 					setUser(JSON.parse(storedUser));
 					setToken(storedToken);
 					console.log('[AuthProvider] Token found');
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		setToken(token);
 
 		await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
-		await SecureStore.setItemAsync(TOKEN_KEY, token);
+		await Utils.setToken(TOKEN_KEY, token);
 	};
 
 	// Logout
@@ -97,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		setToken(null);
 
 		await AsyncStorage.removeItem(USER_KEY);
-		await SecureStore.deleteItemAsync(TOKEN_KEY);
+		await Utils.deleteToken(TOKEN_KEY);
 	};
 
 	if (loading) {

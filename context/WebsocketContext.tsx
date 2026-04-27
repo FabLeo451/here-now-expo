@@ -63,7 +63,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 			return;
 		}
 
-		console.log("[WebsocketContext] Connecting with token:", currentToken);
+		//console.log("[WebsocketContext] Connecting with token:", currentToken);
 
 		const wsUrl = `${process.env.EXPO_PUBLIC_WEBSOCKET_URL}` + (currentToken ? `?token=${currentToken}` : '');
 		const ws = new WebSocket(wsUrl);
@@ -89,18 +89,18 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 			}
 		};
 
-		ws.onerror = () => {
-			console.warn("[WebsocketContext] WebSocket error");
+		ws.onerror = (event) => {
+			console.warn("[WebsocketContext] WebSocket error", event);
 		};
 
 		ws.onclose = (event) => {
-			console.log("[WebsocketContext] WebSocket closed", event.code);
+			console.log("[WebsocketContext] WebSocket closed: " + event.code + ' ' + event.reason);
 			setIsConnected(false);
 			socketRef.current = null;
 			stopHeartbeat();
 			
 			if (event.code == 1008) { // Auth / policy violation
-				console.log("[WebsocketContext] Auth error", event.code);
+				//console.log("[WebsocketContext]", event.code);
 				tokenRef.current = null;
 				logout();
 				return;
