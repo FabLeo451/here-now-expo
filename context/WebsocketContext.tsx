@@ -65,7 +65,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 
 		console.log("[WebsocketContext] Connecting with token:", currentToken);
 
-		const wsUrl = `${process.env.EXPO_PUBLIC_WEBSOCKET_URL}` + (currentToken ? `token=${currentToken}` : '');
+		const wsUrl = `${process.env.EXPO_PUBLIC_WEBSOCKET_URL}` + (currentToken ? `?token=${currentToken}` : '');
 		const ws = new WebSocket(wsUrl);
 		socketRef.current = ws;
 

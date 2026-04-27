@@ -16,20 +16,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		const restoreSession = async () => {
+		
+			console.log('[AuthProvider] Restoring session');
+			
 			try {
 				const storedUser = await AsyncStorage.getItem(USER_KEY);
-
-				// Get token
 				let storedToken = await Utils.getToken(TOKEN_KEY);
+				
+				//console.log('[AuthProvider] storedUser = ',storedUser);
+				//console.log('[AuthProvider] storedToken = ',storedToken);
 
 				if (storedUser && storedToken) {
 					setUser(JSON.parse(storedUser));
-					Utils.setToken(TOKEN_KEY, storedToken);
+					setToken(storedToken);
+					console.log('[AuthProvider] Token found');
 					return;
 				}
 
 				// Create guest session
 				if (!storedToken) {
+					console.log('[AuthProvider] Token not found');
 					const deviceType = await Utils.getDeviceType();
 					const { agent, platform, model, deviceName } = Utils.getDeviceInfo();
 					//console.log(Utils.getDeviceInfo());
@@ -46,21 +52,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 					if (res.ok) {
 						const data = await res.json();
+						//console.log('data: ',data);
+						
 						storedToken = data.token;
 
 						if (storedToken) {
-							await SecureStore.setItemAsync(TOKEN_KEY, storedToken);
+							//await SecureStore.setItemAsync(TOKEN_KEY, storedToken);
+							await Utils.setToken(TOKEN_KEY, storedToken);
 							setToken(storedToken);
+							
+							var user = { name: data.name, isUser: false, isGuest: true };
+							setUser(user);
+							await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
 						}
 
-						setUser(null);
+						
 					} else {
 						console.log('Unable to create guest session');
 					}
 				}
 
 			} catch (err) {
-				console.error('Session restore error', err);
+				console.error('[AuthProvider] Session restore error', err);
 			} finally {
 				setLoading(false);
 			}
