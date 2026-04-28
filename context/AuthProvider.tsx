@@ -27,32 +27,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				//console.log('[AuthProvider] storedToken = ',storedToken);
 
 				if (storedToken) {
-					setUser(JSON.parse(storedUser));
 					setToken(storedToken);
-					console.log('[AuthProvider] Token found');
-					return;
 				}
 
-				// Create guest session
-				if (!storedToken) {
-					console.log('[AuthProvider] Token not found');
+				if (storedUser) {
+					setUser(JSON.parse(storedUser));
+				}
+
+				// Welcome
 					const deviceType = await Utils.getDeviceType();
 					const { agent, platform, model, deviceName } = Utils.getDeviceInfo();
 					//console.log(Utils.getDeviceInfo());
 					//console.log(deviceType);
+					
+					const headers = {
+					  'Content-Type': 'application/json',
+					};
 
+					if (storedToken) {
+					  headers['Authorization'] = `Bearer ${storedToken}`;
+					}
+					
 					const res = await fetch(
-						`${process.env.EXPO_PUBLIC_API_BASE_URL}/session/guest`,
+						`${process.env.EXPO_PUBLIC_API_BASE_URL}/welcome`,
 						{
 							method: 'POST',
-							headers: { 'Content-Type': 'application/json' },
+							headers,
 							body: JSON.stringify({ agent, platform, model, deviceName, deviceType }),
 						}
 					);
 
 					if (res.ok) {
 						const data = await res.json();
-						//console.log('data: ',data);
+						console.log('welcome: ',data);
 						
 						storedToken = data.token;
 
@@ -70,7 +77,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					} else {
 						console.log('Unable to create guest session');
 					}
-				}
 
 			} catch (err) {
 				console.error('[AuthProvider] Session restore error', err);
