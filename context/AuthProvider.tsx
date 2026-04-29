@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 							await Utils.setToken(TOKEN_KEY, storedToken);
 							setToken(storedToken);
 							
-							var user = { name: data.name, isUser: false, isGuest: true };
+							var user = { name: data.name, isUser: false, isGuest: data.isGuest };
 							setUser(user);
 							await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
 						}
