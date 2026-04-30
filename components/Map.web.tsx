@@ -32,24 +32,27 @@ if (isClient) {
 		});
 		return null;
 	}
+	
+	const getUserIcon = (accuracy?: number) => {
+		const color = accuracy && accuracy > 50 ? "#8e8e93" : "#007aff"; // grigio vs blu
 
-	const userIcon = L.divIcon({
-		className: '',
-		html: `
-			<div style="position: relative;">
-			<div style="
-				width: 16px;
-				height: 16px;
-				background: #007aff;
-				border-radius: 50%;
-				border: 3px solid white;
-			"></div>
-
-			</div>
-		`,
-		iconSize: [16, 16],
-		iconAnchor: [8, 8],
-	});
+		return L.divIcon({
+			className: '',
+			html: `
+				<div style="position: relative;">
+					<div style="
+						width: 16px;
+						height: 16px;
+						background: ${color};
+						border-radius: 50%;
+						border: 3px solid white;
+					"></div>
+				</div>
+			`,
+			iconSize: [16, 16],
+			iconAnchor: [8, 8],
+		});
+	};
 
 	LeafletMap = function ({
 		userCoords,
@@ -73,7 +76,7 @@ if (isClient) {
 					{userCoords && (
 						<Marker
 							position={[userCoords.latitude, userCoords.longitude]}
-							icon={userIcon}
+							icon={getUserIcon(userCoords.accuracy)}
 						/>
 					)}
 
