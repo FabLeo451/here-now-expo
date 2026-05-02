@@ -1,14 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import MapView, { Marker, MapPressEvent } from 'react-native-maps';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Animated, Easing } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 type Coords = {
   latitude: number;
   longitude: number;
 };
 
+type UserCoords = {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+  heading?: number;
+};
+
 type Props = {
-  userCoords: { latitude: number; longitude: number } | null;
+  userCoords: UserCoords | null;
   onSelect: (coords: Coords | null) => void;
 };
 
@@ -24,40 +32,71 @@ export default function Map({ userCoords, onSelect }: Props) {
 
   console.log('[Map.native]', userCoords);
   
-	const UserMarker = (coords: any) => {
-	  const color = coords.accuracy && coords.accuracy > 50 ? "#8e8e93" : "#007aff"; // gray vs blu
-	  
-	  return (
-		<View
-		  style={{
-		    width: 40,
-		    height: 40,
-		    alignItems: 'center',
-		    justifyContent: 'center',
-		  }}
-		>
-		  <View
-		    style={{
-		      position: 'absolute',
-		      width: 30,
-		      height: 30,
-		      borderRadius: 20,
-		      backgroundColor: 'rgba(0,122,255,0.2)',
-		    }}
-		  />
-		  <View
-		    style={{
-		      width: 20,
-		      height: 20,
-		      borderRadius: 10,
-		      backgroundColor: color,
-		      borderWidth: 3,
-		      borderColor: 'white',
-		    }}
-		  />
-		</View>
-	  );
-	};
+
+const UserMarker = ({ accuracy, heading = 0 }: UserMarkerProps) => {
+  const color = accuracy && accuracy > 50 ? '#8e8e93' : '#007aff';
+  const safeHeading = heading >= 0 ? heading : 0;
+
+  const rotation = useRef(new Animated.Value(0)).current;
+  const currentHeading = useRef(0);
+
+  useEffect(() => {
+    let newHeading = safeHeading;
+    let prevHeading = currentHeading.current;
+
+    // 🔥 evita rotazioni lunghe (es. 350° → 10°)
+    let diff = newHeading - prevHeading;
+    if (diff > 180) newHeading -= 360;
+    if (diff < -180) newHeading += 360;
+
+    Animated.timing(rotation, {
+      toValue: newHeading,
+      duration: 200,
+      easing: Easing.linear,
+      useNativeDriver: true,
+    }).start();
+
+    currentHeading.current = newHeading;
+  }, [safeHeading]);
+ 
+   const rotateInterpolate = rotation.interpolate({
+    inputRange: [-360, 360],
+    outputRange: ['-360deg', '360deg'],
+  });
+  
+  return (
+    <Animated.View
+      style={{
+        width: 40,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        transform: [{ rotate: rotateInterpolate }],
+      }}
+    >
+
+      {/* ombra + freccia */}
+      <View
+        style={{
+          shadowColor: '#000',
+          shadowOpacity: 0.35,
+          shadowRadius: 4,
+          shadowOffset: { width: 0, height: 2 },
+
+          // Android shadow
+          elevation: 5,
+        }}
+      >
+		  <Svg width={24} height={24} viewBox="0 0 24 24">
+		    <Path
+		      d="M12 2 L18 20 L12 16 L6 20 Z"
+		      fill={color}
+		    />
+		  </Svg>
+      </View>
+    </Animated.View>
+  );
+};
 
   return (
     <View style={styles.container}>
@@ -74,7 +113,10 @@ export default function Map({ userCoords, onSelect }: Props) {
 
 		{userCoords && (
 		  <Marker coordinate={userCoords}>
-			<UserMarker coords={userCoords}/>
+			<UserMarker
+			  accuracy={userCoords.accuracy}
+			  heading={userCoords.heading}
+			/>
 		  </Marker>
 		)}
 
