@@ -23,6 +23,41 @@ export default function Map({ userCoords, onSelect }: Props) {
   };
 
   console.log('[Map.native]', userCoords);
+  
+	const UserMarker = (coords: any) => {
+	  const color = coords.accuracy && coords.accuracy > 50 ? "#8e8e93" : "#007aff"; // gray vs blu
+	  
+	  return (
+		<View
+		  style={{
+		    width: 40,
+		    height: 40,
+		    alignItems: 'center',
+		    justifyContent: 'center',
+		  }}
+		>
+		  <View
+		    style={{
+		      position: 'absolute',
+		      width: 30,
+		      height: 30,
+		      borderRadius: 20,
+		      backgroundColor: 'rgba(0,122,255,0.2)',
+		    }}
+		  />
+		  <View
+		    style={{
+		      width: 20,
+		      height: 20,
+		      borderRadius: 10,
+		      backgroundColor: color,
+		      borderWidth: 3,
+		      borderColor: 'white',
+		    }}
+		  />
+		</View>
+	  );
+	};
 
   return (
     <View style={styles.container}>
@@ -37,45 +72,17 @@ export default function Map({ userCoords, onSelect }: Props) {
         onPress={handlePress}
       >
 
-		<Marker coordinate={userCoords || { latitude: 0, longitude: 0 }}>
-		<View
-			style={{
-			width: 40,
-			height: 40,
-			alignItems: 'center',
-			justifyContent: 'center',
-			}}
-		>
-			{/* alone */}
-			<View
-			style={{
-				position: 'absolute',
-				width: 30,
-				height: 30,
-				borderRadius: 20,
-				backgroundColor: 'rgba(0,122,255,0.2)',
-			}}
-			/>
-
-			{/* punto centrale */}
-			<View
-			style={{
-				width: 20,
-				height: 20,
-				borderRadius: 10,
-				backgroundColor: '#007AFF',
-				borderWidth: 3,
-				borderColor: 'white',
-			}}
-			/>
-		</View>
-		</Marker>
+		{userCoords && (
+		  <Marker coordinate={userCoords}>
+			<UserMarker coords={userCoords}/>
+		  </Marker>
+		)}
 
         {selectedCoords && (
         <Marker
           coordinate={{
-            latitude: selectedCoords?.latitude,
-            longitude: selectedCoords?.longitude,
+            latitude: selectedCoords.latitude,
+            longitude: selectedCoords.longitude,
           }}
         />)}
       </MapView>
