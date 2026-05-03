@@ -6,8 +6,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Map from '@/components/Map';
 import { useWebsocket } from "@/hooks/useWebsocket";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const MapTab: React.FC = () => {
+	const insets = useSafeAreaInsets();
     const [gpsPermission, setGPSPermission] = useState<boolean>(false);
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
     const [selectedCoords, setSelectedCoords] = useState<{
@@ -118,7 +120,15 @@ const MapTab: React.FC = () => {
     }
 
     return (
-        <View style={{ flex: 1 }}>
+		<View style={{
+		  paddingTop: insets.top,
+		  paddingBottom: insets.bottom,
+		  paddingLeft: insets.left,
+		  paddingRight: insets.right,
+		  flex: 1,
+		  backgroundColor: '#f0f0f0',
+		}}
+		>
 
             {/* MAP */}
             <View style={{ flex: 1 }}>
