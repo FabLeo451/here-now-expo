@@ -138,6 +138,9 @@ const MapTab: React.FC = () => {
                         console.log('[map] Selected:', coords);
                         setSelectedCoords(coords);
                     }}
+                    onBoundsChange={(bounds: any) => {
+                    		console.log('[map] bounds:', bounds);
+                    }}
                 />
             </View>
 

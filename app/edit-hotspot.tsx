@@ -87,7 +87,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
 const EditHotspotTab: React.FC = () => {
 	const { action, latIn, longIn, hotspotEnc } = useLocalSearchParams();
 	const insets = useSafeAreaInsets();
-	const { token } = useAuth();
+	const { token, user } = useAuth();
 	const isFocused = useIsFocused();
 
 	const [form, dispatch] = useReducer(formReducer, initialState);
@@ -128,31 +128,6 @@ const EditHotspotTab: React.FC = () => {
 
 	// Get user location on create
 	useEffect(() => {
-/*
-		const getCurrentPosition = async () => {
-			if (!isFocused || action != 'create') return
-
-			const { status } = await Location.requestForegroundPermissionsAsync();
-			if (status !== 'granted') {
-				Alert.alert('GPS not permitted');
-				return;
-			}
-
-			let loc = await Location.getCurrentPositionAsync({
-				accuracy: Location.Accuracy.BestForNavigation, // o .BestForNavigation
-				//maximumAge: 0,      // No cache
-			});
-
-			const coords = {
-				latitude: loc.coords.latitude,
-				longitude: loc.coords.longitude,
-			};
-
-			dispatch({ type: 'SET_LOCATION', location: coords });
-		}
-
-		getCurrentPosition();
-*/
 		if (action == 'create' && latIn && longIn) {
 			console.log(`[${COMPONENT}] latIn=`, latIn);
 			console.log(`[${COMPONENT}] longIn=`, longIn);
@@ -415,42 +390,46 @@ const EditHotspotTab: React.FC = () => {
 					/>
 
 					{/* Enabled / Private */}
-					<View style={styles.row}>
-						<Text style={styles.label}>Enabled</Text>
-						<Switch value={form.enabled} onValueChange={(val) => dispatch({ type: 'SET_FIELD', field: 'enabled', value: val })} />
-					</View>
+					{user.isUser && (
+						<>
+							<View style={styles.row}>
+								<Text style={styles.label}>Enabled</Text>
+								<Switch value={form.enabled} onValueChange={(val) => dispatch({ type: 'SET_FIELD', field: 'enabled', value: val })} />
+							</View>
 
-					<View style={styles.row}>
-						<Text style={styles.label}>Private</Text>
-						<Switch value={form.isPrivate} onValueChange={(val) => dispatch({ type: 'SET_FIELD', field: 'isPrivate', value: val })} />
-					</View>
+							<View style={styles.row}>
+								<Text style={styles.label}>Private</Text>
+								<Switch value={form.isPrivate} onValueChange={(val) => dispatch({ type: 'SET_FIELD', field: 'isPrivate', value: val })} />
+							</View>
 
-					{/* Start / End Time */}
-					<Text style={styles.label}>Start time</Text>
-					<View style={styles.rowLeft}>
-						<Text>{form.startDate.toLocaleString()}</Text>
-						<TouchableOpacity style={styles.selectButton} onPress={() => setShowStartDatePicker(true)}>
-							<Ionicons name="calendar" size={25} color="#fff" />
-						</TouchableOpacity>
-						<TouchableOpacity style={styles.selectButton} onPress={() => setShowStartTimePicker(true)}>
-							<Ionicons name="time" size={25} color="#fff" />
-						</TouchableOpacity>
-					</View>
-					{showStartDatePicker && <DateTimePicker value={form.startDate} mode="date" display={Platform.OS === 'ios' ? 'inline' : 'default'} onChange={onChangeStartDate} />}
-					{showStartTimePicker && <DateTimePicker value={form.startDate} mode="time" display={Platform.OS === 'ios' ? 'inline' : 'default'} onChange={onChangeStartDate} />}
+							{/* Start / End Time */}
+							<Text style={styles.label}>Start time</Text>
+							<View style={styles.rowLeft}>
+								<Text>{form.startDate.toLocaleString()}</Text>
+								<TouchableOpacity style={styles.selectButton} onPress={() => setShowStartDatePicker(true)}>
+									<Ionicons name="calendar" size={25} color="#fff" />
+								</TouchableOpacity>
+								<TouchableOpacity style={styles.selectButton} onPress={() => setShowStartTimePicker(true)}>
+									<Ionicons name="time" size={25} color="#fff" />
+								</TouchableOpacity>
+							</View>
+							{showStartDatePicker && <DateTimePicker value={form.startDate} mode="date" display={Platform.OS === 'ios' ? 'inline' : 'default'} onChange={onChangeStartDate} />}
+							{showStartTimePicker && <DateTimePicker value={form.startDate} mode="time" display={Platform.OS === 'ios' ? 'inline' : 'default'} onChange={onChangeStartDate} />}
 
-					<Text style={styles.label}>End time</Text>
-					<View style={styles.rowLeft}>
-						<Text>{form.endDate.toLocaleString()}</Text>
-						<TouchableOpacity style={styles.selectButton} onPress={() => setShowEndDatePicker(true)}>
-							<Ionicons name="calendar" size={25} color="#fff" />
-						</TouchableOpacity>
-						<TouchableOpacity style={styles.selectButton} onPress={() => setShowEndTimePicker(true)}>
-							<Ionicons name="time" size={25} color="#fff" />
-						</TouchableOpacity>
-					</View>
-					{showEndDatePicker && <DateTimePicker value={form.endDate} mode="date" display={Platform.OS === 'ios' ? 'inline' : 'default'} onChange={onChangeEndDate} />}
-					{showEndTimePicker && <DateTimePicker value={form.endDate} mode="time" display={Platform.OS === 'ios' ? 'inline' : 'default'} onChange={onChangeEndDate} />}
+							<Text style={styles.label}>End time</Text>
+							<View style={styles.rowLeft}>
+								<Text>{form.endDate.toLocaleString()}</Text>
+								<TouchableOpacity style={styles.selectButton} onPress={() => setShowEndDatePicker(true)}>
+									<Ionicons name="calendar" size={25} color="#fff" />
+								</TouchableOpacity>
+								<TouchableOpacity style={styles.selectButton} onPress={() => setShowEndTimePicker(true)}>
+									<Ionicons name="time" size={25} color="#fff" />
+								</TouchableOpacity>
+							</View>
+							{showEndDatePicker && <DateTimePicker value={form.endDate} mode="date" display={Platform.OS === 'ios' ? 'inline' : 'default'} onChange={onChangeEndDate} />}
+							{showEndTimePicker && <DateTimePicker value={form.endDate} mode="time" display={Platform.OS === 'ios' ? 'inline' : 'default'} onChange={onChangeEndDate} />}
+						</>
+					)}
 
 					<Button style={{ marginTop: 30 }} onPress={submitHotspot}>
 						{action === 'create' ? 'Create' : 'Save'}

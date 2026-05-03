@@ -19,6 +19,7 @@ if (isClient) {
 		TileLayer,
 		Marker,
 		useMapEvents,
+		useMap,
 	} = require('react-leaflet');
 
 	function LocationSelector({ onSelect }: any) {
@@ -32,9 +33,9 @@ if (isClient) {
 		});
 		return null;
 	}
-	
+
 	const getUserIcon = (accuracy?: number) => {
-		const color = accuracy && accuracy > 50 ? "#8e8e93" : "#007aff"; // grigio vs blu
+		const color = accuracy && accuracy > 50 ? "#8e8e93" : "#007aff";
 
 		return L.divIcon({
 			className: '',
@@ -54,15 +55,39 @@ if (isClient) {
 		});
 	};
 
+	function BoundsListener({ onChange }: any) {
+		const map = useMap();
+
+		useMapEvents({
+			moveend: () => {
+				if (!onChange) return;
+
+				const bounds = map.getBounds();
+
+				onChange({
+					northEast: bounds.getNorthEast(),
+					southWest: bounds.getSouthWest(),
+				});
+			},
+		});
+
+		return null;
+	}
+
 	LeafletMap = function ({
 		userCoords,
 		onSelect,
 		selectedCoords,
+		onBoundsChange,
 	}: any) {
 		return (
 			<div style={{ height: '100vh', width: '100%' }}>
 				<MapContainer
-					center={userCoords ? [userCoords.latitude, userCoords.longitude] : [0,0]}
+					center={
+						userCoords
+							? [userCoords.latitude, userCoords.longitude]
+							: [0, 0]
+					}
 					zoom={15}
 					style={{ height: '100%', width: '100%' }}
 				>
@@ -73,19 +98,26 @@ if (isClient) {
 
 					<LocationSelector onSelect={onSelect} />
 
+					<BoundsListener onChange={onBoundsChange} />
+
 					{userCoords && (
 						<Marker
-							position={[userCoords.latitude, userCoords.longitude]}
+							position={[
+								userCoords.latitude,
+								userCoords.longitude,
+							]}
 							icon={getUserIcon(userCoords.accuracy)}
 						/>
 					)}
 
-					{selectedCoords && (<Marker
-						position={[
-							selectedCoords?.latitude,
-							selectedCoords?.longitude,
-						]}
-					/>)}
+					{selectedCoords && (
+						<Marker
+							position={[
+								selectedCoords.latitude,
+								selectedCoords.longitude,
+							]}
+						/>
+					)}
 				</MapContainer>
 			</div>
 		);
@@ -95,11 +127,16 @@ if (isClient) {
 type Props = {
 	userCoords: { latitude: number; longitude: number } | null;
 	onSelect: (coords: { latitude: number; longitude: number } | null) => void;
+	onBoundsChange?: (bounds: {
+		northEast: { lat: number; lng: number };
+		southWest: { lat: number; lng: number };
+	}) => void;
 };
 
 export default function Map({
 	userCoords,
 	onSelect,
+	onBoundsChange,
 }: Props) {
 	const [selectedCoords, setSelectedCoords] = useState<{
 		latitude: number;
@@ -116,6 +153,7 @@ export default function Map({
 				onSelect(coords);
 			}}
 			selectedCoords={selectedCoords}
+			onBoundsChange={onBoundsChange}
 		/>
 	);
 }
