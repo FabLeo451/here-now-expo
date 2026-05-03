@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import Map from '@/components/Map';
 import { useWebsocket, sendMessage } from "@/hooks/useWebsocket";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Hotspot } from '@/lib/hotspot'
 
 type LatLng = {
 	latitide: number;
@@ -27,6 +28,7 @@ const MapTab: React.FC = () => {
         longitude: number;
     } | null>(null);
     const { isConnected, sendMessage, callback } = useWebsocket();
+    const [hotspots, setHotspots] = useState<Hotspot[]>([]);
 
     // Init
     useEffect(() => {
@@ -91,10 +93,9 @@ const MapTab: React.FC = () => {
 	
 	const onMessage = useCallback((message) => {
 		console.log('[map] onMessage', message);
-		/*
-		if (message.Type === "map") {
-			let str = decodeBase64(message.Payload);
-			let parsed: Hotspot[] = JSON.parse(str);
+		
+		if (message.Type === "array") {
+			let parsed: Hotspot[] = JSON.parse(message.Payload);
 
 			//console.log('[map] decoded payload =', str);
 
@@ -104,7 +105,6 @@ const MapTab: React.FC = () => {
 			console.log('[map] Updating hotspots...', parsed.length);
 			setHotspots(parsed);
 		}
-		*/
 	}, []);
 	
 	const handleCreate = async () => {
@@ -157,12 +157,13 @@ const MapTab: React.FC = () => {
             <View style={{ flex: 1 }}>
                 <Map
                     userCoords={location ? location.coords : null}
+                    hotspots={hotspots}
                     onSelect={(coords: any) => {
                         console.log('[map] Selected:', coords);
                         setSelectedCoords(coords);
                     }}
                     onBoundsChange={(bounds: any) => {
-                    		console.log('[map] bounds:', bounds);
+                    		//console.log('[map] bounds:', bounds);
                     		queryOnBounds(bounds);
                     }}
                 />

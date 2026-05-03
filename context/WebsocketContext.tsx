@@ -79,7 +79,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 		ws.onmessage = (event) => {
 			try {
 				const message = JSON.parse(event.data);
-				//console.log("[WebsocketContext]", message);
+				//console.log("[WebsocketContext] message =", message);
 
 				if (message.AppId !== process.env.EXPO_PUBLIC_APP_ID) return;
 
@@ -162,7 +162,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 
 	const sendMessage = <T extends Record<string, any>>(message: T) => {
 		if (socketRef.current?.readyState === WebSocket.OPEN) {
-			console.log(message);
+			//console.log(message);
 			const str = JSON.stringify(message);
 			socketRef.current.send(str);
 		}
