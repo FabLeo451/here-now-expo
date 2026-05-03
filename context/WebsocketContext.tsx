@@ -162,10 +162,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 
 	const sendMessage = <T extends Record<string, any>>(message: T) => {
 		if (socketRef.current?.readyState === WebSocket.OPEN) {
-			if (message.payload) {
-				message.payload = encodeBase64(message.payload);
-			}
-			//console.log(message);
+			console.log(message);
 			const str = JSON.stringify(message);
 			socketRef.current.send(str);
 		}

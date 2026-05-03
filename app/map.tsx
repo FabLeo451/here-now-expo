@@ -5,8 +5,18 @@ import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Map from '@/components/Map';
-import { useWebsocket } from "@/hooks/useWebsocket";
+import { useWebsocket, sendMessage } from "@/hooks/useWebsocket";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+type LatLng = {
+	latitide: number;
+	longitude: number;
+};
+
+type Bounds = {
+	northEast: LatLng;
+	southWest: LatLng;
+};
 
 const MapTab: React.FC = () => {
 	const insets = useSafeAreaInsets();
@@ -65,6 +75,19 @@ const MapTab: React.FC = () => {
             };
         }, [])
 	);
+	
+	function queryOnBounds(bounds: Bounds) {
+		const message = {
+			appId: process.env.EXPO_PUBLIC_APP_ID,
+			type: 'query',
+			payload: {
+				id: "getHotspotsByBoundaries",
+				boundaries: bounds
+			},
+		};
+
+		sendMessage(message);
+	}
 	
 	const onMessage = useCallback((message) => {
 		console.log('[map] onMessage', message);
@@ -140,6 +163,7 @@ const MapTab: React.FC = () => {
                     }}
                     onBoundsChange={(bounds: any) => {
                     		console.log('[map] bounds:', bounds);
+                    		queryOnBounds(bounds);
                     }}
                 />
             </View>

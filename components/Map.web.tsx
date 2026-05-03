@@ -65,8 +65,8 @@ if (isClient) {
 				const bounds = map.getBounds();
 
 				onChange({
-					northEast: bounds.getNorthEast(),
-					southWest: bounds.getSouthWest(),
+					northEast: { latitude: bounds.getNorthEast().lat, longitude: bounds.getNorthEast().lng },
+					southWest: { latitude: bounds.getSouthWest().lat, longitude: bounds.getSouthWest().lng },
 				});
 			},
 		});
@@ -128,8 +128,8 @@ type Props = {
 	userCoords: { latitude: number; longitude: number } | null;
 	onSelect: (coords: { latitude: number; longitude: number } | null) => void;
 	onBoundsChange?: (bounds: {
-		northEast: { lat: number; lng: number };
-		southWest: { lat: number; lng: number };
+		northEast: { latitude: number; longitude: number };
+		southWest: { latitude: number; longitude: number };
 	}) => void;
 };
 
