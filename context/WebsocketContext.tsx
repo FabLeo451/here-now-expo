@@ -81,7 +81,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 				const message = JSON.parse(event.data);
 				//console.log("[WebsocketContext] message =", message);
 
-				if (message.AppId !== process.env.EXPO_PUBLIC_APP_ID) return;
+				if (message.appId !== process.env.EXPO_PUBLIC_APP_ID) return;
 
 				listenersRef.current.forEach((cb) => cb(message));
 			} catch {
@@ -169,6 +169,7 @@ export const WebsocketProvider = ({ children }: { children: React.ReactNode }) =
 	};
 
 	const callback = (cb: MessageHandler) => {
+		console.log("[WebsocketContext] Callback registered");
 		listenersRef.current.add(cb);
 		return () => listenersRef.current.delete(cb);
 	};

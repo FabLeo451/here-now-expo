@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Hotspot } from '@/lib/hotspot'
 
 let LeafletMap: React.FC<any> = () => null;
 
@@ -76,6 +77,7 @@ if (isClient) {
 
 	LeafletMap = function ({
 		userCoords,
+		hotspots,
 		onSelect,
 		selectedCoords,
 		onBoundsChange,
@@ -112,12 +114,24 @@ if (isClient) {
 
 					{selectedCoords && (
 						<Marker
+							color="red"
 							position={[
 								selectedCoords.latitude,
 								selectedCoords.longitude,
 							]}
 						/>
 					)}
+
+					// Hotspots
+					{hotspots.map((hotspot: Hotspot) => (
+						<Marker 
+							key={hotspot.id}
+							position={[
+								hotspot.position.latitude,
+								hotspot.position.longitude,
+							]}
+						/>
+					))}
 				</MapContainer>
 			</div>
 		);
@@ -126,6 +140,7 @@ if (isClient) {
 
 type Props = {
 	userCoords: { latitude: number; longitude: number } | null;
+	hotspots: Hotspot[];
 	onSelect: (coords: { latitude: number; longitude: number } | null) => void;
 	onBoundsChange?: (bounds: {
 		northEast: { latitude: number; longitude: number };
@@ -135,6 +150,7 @@ type Props = {
 
 export default function Map({
 	userCoords,
+	hotspots,
 	onSelect,
 	onBoundsChange,
 }: Props) {
@@ -145,9 +161,12 @@ export default function Map({
 
 	if (!isClient) return null;
 
+	console.log('[Map.web] hotspots =', hotspots);
+
 	return (
 		<LeafletMap
 			userCoords={userCoords}
+			hotspots={hotspots}
 			onSelect={(coords: any) => {
 				setSelectedCoords(coords);
 				onSelect(coords);

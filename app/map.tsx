@@ -5,7 +5,7 @@ import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Map from '@/components/Map';
-import { useWebsocket, sendMessage } from "@/hooks/useWebsocket";
+import { useWebsocket } from "@/hooks/useWebsocket";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Hotspot } from '@/lib/hotspot'
 
@@ -89,24 +89,21 @@ const MapTab: React.FC = () => {
 		};
 
 		sendMessage(message);
-	}
-	
-	const onMessage = useCallback((message) => {
-		console.log('[map] onMessage', message);
-		
-		if (message.Type === "array") {
-			let parsed: Hotspot[] = JSON.parse(message.Payload);
+    }
 
-			//console.log('[map] decoded payload =', str);
+    const onMessage = useCallback((message) => {
+        console.log('[map] onMessage', message);
 
-			if (!parsed)
-				parsed = [];
+        if (message.type === "array") {
+            console.log('[map] Updating hotspots...', message.payload.length);
+            setHotspots(message.payload);
+        }
+    }, []);
 
-			console.log('[map] Updating hotspots...', parsed.length);
-			setHotspots(parsed);
-		}
-	}, []);
-	
+    useEffect(() => {
+        return callback(onMessage);
+    }, [callback, onMessage]);
+
 	const handleCreate = async () => {
         console.log('[map] Add hotspot');
 		//router.replace('/create-hotspot');
@@ -143,15 +140,15 @@ const MapTab: React.FC = () => {
     }
 
     return (
-		<View style={{
-		  paddingTop: insets.top,
-		  paddingBottom: insets.bottom,
-		  paddingLeft: insets.left,
-		  paddingRight: insets.right,
-		  flex: 1,
-		  backgroundColor: '#f0f0f0',
-		}}
-		>
+        <View style={{
+            paddingTop: insets.top,
+            paddingBottom: insets.bottom,
+            paddingLeft: insets.left,
+            paddingRight: insets.right,
+            flex: 1,
+            backgroundColor: '#f0f0f0',
+        }}
+        >
 
             {/* MAP */}
             <View style={{ flex: 1 }}>
@@ -163,8 +160,8 @@ const MapTab: React.FC = () => {
                         setSelectedCoords(coords);
                     }}
                     onBoundsChange={(bounds: any) => {
-                    		//console.log('[map] bounds:', bounds);
-                    		queryOnBounds(bounds);
+                        //console.log('[map] bounds:', bounds);
+                        queryOnBounds(bounds);
                     }}
                 />
             </View>
