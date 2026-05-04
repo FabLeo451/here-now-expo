@@ -6,6 +6,7 @@ import MapView, {
 } from 'react-native-maps';
 import { View, StyleSheet, Animated, Easing } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { Hotspot } from '@/lib/hotspot'
 
 type Coords = {
   latitude: number;
@@ -26,6 +27,7 @@ type Bounds = {
 
 type Props = {
   userCoords: UserCoords | null;
+  hotspots: Hotspot[];
   onSelect: (coords: Coords | null) => void;
   onBoundsChange?: (bounds: Bounds) => void;
 };
@@ -37,6 +39,7 @@ type UserMarkerProps = {
 
 export default function Map({
   userCoords,
+  hotspots,
   onSelect,
   onBoundsChange,
 }: Props) {
@@ -146,6 +149,81 @@ export default function Map({
     );
   };
 
+  const RadarMarker = () => {
+    const scale1 = useRef(new Animated.Value(0)).current;
+    const scale2 = useRef(new Animated.Value(0)).current;
+    const scale3 = useRef(new Animated.Value(0)).current;
+
+    const createPulse = (anim: any, delay: number) => {
+      return Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(anim, {
+            toValue: 1,
+            duration: 2000,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(anim, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+    };
+
+    useEffect(() => {
+      createPulse(scale1, 0).start();
+      createPulse(scale2, 600).start();
+      createPulse(scale3, 1200).start();
+    }, []);
+
+    const renderWave = (anim: any) => {
+      const scale = anim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.3, 2.5],
+      });
+
+      const opacity = anim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.6, 0],
+      });
+
+      return (
+        <Animated.View
+          style={{
+            position: 'absolute',
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: '#4ade80',
+            transform: [{ scale }],
+            opacity,
+          }}
+        />
+      );
+    };
+
+    return (
+      <View style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
+        {renderWave(scale1)}
+        {renderWave(scale2)}
+        {renderWave(scale3)}
+
+        {/* centro */}
+        <View
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: '#22c55e',
+          }}
+        />
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -171,6 +249,19 @@ export default function Map({
         {selectedCoords && (
           <Marker coordinate={selectedCoords} />
         )}
+
+          // Hotspots
+        {hotspots.map((hotspot: Hotspot) => (
+          <Marker
+            key={hotspot.id}
+            coordinate={{
+              latitude: hotspot.position.latitude,
+              longitude: hotspot.position.longitude,
+            }}
+          >
+            <RadarMarker />
+          </Marker>
+        ))}
       </MapView>
     </View>
   );
