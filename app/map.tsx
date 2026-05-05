@@ -185,7 +185,7 @@ const MapTab: React.FC = () => {
 const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 50,
     right: 20,
     width: 50,
     height: 50,
