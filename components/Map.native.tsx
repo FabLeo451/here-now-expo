@@ -182,7 +182,7 @@ export default function Map({
     const renderWave = (anim: any) => {
       const scale = anim.interpolate({
         inputRange: [0, 1],
-        outputRange: [0.3, 2.5],
+        outputRange: [0.3, 1.5],
       });
 
       const opacity = anim.interpolate({
@@ -217,7 +217,7 @@ export default function Map({
             width: 10,
             height: 10,
             borderRadius: 5,
-            backgroundColor: '#22c55e',
+            backgroundColor: 'limegreen',
           }}
         />
       </View>
