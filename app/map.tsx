@@ -163,6 +163,9 @@ const MapTab: React.FC = () => {
                         //console.log('[map] bounds:', bounds);
                         queryOnBounds(bounds);
                     }}
+                    onHotspotSelect={(hotspot: Hotspot) => {
+                        console.log('[map] Selected:', hotspot.name);
+                    }}
                 />
             </View>
 

@@ -31,6 +31,7 @@ type Props = {
   hotspots: Hotspot[];
   onSelect: (coords: Coords | null) => void;
   onBoundsChange?: (bounds: Bounds) => void;
+  onHotspotSelect: (hotspot: Hotspot) => void;
 };
 
 type UserMarkerProps = {
@@ -43,6 +44,7 @@ export default function Map({
   hotspots,
   onSelect,
   onBoundsChange,
+  onHotspotSelect
 }: Props) {
   const [selectedCoords, setSelectedCoords] = useState<Coords | null>(null);
 
@@ -258,6 +260,10 @@ export default function Map({
             coordinate={{
               latitude: hotspot.position.latitude,
               longitude: hotspot.position.longitude,
+            }}
+            onPress={() => {
+              //console.log('Tapped hotspot:', hotspot.id);
+              onHotspotSelect(hotspot);
             }}
           >
             <RadarMarker />

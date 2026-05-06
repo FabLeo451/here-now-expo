@@ -81,6 +81,7 @@ if (isClient) {
 		onSelect,
 		selectedCoords,
 		onBoundsChange,
+		onHotspotSelect
 	}: any) {
 		return (
 			<div style={{ height: '100vh', width: '100%' }}>
@@ -130,6 +131,11 @@ if (isClient) {
 								hotspot.position.latitude,
 								hotspot.position.longitude,
 							]}
+							eventHandlers={{
+								click: () => {
+									onHotspotSelect(hotspot);
+								},
+							}}
 						/>
 					))}
 				</MapContainer>
@@ -146,6 +152,7 @@ type Props = {
 		northEast: { latitude: number; longitude: number };
 		southWest: { latitude: number; longitude: number };
 	}) => void;
+	onHotspotSelect: (hotspot: Hotspot) => void;
 };
 
 export default function Map({
@@ -153,6 +160,7 @@ export default function Map({
 	hotspots,
 	onSelect,
 	onBoundsChange,
+	onHotspotSelect
 }: Props) {
 	const [selectedCoords, setSelectedCoords] = useState<{
 		latitude: number;
@@ -173,6 +181,7 @@ export default function Map({
 			}}
 			selectedCoords={selectedCoords}
 			onBoundsChange={onBoundsChange}
+			onHotspotSelect={onHotspotSelect}
 		/>
 	);
 }
