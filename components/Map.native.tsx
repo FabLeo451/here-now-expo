@@ -5,6 +5,7 @@ import MapView, {
   Region,
 } from 'react-native-maps';
 import { View, StyleSheet, Animated, Easing } from 'react-native';
+import { Details } from 'react-native-maps';
 import Svg, { Path } from 'react-native-svg';
 import { Hotspot } from '@/lib/hotspot'
 
@@ -70,12 +71,12 @@ export default function Map({
 
   const handleRegionChangeComplete = (
     region: Region,
-    gesture?: { isGesture: boolean }
+    details: Details
   ) => {
     if (!onBoundsChange) return;
 
-    // opzionale: ignora cambi programmatici
-    if (gesture && !gesture.isGesture) return;
+    // safely handle optional value
+    if (details?.isGesture === false) return;
 
     if (timeout.current) {
       clearTimeout(timeout.current);
@@ -250,7 +251,7 @@ export default function Map({
           <Marker coordinate={selectedCoords} />
         )}
 
-          // Hotspots
+        {/* Hotspots */}
         {hotspots.map((hotspot: Hotspot) => (
           <Marker
             key={hotspot.id}
