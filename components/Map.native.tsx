@@ -4,8 +4,8 @@ import MapView, {
   MapPressEvent,
   Region,
 } from 'react-native-maps';
-import { View, StyleSheet, Animated, Easing } from 'react-native';
-import { Details } from 'react-native-maps';
+import { Text, View, StyleSheet, Animated, Easing, Image } from 'react-native';
+import { Callout, Details } from 'react-native-maps';
 import Svg, { Path } from 'react-native-svg';
 import { Hotspot } from '@/lib/hotspot'
 
@@ -229,7 +229,18 @@ export default function Map({
 
   return (
     <View style={styles.container}>
+      {/*
+        showsPointsOfInterest works on iOS
+        customMapStyle works on Android
+      */}
       <MapView
+        showsPointsOfInterest={false}
+        customMapStyle={[
+          {
+            featureType: 'poi',
+            stylers: [{ visibility: 'off' }],
+          },
+        ]}
         style={styles.map}
         initialRegion={{
           latitude: userCoords?.latitude || 0,
@@ -261,12 +272,9 @@ export default function Map({
               latitude: hotspot.position.latitude,
               longitude: hotspot.position.longitude,
             }}
-            onPress={() => {
-              //console.log('Tapped hotspot:', hotspot.id);
-              onHotspotSelect(hotspot);
-            }}
+            image={require('../assets/images/poi-green.png')}
+            onPress={() => onHotspotSelect(hotspot)}
           >
-            <RadarMarker />
           </Marker>
         ))}
       </MapView>
