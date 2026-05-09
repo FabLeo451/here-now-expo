@@ -4,9 +4,10 @@ import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import Map from '@/components/Map';
 import { useWebsocket } from "@/hooks/useWebsocket";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ModalHotspot from '@/components/ModalHotspot';
+import Map from '@/components/Map';
 import { Hotspot } from '@/lib/hotspot'
 
 type LatLng = {
@@ -91,7 +92,7 @@ const MapTab: React.FC = () => {
 		sendMessage(message);
     }
 
-    const onMessage = useCallback((message) => {
+    const onMessage = useCallback((message: any) => {
         console.log('[map] onMessage', message);
 
         if (message.type === "array") {

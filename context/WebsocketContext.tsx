@@ -7,7 +7,7 @@ type MessageHandler = (message: any) => void;
 
 type WebsocketContextType = {
 	isConnected: boolean;
-	sendMessage: (message: string) => void;
+	sendMessage: (message: any) => void;
 	callback: (cb: MessageHandler) => () => void;
 	connect: (token: string) => void;
 };
