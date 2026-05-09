@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MapView, {
-  Marker,
-  MapPressEvent,
-  Region,
+	Marker,
+	MapPressEvent,
+	Region,
 } from 'react-native-maps';
 import { Text, View, StyleSheet, Animated, Easing, Image } from 'react-native';
 import { Callout, Details } from 'react-native-maps';
@@ -10,283 +10,224 @@ import Svg, { Path } from 'react-native-svg';
 import { Hotspot } from '@/lib/hotspot'
 
 type Coords = {
-  latitude: number;
-  longitude: number;
+	latitude: number;
+	longitude: number;
 };
 
 type UserCoords = {
-  latitude: number;
-  longitude: number;
-  accuracy?: number;
-  heading?: number;
+	latitude: number;
+	longitude: number;
+	accuracy?: number;
+	heading?: number;
 };
 
 type Bounds = {
-  northEast: { latitude: number; longitude: number };
-  southWest: { latitude: number; longitude: number };
+	northEast: { latitude: number; longitude: number };
+	southWest: { latitude: number; longitude: number };
 };
 
 type Props = {
-  userCoords: UserCoords | null;
-  hotspots: Hotspot[];
-  onSelect: (coords: Coords | null) => void;
-  onBoundsChange?: (bounds: Bounds) => void;
-  onHotspotSelect: (hotspot: Hotspot) => void;
+	userCoords: UserCoords | null;
+	hotspots: Hotspot[];
+	onMapReady?: (bounds: Bounds) => void;
+	onSelect: (coords: Coords | null) => void;
+	onBoundsChange?: (bounds: Bounds) => void;
+	onHotspotSelect: (hotspot: Hotspot) => void;
 };
 
 type UserMarkerProps = {
-  accuracy?: number;
-  heading?: number;
+	accuracy?: number;
+	heading?: number;
 };
 
 export default function Map({
-  userCoords,
-  hotspots,
-  onSelect,
-  onBoundsChange,
-  onHotspotSelect
+	userCoords,
+	hotspots,
+	onMapReady,
+	onSelect,
+	onBoundsChange,
+	onHotspotSelect
 }: Props) {
-  const [selectedCoords, setSelectedCoords] = useState<Coords | null>(null);
+	const [selectedCoords, setSelectedCoords] = useState<Coords | null>(null);
+	const mapRef = useRef<MapView>(null);
+	const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const handlePress = (e: MapPressEvent) => {
+		const coords = e.nativeEvent.coordinate;
+		setSelectedCoords(coords);
+		onSelect(coords);
+	};
 
-  const handlePress = (e: MapPressEvent) => {
-    const coords = e.nativeEvent.coordinate;
-    setSelectedCoords(coords);
-    onSelect(coords);
-  };
+	const getBounds = (region: Region): Bounds => {
+		const { latitude, longitude, latitudeDelta, longitudeDelta } = region;
 
-  const getBounds = (region: Region): Bounds => {
-    const { latitude, longitude, latitudeDelta, longitudeDelta } = region;
+		return {
+			northEast: {
+				latitude: latitude + latitudeDelta / 2,
+				longitude: longitude + longitudeDelta / 2,
+			},
+			southWest: {
+				latitude: latitude - latitudeDelta / 2,
+				longitude: longitude - longitudeDelta / 2,
+			},
+		};
+	};
 
-    return {
-      northEast: {
-        latitude: latitude + latitudeDelta / 2,
-        longitude: longitude + longitudeDelta / 2,
-      },
-      southWest: {
-        latitude: latitude - latitudeDelta / 2,
-        longitude: longitude - longitudeDelta / 2,
-      },
-    };
-  };
+	const handleRegionChangeComplete = (
+		region: Region,
+		details: Details
+	) => {
+		if (!onBoundsChange) return;
 
-  const handleRegionChangeComplete = (
-    region: Region,
-    details: Details
-  ) => {
-    if (!onBoundsChange) return;
+		// safely handle optional value
+		if (details?.isGesture === false) return;
 
-    // safely handle optional value
-    if (details?.isGesture === false) return;
+		if (timeout.current) {
+			clearTimeout(timeout.current);
+		}
 
-    if (timeout.current) {
-      clearTimeout(timeout.current);
-    }
+		timeout.current = setTimeout(() => {
+			onBoundsChange(getBounds(region));
+		}, 300);
+	};
 
-    timeout.current = setTimeout(() => {
-      onBoundsChange(getBounds(region));
-    }, 300);
-  };
+	useEffect(() => {
+		return () => {
+			if (timeout.current) clearTimeout(timeout.current);
+		};
+	}, []);
 
-  useEffect(() => {
-    return () => {
-      if (timeout.current) clearTimeout(timeout.current);
-    };
-  }, []);
+	const UserMarker = ({ accuracy, heading = 0 }: UserMarkerProps) => {
+		const color = accuracy && accuracy > 50 ? '#8e8e93' : '#007aff';
+		const safeHeading = heading >= 0 ? heading : 0;
 
-  const UserMarker = ({ accuracy, heading = 0 }: UserMarkerProps) => {
-    const color = accuracy && accuracy > 50 ? '#8e8e93' : '#007aff';
-    const safeHeading = heading >= 0 ? heading : 0;
+		const rotation = useRef(new Animated.Value(0)).current;
+		const currentHeading = useRef(0);
 
-    const rotation = useRef(new Animated.Value(0)).current;
-    const currentHeading = useRef(0);
+		useEffect(() => {
+			let newHeading = safeHeading;
+			let prevHeading = currentHeading.current;
 
-    useEffect(() => {
-      let newHeading = safeHeading;
-      let prevHeading = currentHeading.current;
+			let diff = newHeading - prevHeading;
+			if (diff > 180) newHeading -= 360;
+			if (diff < -180) newHeading += 360;
 
-      let diff = newHeading - prevHeading;
-      if (diff > 180) newHeading -= 360;
-      if (diff < -180) newHeading += 360;
+			Animated.timing(rotation, {
+				toValue: newHeading,
+				duration: 200,
+				easing: Easing.linear,
+				useNativeDriver: true,
+			}).start();
 
-      Animated.timing(rotation, {
-        toValue: newHeading,
-        duration: 200,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }).start();
+			currentHeading.current = newHeading;
+		}, [safeHeading]);
 
-      currentHeading.current = newHeading;
-    }, [safeHeading]);
+		const rotateInterpolate = rotation.interpolate({
+			inputRange: [-360, 360],
+			outputRange: ['-360deg', '360deg'],
+		});
 
-    const rotateInterpolate = rotation.interpolate({
-      inputRange: [-360, 360],
-      outputRange: ['-360deg', '360deg'],
-    });
+		return (
+			<Animated.View
+				style={{
+					width: 40,
+					height: 40,
+					alignItems: 'center',
+					justifyContent: 'center',
+					transform: [{ rotate: rotateInterpolate }],
+				}}
+			>
+				<View
+					style={{
+						shadowColor: '#000',
+						shadowOpacity: 0.35,
+						shadowRadius: 4,
+						shadowOffset: { width: 0, height: 2 },
+						elevation: 5,
+					}}
+				>
+					<Svg width={24} height={24} viewBox="0 0 24 24">
+						<Path d="M12 2 L18 20 L12 16 L6 20 Z" fill={color} />
+					</Svg>
+				</View>
+			</Animated.View>
+		);
+	};
 
-    return (
-      <Animated.View
-        style={{
-          width: 40,
-          height: 40,
-          alignItems: 'center',
-          justifyContent: 'center',
-          transform: [{ rotate: rotateInterpolate }],
-        }}
-      >
-        <View
-          style={{
-            shadowColor: '#000',
-            shadowOpacity: 0.35,
-            shadowRadius: 4,
-            shadowOffset: { width: 0, height: 2 },
-            elevation: 5,
-          }}
-        >
-          <Svg width={24} height={24} viewBox="0 0 24 24">
-            <Path d="M12 2 L18 20 L12 16 L6 20 Z" fill={color} />
-          </Svg>
-        </View>
-      </Animated.View>
-    );
-  };
+	return (
+		<View style={styles.container}>
+			{/*
+				showsPointsOfInterest works on iOS
+				customMapStyle works on Android
+			*/}
+			<MapView
+				ref={mapRef}
+				showsPointsOfInterest={false}
+				customMapStyle={[
+					{
+						featureType: 'poi',
+						stylers: [{ visibility: 'off' }],
+					},
+				]}
+				style={styles.map}
+				initialRegion={{
+					latitude: userCoords?.latitude || 0,
+					longitude: userCoords?.longitude || 0,
+					latitudeDelta: 0.01,
+					longitudeDelta: 0.01,
+				}}
+				onMapReady={async () => {
+					console.log('[Map.native] Map ready');
+					const boundigBox = await mapRef.current?.getMapBoundaries();
 
-  const RadarMarker = () => {
-    const scale1 = useRef(new Animated.Value(0)).current;
-    const scale2 = useRef(new Animated.Value(0)).current;
-    const scale3 = useRef(new Animated.Value(0)).current;
+					if (boundigBox) {
+						let bounds: Bounds;
+						bounds = {
+							northEast: { latitude: boundigBox?.northEast.latitude, longitude: boundigBox?.northEast.longitude },
+							southWest: { latitude: boundigBox?.southWest.latitude, longitude: boundigBox?.southWest.longitude }
+						};
+						onMapReady?.(bounds)
+					}
+				}}
+				onPress={handlePress}
+				onRegionChangeComplete={handleRegionChangeComplete}
+			>
+				{userCoords && (
+					<Marker coordinate={userCoords}>
+						<UserMarker
+							accuracy={userCoords.accuracy}
+							heading={userCoords.heading}
+						/>
+					</Marker>
+				)}
 
-    const createPulse = (anim: any, delay: number) => {
-      return Animated.loop(
-        Animated.sequence([
-          Animated.delay(delay),
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 2000,
-            easing: Easing.out(Easing.ease),
-            useNativeDriver: true,
-          }),
-          Animated.timing(anim, {
-            toValue: 0,
-            duration: 0,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-    };
+				{selectedCoords && (
+					<Marker coordinate={selectedCoords} />
+				)}
 
-    useEffect(() => {
-      createPulse(scale1, 0).start();
-      createPulse(scale2, 600).start();
-      createPulse(scale3, 1200).start();
-    }, []);
-
-    const renderWave = (anim: any) => {
-      const scale = anim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0.3, 1.5],
-      });
-
-      const opacity = anim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0.6, 0],
-      });
-
-      return (
-        <Animated.View
-          style={{
-            position: 'absolute',
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: '#4ade80',
-            transform: [{ scale }],
-            opacity,
-          }}
-        />
-      );
-    };
-
-    return (
-      <View style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
-        {renderWave(scale1)}
-        {renderWave(scale2)}
-        {renderWave(scale3)}
-
-        {/* centro */}
-        <View
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: 5,
-            backgroundColor: 'limegreen',
-          }}
-        />
-      </View>
-    );
-  };
-
-  return (
-    <View style={styles.container}>
-      {/*
-        showsPointsOfInterest works on iOS
-        customMapStyle works on Android
-      */}
-      <MapView
-        showsPointsOfInterest={false}
-        customMapStyle={[
-          {
-            featureType: 'poi',
-            stylers: [{ visibility: 'off' }],
-          },
-        ]}
-        style={styles.map}
-        initialRegion={{
-          latitude: userCoords?.latitude || 0,
-          longitude: userCoords?.longitude || 0,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-        onPress={handlePress}
-        onRegionChangeComplete={handleRegionChangeComplete}
-      >
-        {userCoords && (
-          <Marker coordinate={userCoords}>
-            <UserMarker
-              accuracy={userCoords.accuracy}
-              heading={userCoords.heading}
-            />
-          </Marker>
-        )}
-
-        {selectedCoords && (
-          <Marker coordinate={selectedCoords} />
-        )}
-
-        {/* Hotspots */}
-        {hotspots.map((hotspot: Hotspot) => (
-          <Marker
-            key={hotspot.id}
-            coordinate={{
-              latitude: hotspot.position.latitude,
-              longitude: hotspot.position.longitude,
-            }}
-            image={require('../assets/images/poi-green.png')}
-            onPress={() => onHotspotSelect(hotspot)}
-          >
-          </Marker>
-        ))}
-      </MapView>
-    </View>
-  );
+				{/* Hotspots */}
+				{hotspots.map((hotspot: Hotspot) => (
+					<Marker
+						key={hotspot.id}
+						coordinate={{
+							latitude: hotspot.position.latitude,
+							longitude: hotspot.position.longitude,
+						}}
+						image={require('../public/images/markers/green.png')}
+						onPress={() => onHotspotSelect(hotspot)}
+					>
+					</Marker>
+				))}
+			</MapView>
+		</View>
+	);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    flex: 1,
-  },
+	container: {
+		flex: 1,
+	},
+	map: {
+		flex: 1,
+	},
 });
