@@ -31,6 +31,12 @@ const MapTab: React.FC = () => {
     const { isConnected, sendMessage, callback } = useWebsocket();
     const [hotspots, setHotspots] = useState<Hotspot[]>([]);
 
+	const [modalVisible, setModalVisible] = useState<{ visible: boolean; id: string, hotspot: Hotspot | null }>({
+		visible: false,
+		id: '',
+		hotspot: null
+	});
+
     // Init
     useEffect(() => {
         const init = async () => {
@@ -150,6 +156,12 @@ const MapTab: React.FC = () => {
             backgroundColor: '#f0f0f0',
         }}
         >
+			<ModalHotspot
+				visible={modalVisible.visible}
+				id={modalVisible.id}
+				hotspot={modalVisible.hotspot}
+				onClose={() => setModalVisible({ visible: false, id: 'dummyId', hotspot: null })}
+			/>
 
             {/* MAP */}
             <View style={{ flex: 1 }}>
@@ -166,6 +178,7 @@ const MapTab: React.FC = () => {
                     }}
                     onHotspotSelect={(hotspot: Hotspot) => {
                         console.log('[map] Selected:', hotspot.name);
+                        setModalVisible({ visible: true, id: hotspot.id, hotspot });
                     }}
                 />
             </View>

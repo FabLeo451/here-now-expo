@@ -26,38 +26,11 @@ function openInGoogleMaps(latitude: number, longitude: number) {
 
 type Props = {
 	visible: boolean;
-	id: string;
 	hotspot: Hotspot | null;
 	onClose: () => void;
 };
 
-export default function ModalHotspot({ visible, id, hotspot, onClose }: Props) {
-	const [context, setContext] = useState(null);
-	const [authenticated, setAuthenticated] = useState<boolean>(false);
-	const [likes, setLikes] = useState<number>(0);
-	const [likedByMe, setLikedByMe] = useState<boolean>(false);
-	const [loading, setLoading] = useState(true);
-	const [loaded, setLoaded] = useState(false);
-	const [subscribed, setSubscribed] = useState<boolean>(false);
-
-	useEffect(() => {
-		const init = async () => {
-			const token = await AsyncStorage.getItem('authToken');
-
-			//console.log('[ModalHotspot] visible = ' + visible + ', id = ' + id);
-			//console.log('[ModalHotspot] hotspot =', hotspot);
-
-			if (!visible)
-				return;
-
-			const contextStr = await AsyncStorage.getItem('context');
-			const ctx = contextStr ? JSON.parse(contextStr) : {};
-			setContext(ctx);
-			setAuthenticated(ctx.user.isAuthenticated);
-		};
-
-		init();
-	}, [visible, id]);
+export default function ModalHotspot({ visible, hotspot, onClose }: Props) {
 
 	const stylesModal = StyleSheet.create({
 		overlay: {
@@ -108,14 +81,15 @@ export default function ModalHotspot({ visible, id, hotspot, onClose }: Props) {
 						</TouchableOpacity>
 
 						<Text style={{ fontSize: 18, fontWeight: "bold", marginVertical: 5 }}>{hotspot?.name}</Text>
-						<Text style={{ fontSize: 10, fontStyle: "italic", marginBottom: 8, color: "gray" }}>Created by {hotspot?.owner}</Text>
+						<Text style={{ fontSize: 10, fontStyle: "italic", marginBottom: 8, color: "gray" }}>Created by {hotspot ? hotspot.owner : ""}</Text>
 						<Text style={{ fontSize: 12, marginBottom: 8, color: "slategray" }}>{hotspot?.description}</Text>
 						
 						{/* Open details page */}
 						<TouchableOpacity
 							style={[styles.rowLeft, { marginVertical: 8 }]}
 							onPress={() => {
-								router.navigate(`/hotspot/${id}`);
+								if (hotspot)
+									router.navigate(`/hotspot/${hotspot.id}`);
 							}}
 						>
 							<Ionicons name="clipboard-outline" size={25} color="green" />
@@ -126,7 +100,10 @@ export default function ModalHotspot({ visible, id, hotspot, onClose }: Props) {
 						<TouchableOpacity
 							style={[styles.rowLeft, { marginVertical: 8 }]}
 							onPress={() => {
-								const { latitude, longitude } = hotspot?.position;
+								if (!hotspot)
+									return;
+
+								const { latitude, longitude } = hotspot.position;
 								openInGoogleMaps(latitude, longitude);
 							}}
 						>
