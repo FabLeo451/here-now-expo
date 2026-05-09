@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 import { useWebsocket } from "@/hooks/useWebsocket";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ModalHotspot from '@/components/ModalHotspot';
-import Map from '@/components/Map';
+import Map from '@/components/map/Map';
 import { Hotspot } from '@/lib/hotspot'
 
 type LatLng = {
@@ -190,7 +190,6 @@ const MapTab: React.FC = () => {
             </View>
 
             {/* FAB ADD */}
-            {selectedCoords && (
                 <Pressable
                     onPress={handleCreate}
                     style={({ pressed }) => [
@@ -200,7 +199,6 @@ const MapTab: React.FC = () => {
                 >
                     <Ionicons name="add" size={25} color="#fff" />
                 </Pressable>
-            )}
         </View>
     );
 };

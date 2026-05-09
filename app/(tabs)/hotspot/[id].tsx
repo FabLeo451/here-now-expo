@@ -20,7 +20,7 @@ import { AppButton } from '@/components/AppButton';
 import { Share } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
 import type MapView from 'react-native-maps';
-import Map from '@/components/Map';
+import Map from '@/components/map/Map';
 
 type Params = {
 	id: string;

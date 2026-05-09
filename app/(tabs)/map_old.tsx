@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import * as Location from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams } from 'expo-router';
-import Map from '@/components/Map';
+import Map from '@/components/map/Map';
 import type { MapView } from 'react-native-maps';
 import { Hotspot } from '@/lib/hotspot'
 import { useAuth } from '@/hooks/useAuth';

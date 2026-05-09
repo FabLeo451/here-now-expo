@@ -216,7 +216,7 @@ export default function Map({
 							latitude: hotspot.position.latitude,
 							longitude: hotspot.position.longitude,
 						}}
-						image={require('../public/images/markers/green.png')}
+						image={require('../../public/images/markers/green.png')}
 						onPress={() => onHotspotSelect(hotspot)}
 					>
 					</Marker>
