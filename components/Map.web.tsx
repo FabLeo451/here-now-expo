@@ -83,6 +83,25 @@ if (isClient) {
 		onBoundsChange,
 		onHotspotSelect
 	}: any) {
+		const hotspotIcon = L.divIcon({
+			className: '',
+			html: `
+				<div style="
+					filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.8));
+				">
+					<img
+						src="/images/markers/green.png"
+						style="
+							width: 50px;
+							height: 50px;
+						"
+					/>
+				</div>
+			`,
+			iconSize: [50, 50],
+			iconAnchor: [20, 40],
+		});
+
 		return (
 			<div style={{ height: '100vh', width: '100%' }}>
 				<MapContainer
@@ -131,6 +150,7 @@ if (isClient) {
 								hotspot.position.latitude,
 								hotspot.position.longitude,
 							]}
+							icon={hotspotIcon}
 							eventHandlers={{
 								click: () => {
 									onHotspotSelect(hotspot);
