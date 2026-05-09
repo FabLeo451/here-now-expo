@@ -158,7 +158,6 @@ const MapTab: React.FC = () => {
         >
 			<ModalHotspot
 				visible={modalVisible.visible}
-				id={modalVisible.id}
 				hotspot={modalVisible.hotspot}
 				onClose={() => setModalVisible({ visible: false, id: 'dummyId', hotspot: null })}
 			/>
@@ -168,6 +167,10 @@ const MapTab: React.FC = () => {
                 <Map
                     userCoords={location ? location.coords : null}
                     hotspots={hotspots}
+                    onMapReady={(bounds: any) => {
+                        console.log('[map] Map ready:', bounds);
+                        queryOnBounds(bounds);
+                    }}
                     onSelect={(coords: any) => {
                         console.log('[map] Selected:', coords);
                         setSelectedCoords(coords);

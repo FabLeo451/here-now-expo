@@ -78,6 +78,7 @@ if (isClient) {
 	LeafletMap = function ({
 		userCoords,
 		hotspots,
+		onMapReady,
 		onSelect,
 		selectedCoords,
 		onBoundsChange,
@@ -112,6 +113,22 @@ if (isClient) {
 					}
 					zoom={15}
 					style={{ height: '100%', width: '100%' }}
+					whenReady={(event: any) => {
+						const map = event.target;
+
+						const bounds = map.getBounds();
+
+						onMapReady?.({
+							northEast: {
+								latitude: bounds.getNorthEast().lat,
+								longitude: bounds.getNorthEast().lng,
+							},
+							southWest: {
+								latitude: bounds.getSouthWest().lat,
+								longitude: bounds.getSouthWest().lng,
+							},
+						});
+					}}
 				>
 					<TileLayer
 						url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -167,6 +184,10 @@ if (isClient) {
 type Props = {
 	userCoords: { latitude: number; longitude: number } | null;
 	hotspots: Hotspot[];
+	onMapReady?: (bounds: {
+		northEast: { latitude: number; longitude: number };
+		southWest: { latitude: number; longitude: number };
+	}) => void;
 	onSelect: (coords: { latitude: number; longitude: number } | null) => void;
 	onBoundsChange?: (bounds: {
 		northEast: { latitude: number; longitude: number };
@@ -178,6 +199,7 @@ type Props = {
 export default function Map({
 	userCoords,
 	hotspots,
+	onMapReady,
 	onSelect,
 	onBoundsChange,
 	onHotspotSelect
@@ -195,6 +217,7 @@ export default function Map({
 		<LeafletMap
 			userCoords={userCoords}
 			hotspots={hotspots}
+			onMapReady={onMapReady}
 			onSelect={(coords: any) => {
 				setSelectedCoords(coords);
 				onSelect(coords);
