@@ -135,7 +135,7 @@ if (isClient) {
 						attribution="&copy; OpenStreetMap contributors"
 					/>
 
-					<LocationSelector onSelect={onSelect} />
+					{onSelect && (<LocationSelector onSelect={onSelect} />)}
 
 					<BoundsListener onChange={onBoundsChange} />
 
@@ -219,6 +219,9 @@ export default function Map({
 			hotspots={hotspots}
 			onMapReady={onMapReady}
 			onSelect={(coords: any) => {
+				if (!onSelect)
+					return;
+				
 				setSelectedCoords(coords);
 				onSelect(coords);
 			}}

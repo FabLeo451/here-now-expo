@@ -163,6 +163,12 @@ const MapTab: React.FC = () => {
 			/>
 
             {/* MAP */}
+                                {/* 
+                    onSelect={(coords: any) => {
+                        console.log('[map] Selected:', coords);
+                        setSelectedCoords(coords);
+                    }}
+                    */}
             <View style={{ flex: 1 }}>
                 <Map
                     userCoords={location ? location.coords : null}
@@ -171,10 +177,7 @@ const MapTab: React.FC = () => {
                         console.log('[map] Map ready:', bounds);
                         queryOnBounds(bounds);
                     }}
-                    onSelect={(coords: any) => {
-                        console.log('[map] Selected:', coords);
-                        setSelectedCoords(coords);
-                    }}
+
                     onBoundsChange={(bounds: any) => {
                         //console.log('[map] bounds:', bounds);
                         queryOnBounds(bounds);

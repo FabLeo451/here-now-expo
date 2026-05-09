@@ -53,6 +53,9 @@ export default function Map({
 	const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const handlePress = (e: MapPressEvent) => {
+		if (!onSelect)
+			return;
+		
 		const coords = e.nativeEvent.coordinate;
 		setSelectedCoords(coords);
 		onSelect(coords);
