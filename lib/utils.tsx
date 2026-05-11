@@ -52,10 +52,34 @@ export const getDeviceType = async (): Promise<string> => {
 	}
 };
 
+function getBrowser() {
+	const ua = navigator.userAgent;
+
+	let browser = 'Unknown';
+
+	if (ua.includes('Firefox/')) {
+		browser = ua.match(/Firefox\/([\d.]+)/)?.[0] || 'Firefox';
+	} else if (ua.includes('Edg/')) {
+		browser = ua.match(/Edg\/([\d.]+)/)?.[0] || 'Edge';
+	} else if (ua.includes('Chrome/')) {
+		browser = ua.match(/Chrome\/([\d.]+)/)?.[0] || 'Chrome';
+	} else if (ua.includes('Safari/')) {
+		browser = ua.match(/Version\/([\d.]+)/)?.[0] || 'Safari';
+	}
+
+	return browser;
+}
+
 export const getDeviceInfo = () => {
 	const name = Constants.expoConfig?.name ?? 'unknown';
 	const version = Constants.expoConfig?.version ?? 'unknown';
-	const agent = name + '/' + version;
+
+	let agent = name + '/' + version;
+
+	if (Platform.OS === 'web') {
+		agent = getBrowser();
+	}
+
 	const platform = Platform.OS + ' ' + Platform.Version;
 	const model = Device.modelName || 'Undefined';
 	const deviceName = Device.deviceName || 'Undefined';
