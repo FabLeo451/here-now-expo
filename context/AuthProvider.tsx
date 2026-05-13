@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { AuthContext, User } from './AuthContext';
 import Constants from 'expo-constants';
@@ -8,6 +9,7 @@ import * as Utils from '@/lib/utils';
 
 const USER_KEY = 'herenow_user';
 const TOKEN_KEY = 'herenow_token';
+const REFRESH_TOKEN_KEY = 'herenow_refresh_token';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
@@ -56,26 +58,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 							body: JSON.stringify({ agent, platform, model, deviceName, deviceType }),
 						}
 					);
+					
+					console.log(res);
 
 					if (res.ok) {
 						const data = await res.json();
 						console.log('welcome: ',data);
-						
-						storedToken = data.token;
 
-						if (storedToken) {
-							//await SecureStore.setItemAsync(TOKEN_KEY, storedToken);
-							await Utils.setToken(TOKEN_KEY, storedToken);
-							setToken(storedToken);
+						if (data.token) {
+							await Utils.setToken(TOKEN_KEY, data.token);
+							setToken(data.token);
+							
+							await Utils.setToken(REFRESH_TOKEN_KEY, data.refreshToken);
 							
 							var user = { name: data.name, isUser: false, isGuest: data.isGuest };
 							setUser(user);
 							await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
 						}
-
-						
 					} else {
-						console.log('Unable to create guest session');
+						switch(res.status) {
+							case 401:
+								console.log(res.statusText);
+								logout();
+								//router.replace('/')
+								// To do: call /refresh
+								break;
+								
+							default:
+								console.log(res.statusText);
+								break;
+						}
 					}
 
 			} catch (err) {
