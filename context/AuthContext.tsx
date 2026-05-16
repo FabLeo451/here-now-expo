@@ -1,10 +1,9 @@
 import { createContext } from 'react';
 
 export type User = {
-  id: string;
   name: string;
+  isUser: boolean;
   isGuest: boolean;
-  isAuthenticated: boolean;
 };
 
 export type AuthContextType = {

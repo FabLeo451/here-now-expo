@@ -5,6 +5,9 @@ import { Buffer } from 'buffer';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const ACCESS_TOKEN_KEY = 'herenow_access_token';
+const REFRESH_TOKEN_KEY = 'herenow_refresh_token';
+
 export const encodeBase64 = (text: string): string => {
   return Buffer.from(text, 'utf-8').toString('base64');
 };
@@ -27,11 +30,32 @@ export const setToken = async (key: string, value: string) => {
   return await SecureStore.setItemAsync(key, value);
 };
 
+export const getAccessToken = async () => {
+  return await getToken(ACCESS_TOKEN_KEY);
+};
+
+export const getRefreshToken = async () => {
+  return await getToken(REFRESH_TOKEN_KEY);
+};
+
+export const setAccessToken = async (value: string) => {
+	return await setToken(ACCESS_TOKEN_KEY, value);
+}
+
+export const setRefreshToken = async (value: string) => {
+	return await setToken(REFRESH_TOKEN_KEY, value);
+}
+
 export const deleteToken = async (key: string) => {
   if (Platform.OS === 'web') {
     return await AsyncStorage.removeItem(key);
   }
   return await SecureStore.deleteItemAsync(key);
+};
+
+export const deleteTokens = async () => {
+  await deleteToken(ACCESS_TOKEN_KEY);
+  await deleteToken(REFRESH_TOKEN_KEY);
 };
 
 export const getDeviceType = async (): Promise<string> => {
