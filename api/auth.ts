@@ -8,7 +8,7 @@ export async function welcome() {
     const deviceType = await Utils.getDeviceType();
     const { agent, platform, model, deviceName } = Utils.getDeviceInfo();
 
-    const response = await apiClient.post("/welcome", {
+    const response = await apiClient.post(`${process.env.EXPO_PUBLIC_API_ROOT}/welcome`, {
         agent, platform, model, deviceName, deviceType
     });
 
