@@ -7,9 +7,10 @@ export async function welcome() {
 
     const deviceType = await Utils.getDeviceType();
     const { agent, platform, model, deviceName } = Utils.getDeviceInfo();
+    const appId = process.env.EXPO_PUBLIC_APP_ID;
 
-    const response = await apiClient.post(`${process.env.EXPO_PUBLIC_API_ROOT}/welcome`, {
-        agent, platform, model, deviceName, deviceType
+    const response = await apiClient.post(`${process.env.EXPO_PUBLIC_API_BASE_URL}/welcome`, {
+        appId, agent, platform, model, deviceName, deviceType
     });
 
     return response.data;
@@ -28,6 +29,7 @@ export async function getMe() {
     type User = {
         id: string;
         email: string;
+        name: string;
     };
 
     const response = await apiClient.get<User>("/me");
