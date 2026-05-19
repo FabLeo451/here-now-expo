@@ -86,9 +86,11 @@ apiClient.interceptors.response.use(
         console.log("response.data =", response.data);
 
         const newAccessToken = response.data.accessToken;
+        const newRefreshToken = response.data.refreshToken;
 
-        // salva nuovo token
+        // Save new tokens
         await Utils.setAccessToken(newAccessToken);
+        await Utils.setRefreshToken(newRefreshToken);
 
         // aggiorna header globali
         apiClient.defaults.headers.common.Authorization =
