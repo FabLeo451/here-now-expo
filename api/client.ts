@@ -71,16 +71,19 @@ apiClient.interceptors.response.use(
         const refreshToken = await Utils.getRefreshToken();
 
         if (!refreshToken) {
-          throw new Error("Refresh token mancante");
+          throw new Error("Refresh token missing");
         }
 
         // call refresh
+        console.log("Calling refresh");
         const response = await axios.post(
-          `${process.env.EXPO_PUBLIC_API_ROOT}/refresh`,
+          `${process.env.EXPO_PUBLIC_API_BASE_URL}/refresh`,
           {
             refreshToken,
           }
         );
+        
+        console.log("response.data =", response.data);
 
         const newAccessToken = response.data.accessToken;
 
@@ -105,7 +108,7 @@ apiClient.interceptors.response.use(
         // logout
         await Utils.deleteTokens();
 
-        console.log("Sessione expired");
+        console.log("Unable to refresh token: ", refreshError);
 
         return Promise.reject(refreshError);
 

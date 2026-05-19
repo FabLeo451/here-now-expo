@@ -9,7 +9,7 @@ export async function welcome() {
     const { agent, platform, model, deviceName } = Utils.getDeviceInfo();
     const appId = process.env.EXPO_PUBLIC_APP_ID;
 
-    const response = await apiClient.post(`${process.env.EXPO_PUBLIC_API_BASE_URL}/welcome`, {
+    const response = await apiClient.post(`welcome`, {
         appId, agent, platform, model, deviceName, deviceType
     });
 

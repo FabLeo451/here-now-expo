@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, Pressable } from 'react-native';
+import axios from "axios";
 import * as Utils from "@/lib/utils";
 import { welcome, getMe } from "../api/auth";
 
@@ -23,6 +24,27 @@ const TestPage: React.FC = () => {
         }
     }
 
+    const handleRefresh = async () => {
+        try {
+        		const refreshToken = await Utils.getRefreshToken();
+        		
+		    if (!refreshToken) {
+		      throw new Error("Refresh token missing");
+		    }
+        
+		    const response = await axios.post(
+		      `${process.env.EXPO_PUBLIC_API_BASE_URL}/refresh`,
+		      {
+		        refreshToken,
+		      }
+		    );
+		    
+		    console.log(response);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     const handleClearTokens = async () => {
         await Utils.deleteTokens();
     }
@@ -36,6 +58,15 @@ const TestPage: React.FC = () => {
             >
                 <Text style={{ color: "white", fontWeight: "600" }}>
                     Me
+                </Text>
+            </Pressable>
+
+            <Pressable
+                onPress={() => handleRefresh()}
+                style={buttonStyle}
+            >
+                <Text style={{ color: "white", fontWeight: "600" }}>
+                    Refresh
                 </Text>
             </Pressable>
 
